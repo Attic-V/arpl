@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 #include "file.h"
+#include "scanner.h"
+#include "token.h"
 
 int main (int argc, char **argv)
 {
@@ -13,8 +15,9 @@ int main (int argc, char **argv)
 	char *path = argv[1];
 
 	char *source = readFile(path);
-	printf("%s\n", source);
+	Token *tokens = scan(source);
 
+	free(tokens);
 	free(source);
 
 	return 0;
