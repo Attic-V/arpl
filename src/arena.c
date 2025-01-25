@@ -35,13 +35,13 @@ void arena_free (Arena *arena)
 
 void *arena_allocate (Arena *arena, size_t size)
 {
-	*(size_t *)arena_allocate_raw(arena, sizeof(size_t)) = size;
+	*(size_t *)arena_allocate_raw(arena, sizeof(size)) = size;
 	return arena_allocate_raw(arena, size);
 }
 
 void *arena_reallocate (Arena *arena, void *ptr, size_t size)
 {
-	size_t oldsize = *(size_t *)(ptr - sizeof(size_t));
+	size_t oldsize = *(size_t *)(ptr - sizeof(oldsize));
 	void *newptr = arena_allocate(arena, size);
 	memcpy(newptr, ptr, oldsize);
 	return newptr;
