@@ -47,3 +47,10 @@ void *arena_reallocate (Arena *arena, void *ptr, size_t oldsize, size_t newsize)
 	memcpy(new_ptr, ptr, oldsize);
 	return ptr;
 }
+
+void *arena_copy (Arena *arena, void *ptr, size_t size)
+{
+	void *newptr = arena_allocate(arena, size);
+	memcpy(newptr, ptr, size);
+	return newptr;
+}

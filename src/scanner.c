@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "scanner.h"
 
@@ -11,11 +12,12 @@ typedef struct {
 	int line;
 	Token *tokens;
 	int count;
+	Arena *arena;
 } Scanner;
 
 Scanner scanner;
 
-void addToken (Arena *arena, TokenType type);
+void addToken (TokenType type);
 
 Token *scan (Arena *arena, char *source)
 {
@@ -23,6 +25,7 @@ Token *scan (Arena *arena, char *source)
 	scanner.line = 1;
 	scanner.tokens = arena_allocate(arena, sizeof(Token));
 	scanner.count = 0;
+	scanner.arena = arena_init();
 
 	for (;;) {
 		if (*scanner.current == '\0') break;
@@ -43,7 +46,7 @@ Token *scan (Arena *arena, char *source)
 			while (isdigit(*scanner.current)) {
 				scanner.current++;
 			}
-			addToken(arena, TT_Number);
+			addToken(TT_Number);
 			continue;
 		}
 
@@ -56,10 +59,14 @@ Token *scan (Arena *arena, char *source)
 		.length = 1,
 		.line = scanner.line,
 	};
-	return scanner.tokens;
+
+	Token *tokens = arena_copy(arena, scanner.tokens, sizeof(Token) * scanner.count);
+	arena_free(scanner.arena);
+
+	return tokens;
 }
 
-void addToken (Arena *arena, TokenType type)
+void addToken (TokenType type)
 {
 	scanner.tokens[scanner.count++] = (Token){
 		.type = type,
@@ -67,5 +74,5 @@ void addToken (Arena *arena, TokenType type)
 		.length = scanner.current - scanner.start,
 		.line = scanner.line,
 	};
-	scanner.tokens = arena_reallocate(arena, scanner.tokens, sizeof(Token) * (scanner.count - 1), sizeof(Token) * (scanner.count + 1));
+	scanner.tokens = arena_reallocate(scanner.arena, scanner.tokens, sizeof(Token) * (scanner.count - 1), sizeof(Token) * (scanner.count + 1));
 }
