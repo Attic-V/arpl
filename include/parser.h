@@ -5,6 +5,6 @@
 #include "ast.h"
 #include "token.h"
 
-Ast *parse (Arena *arena, Token *tokens);
+AstRoot *parse (Arena *arena, Token *tokens);
 
 #endif

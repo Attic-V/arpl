@@ -1,41 +1,23 @@
 #include "ast.h"
 
-Ast *ast_init (Arena *arena);
-
-typedef enum {
-	NLiteral,
-	NRoot,
-} AstNodeType;
-
-struct Ast {
-	AstNodeType type;
-	union {
-		struct {
-			Token value;
-		} literal;
-		struct {
-			Ast *literal;
-		} root;
-	} as;
+struct AstLiteral {
+	Token value;
 };
 
-Ast *ast_initLiteral (Arena *arena, Token value)
+struct AstRoot {
+	AstLiteral *literal;
+};
+
+AstLiteral *ast_initLiteral (Arena *arena, Token value)
 {
-	Ast *ast = ast_init(arena);
-	ast->type = NLiteral;
-	ast->as.literal.value = value;
-	return ast;
+	AstLiteral *node = arena_allocate(arena, sizeof(*node));
+	node->value = value;
+	return node;
 }
 
-Ast *ast_initRoot (Arena *arena, Ast *literal)
+AstRoot *ast_initRoot (Arena *arena, AstLiteral *literal)
 {
-	Ast *ast = ast_init(arena);
-	ast->type = NRoot;
-	ast->as.root.literal = literal;
-	return ast;
-}
-
-Ast *ast_init (Arena *arena)
-{
-	return arena_allocate(arena, sizeof(Ast));
+	AstRoot *node = arena_allocate(arena, sizeof(*node));
+	node->literal = literal;
+	return node;
 }
