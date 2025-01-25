@@ -6,6 +6,8 @@
 
 #define ARENA_MEMORY_SIZE (4 * 1024 * 1024)
 
+void *arena_allocate_raw (Arena *arena, size_t size);
+
 struct Arena {
 	void *memory;
 	size_t offset;
@@ -33,19 +35,16 @@ void arena_free (Arena *arena)
 
 void *arena_allocate (Arena *arena, size_t size)
 {
-	if (arena->offset + size > ARENA_MEMORY_SIZE) {
-		return NULL;
-	}
-	void *ptr = arena->memory + arena->offset;
-	arena->offset += size;
-	return ptr;
+	*(size_t *)arena_allocate_raw(arena, sizeof(size_t)) = size;
+	return arena_allocate_raw(arena, size);
 }
 
-void *arena_reallocate (Arena *arena, void *ptr, size_t oldsize, size_t newsize)
+void *arena_reallocate (Arena *arena, void *ptr, size_t size)
 {
-	void *new_ptr = arena_allocate(arena, newsize);
-	memcpy(new_ptr, ptr, oldsize);
-	return ptr;
+	size_t oldsize = *(size_t *)(ptr - sizeof(size_t));
+	void *newptr = arena_allocate(arena, size);
+	memcpy(newptr, ptr, oldsize);
+	return newptr;
 }
 
 void *arena_copy (Arena *arena, void *ptr, size_t size)
@@ -53,4 +52,14 @@ void *arena_copy (Arena *arena, void *ptr, size_t size)
 	void *newptr = arena_allocate(arena, size);
 	memcpy(newptr, ptr, size);
 	return newptr;
+}
+
+void *arena_allocate_raw (Arena *arena, size_t size)
+{
+	if (arena->offset + size > ARENA_MEMORY_SIZE) {
+		return NULL;
+	}
+	void *ptr = arena->memory + arena->offset;
+	arena->offset += size;
+	return ptr;
 }
