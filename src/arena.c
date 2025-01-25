@@ -58,13 +58,6 @@ void *arena_reallocate (Arena *arena, void *ptr, size_t size)
 	return newptr;
 }
 
-void *arena_copy (Arena *arena, void *ptr, size_t size)
-{
-	void *newptr = arena_allocate(arena, size);
-	memcpy(newptr, ptr, size);
-	return newptr;
-}
-
 void *arena_allocate_raw (Arena *arena, size_t size)
 {
 	arena->previous = arena->memory + arena->offset;

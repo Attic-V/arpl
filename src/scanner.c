@@ -25,7 +25,7 @@ Token *scan (Arena *arena, char *source)
 	scanner.line = 1;
 	scanner.tokens = arena_allocate(arena, sizeof(Token));
 	scanner.count = 0;
-	scanner.arena = arena_init();
+	scanner.arena = arena;
 
 	for (;;) {
 		if (*scanner.current == '\0') break;
@@ -60,10 +60,7 @@ Token *scan (Arena *arena, char *source)
 		.line = scanner.line,
 	};
 
-	Token *tokens = arena_copy(arena, scanner.tokens, sizeof(Token) * scanner.count);
-	arena_free(scanner.arena);
-
-	return tokens;
+	return scanner.tokens;
 }
 
 void addToken (TokenType type)
