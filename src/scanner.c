@@ -67,5 +67,5 @@ void addToken (Arena *arena, TokenType type)
 		.length = scanner.current - scanner.start,
 		.line = scanner.line,
 	};
-	scanner.tokens = arena_reallocate(arena, scanner.tokens, sizeof(Token) * (scanner.count + 1));
+	scanner.tokens = arena_reallocate(arena, scanner.tokens, sizeof(Token) * (scanner.count - 1), sizeof(Token) * (scanner.count + 1));
 }
