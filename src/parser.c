@@ -8,7 +8,7 @@ typedef struct {
 
 Parser parser;
 
-AstRoot *parse (Arena *arena, Token *tokens)
+Ast *parse (Arena *arena, Token *tokens)
 {
 	parser.arena = arena;
 	parser.tokens = tokens;
@@ -16,6 +16,7 @@ AstRoot *parse (Arena *arena, Token *tokens)
 
 	AstLiteral *astLiteral = ast_initLiteral(parser.arena, tokens[0]);
 	AstRoot *astRoot = ast_initRoot(arena, astLiteral);
+	Ast *ast = ast_init(arena, astRoot);
 
-	return astRoot;
+	return ast;
 }

@@ -1,5 +1,9 @@
 #include "ast.h"
 
+struct Ast {
+	AstRoot *root;
+};
+
 struct AstLiteral {
 	Token value;
 };
@@ -7,6 +11,13 @@ struct AstLiteral {
 struct AstRoot {
 	AstLiteral *literal;
 };
+
+Ast *ast_init (Arena *arena, AstRoot *root)
+{
+	Ast *ast = arena_allocate(arena, sizeof(*ast));
+	ast->root = root;
+	return ast;
+}
 
 AstLiteral *ast_initLiteral (Arena *arena, Token value)
 {

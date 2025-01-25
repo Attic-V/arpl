@@ -21,7 +21,7 @@ int main (int argc, char **argv)
 
 	char *source = readFile(arena, path);
 	Token *tokens = scan(arena, source);
-	AstRoot *ast = parse(arena, tokens);
+	Ast *ast = parse(arena, tokens);
 
 	(void)ast;
 
