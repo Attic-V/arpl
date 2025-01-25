@@ -2,7 +2,9 @@
 #include <stdlib.h>
 
 #include "arena.h"
+#include "ast.h"
 #include "file.h"
+#include "parser.h"
 #include "scanner.h"
 #include "token.h"
 
@@ -19,8 +21,9 @@ int main (int argc, char **argv)
 
 	char *source = readFile(arena, path);
 	Token *tokens = scan(arena, source);
+	Ast *ast = parse(arena, tokens);
 
-	(void)tokens;
+	(void)ast;
 
 	arena_free(arena);
 
