@@ -3,7 +3,7 @@
 
 #include "file.h"
 
-char *readFile (char *path)
+char *readFile (Arena *arena, char *path)
 {
 	FILE *file = fopen(path, "rb");
 	if (file == NULL) {
@@ -15,7 +15,7 @@ char *readFile (char *path)
 	size_t size = ftell(file);
 	rewind(file);
 
-	char *buffer = (char *)malloc(size + 1);
+	char *buffer = (char *)arena_allocate(arena, size + 1);
 	if (buffer == NULL) {
 		fprintf(stderr, "memory allocation failed\n");
 		exit(1);

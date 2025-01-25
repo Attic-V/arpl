@@ -15,13 +15,13 @@ typedef struct {
 
 Scanner scanner;
 
-void addToken (TokenType type);
+void addToken (Arena *arena, TokenType type);
 
-Token *scan (char *source)
+Token *scan (Arena *arena, char *source)
 {
 	scanner.current = source;
 	scanner.line = 1;
-	scanner.tokens = malloc(sizeof(Token));
+	scanner.tokens = arena_allocate(arena, sizeof(Token));
 	scanner.count = 0;
 
 	for (;;) {
@@ -43,7 +43,7 @@ Token *scan (char *source)
 			while (isdigit(*scanner.current)) {
 				scanner.current++;
 			}
-			addToken(TT_Number);
+			addToken(arena, TT_Number);
 			continue;
 		}
 
@@ -59,7 +59,7 @@ Token *scan (char *source)
 	return scanner.tokens;
 }
 
-void addToken (TokenType type)
+void addToken (Arena *arena, TokenType type)
 {
 	scanner.tokens[scanner.count++] = (Token){
 		.type = type,
@@ -67,5 +67,5 @@ void addToken (TokenType type)
 		.length = scanner.current - scanner.start,
 		.line = scanner.line,
 	};
-	scanner.tokens = realloc(scanner.tokens, sizeof(Token) * (scanner.count + 1));
+	scanner.tokens = arena_reallocate(arena, scanner.tokens, sizeof(Token) * (scanner.count + 1));
 }

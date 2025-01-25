@@ -1,6 +1,8 @@
 #ifndef file_h
 #define file_h
 
-char *readFile (char *path);
+#include "arena.h"
+
+char *readFile (Arena *arena, char *path);
 
 #endif
