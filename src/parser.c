@@ -15,8 +15,8 @@ Ast *parse (Arena *arena, Token *tokens)
 	parser.tokens = tokens;
 	parser.current = 0;
 
-	parser.ast = ast_init(parser.arena);
-	ast_setValue(parser.ast, tokens[0]);
+	Ast *value = ast_initLiteral(parser.arena, tokens[0]);
+	parser.ast = ast_initRoot(arena, value);
 
 	return parser.ast;
 }

@@ -6,7 +6,7 @@
 
 typedef struct Ast Ast;
 
-Ast *ast_init (Arena *arena);
-void ast_setValue (Ast *ast, Token value);
+Ast *ast_initLiteral (Arena *arena, Token value);
+Ast *ast_initRoot (Arena *arena, Ast *literal);
 
 #endif
