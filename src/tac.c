@@ -1,26 +1,7 @@
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "tac.h"
-
-typedef enum {
-	TacAssign,
-} TacType;
-
-struct Tac {
-	TacInstruction *head;
-};
-
-struct TacInstruction {
-	TacType type;
-	union {
-		struct {
-			char *var;
-			int32_t value;
-		} assign;
-	} as;
-};
 
 Tac *tac_init (Arena *arena)
 {
