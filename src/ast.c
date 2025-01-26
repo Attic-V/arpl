@@ -1,17 +1,5 @@
 #include "ast.h"
 
-struct Ast {
-	AstRoot *root;
-};
-
-struct AstLiteral {
-	Token value;
-};
-
-struct AstRoot {
-	AstLiteral *literal;
-};
-
 Ast *ast_init (Arena *arena, AstRoot *root)
 {
 	Ast *ast = arena_allocate(arena, sizeof(*ast));
@@ -31,19 +19,4 @@ AstRoot *ast_initRoot (Arena *arena, AstLiteral *literal)
 	AstRoot *node = arena_allocate(arena, sizeof(*node));
 	node->literal = literal;
 	return node;
-}
-
-AstRoot *ast_getRoot (Ast *ast)
-{
-	return ast->root;
-}
-
-Token ast_literalGetValue (AstLiteral *literal)
-{
-	return literal->value;
-}
-
-AstLiteral *ast_rootGetLiteral (AstRoot *root)
-{
-	return root->literal;
 }

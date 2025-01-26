@@ -10,7 +10,7 @@ Tac *tac_generate (Arena *arena, Ast *ast)
 {
 	generator.arena = arena;
 	Tac *tac = tac_init(arena);
-	TacInstruction *next = tac_init_const(arena, ast_literalGetValue(ast_rootGetLiteral(ast_getRoot(ast))));
+	TacInstruction *next = tac_init_const(arena, ast->root->literal->value);
 	tac_set_head(tac, next);
 	return tac;
 }
