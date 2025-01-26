@@ -1,3 +1,7 @@
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "tac_generator.h"
 
 Tac *visitAst (Ast *ast);
@@ -6,6 +10,7 @@ TacInstruction *visitLiteral (AstLiteral *literal);
 
 typedef struct {
 	Arena *arena;
+	int temp;
 } Generator;
 
 Generator generator;
@@ -13,6 +18,7 @@ Generator generator;
 Tac *tac_generate (Arena *arena, Ast *ast)
 {
 	generator.arena = arena;
+	generator.temp = 0;
 	return visitAst(ast);
 }
 
@@ -31,6 +37,7 @@ TacInstruction *visitRoot (AstRoot *root)
 
 TacInstruction *visitLiteral (AstLiteral *literal)
 {
-	TacInstruction *ins = tac_init_const(generator.arena, literal->value);
-	return ins;
+	char *buffer = arena_allocate(generator.arena, (int)log10f(generator.temp ? generator.temp : 1) + 2);
+	sprintf(buffer, "t%d", generator.temp++);
+	return tac_init_assign(generator.arena, buffer, literal->value);
 }

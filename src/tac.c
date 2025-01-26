@@ -4,12 +4,22 @@
 
 #include "tac.h"
 
+typedef enum {
+	TacAssign,
+} TacType;
+
 struct Tac {
 	TacInstruction *head;
 };
 
 struct TacInstruction {
-	int32_t value;
+	TacType type;
+	union {
+		struct {
+			char *var;
+			int32_t value;
+		} assign;
+	} as;
 };
 
 Tac *tac_init (Arena *arena)
@@ -18,12 +28,14 @@ Tac *tac_init (Arena *arena)
 	return tac;
 }
 
-TacInstruction *tac_init_const (Arena *arena, Token value)
+TacInstruction *tac_init_assign (Arena *arena, char *var, Token value)
 {
 	TacInstruction *tac = arena_allocate(arena, sizeof(*tac));
+	tac->type = TacAssign;
 	char *buffer = arena_allocate(arena, value.length + 1);
 	sprintf(buffer, "%.*s", value.length, value.lexeme);
-	tac->value = atoi(buffer);
+	tac->as.assign.var = var;
+	tac->as.assign.value = atoi(buffer);
 	return tac;
 }
 

@@ -8,7 +8,7 @@ typedef struct Tac Tac;
 typedef struct TacInstruction TacInstruction;
 
 Tac *tac_init (Arena *arena);
-TacInstruction *tac_init_const (Arena *arena, Token value);
+TacInstruction *tac_init_assign (Arena *arena, char *var, Token value);
 
 void tac_set_head (Tac *tac, TacInstruction *head);
 
