@@ -4,7 +4,7 @@
 #include "arena.h"
 #include "ast.h"
 #include "file.h"
-#include "ir_generator.h"
+#include "tac_generator.h"
 #include "parser.h"
 #include "scanner.h"
 #include "token.h"

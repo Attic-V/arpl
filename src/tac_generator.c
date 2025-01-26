@@ -1,4 +1,4 @@
-#include "ir_generator.h"
+#include "tac_generator.h"
 
 typedef struct {
 	Arena *arena;
