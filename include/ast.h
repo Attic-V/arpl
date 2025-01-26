@@ -12,4 +12,6 @@ Ast *ast_init (Arena *arena, AstRoot *root);
 AstLiteral *ast_initLiteral (Arena *arena, Token value);
 AstRoot *ast_initRoot (Arena *arena, AstLiteral *literal);
 
+Token ast_get_literalValue (Ast *ast);
+
 #endif

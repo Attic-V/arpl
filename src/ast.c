@@ -32,3 +32,8 @@ AstRoot *ast_initRoot (Arena *arena, AstLiteral *literal)
 	node->literal = literal;
 	return node;
 }
+
+Token ast_get_literalValue (Ast *ast)
+{
+	return ast->root->literal->value;
+}

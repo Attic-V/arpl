@@ -4,6 +4,7 @@
 #include "arena.h"
 #include "ast.h"
 #include "file.h"
+#include "ir_generator.h"
 #include "parser.h"
 #include "scanner.h"
 #include "token.h"
@@ -22,8 +23,9 @@ int main (int argc, char **argv)
 	char *source = readFile(arena, path);
 	Token *tokens = scan(arena, source);
 	Ast *ast = parse(arena, tokens);
+	Tac *tac = tac_generate(arena, ast);
 
-	(void)ast;
+	(void)tac;
 
 	arena_free(arena);
 
