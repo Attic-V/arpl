@@ -26,7 +26,7 @@ void asm_generate (Arena *arena, Ssa *ssa)
 	emit("\tglobal _start");
 	emit("");
 	emit("_start:");
-	emit("\tpush    %d", ssa->next->value);
+	emit("\tpush    %d", ssa->as.assign.value);
 	emit("\tmov     rax, 60");
 	emit("\tpop     rdi");
 	emit("\tsyscall");

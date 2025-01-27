@@ -5,17 +5,26 @@
 
 #include "arena.h"
 
+typedef enum {
+	Ssa_Assign,
+} SsaType;
+
 typedef struct {
 	char *var;
 	int32_t value;
-} SsaInstruction;
+} SsaAssign;
 
-typedef struct {
-	SsaInstruction *next;
-} Ssa;
+typedef struct Ssa Ssa;
 
-Ssa *ssa_init (Arena *arena);
-SsaInstruction *ssa_init_assign (Arena *arena, char *var, int32_t value);
-void ssa_set_head (Ssa *ssa, SsaInstruction *head);
+struct Ssa {
+	SsaType type;
+	union {
+		SsaAssign assign;
+	} as;
+	Ssa *next;
+	Ssa *previous;
+};
+
+Ssa *ssa_initAssign (Arena *arena, char *var, int32_t value);
 
 #endif
