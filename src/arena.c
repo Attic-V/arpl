@@ -17,7 +17,7 @@ struct Arena {
 
 Arena *arena_init (void)
 {
-	Arena *arena = malloc(sizeof(Arena));
+	Arena *arena = malloc(sizeof(*arena));
 	if (arena == NULL) {
 		return NULL;
 	}
