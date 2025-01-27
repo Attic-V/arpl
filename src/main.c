@@ -4,6 +4,7 @@
 #include "arena.h"
 #include "asm_generator.h"
 #include "ast.h"
+#include "data.h"
 #include "file.h"
 #include "parser.h"
 #include "scanner.h"
@@ -13,7 +14,7 @@
 
 int main (int argc, char **argv)
 {
-	Arena *arena = arena_init();
+	Arena *arena = arena_init(4 * MB);
 
 	if (argc != 2) {
 		printf("usage: %s <path>\n", argv[0]);
