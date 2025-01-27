@@ -4,6 +4,6 @@
 #include "arena.h"
 #include "ir.h"
 
-void asm_generate (Arena *arena, Ir *ir);
+void gen_x86 (Arena *arena, Ir *ir);
 
 #endif

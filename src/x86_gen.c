@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "asm_generator.h"
+#include "x86_gen.h"
 
 void emit (char *format, ...);
 
@@ -12,7 +12,7 @@ typedef struct {
 
 static AsmGenerator gen;
 
-void asm_generate (Arena *arena, Ir *ir)
+void gen_x86 (Arena *arena, Ir *ir)
 {
 	const char *path = "out.s";
 	remove(path);

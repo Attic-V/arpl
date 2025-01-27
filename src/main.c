@@ -2,13 +2,13 @@
 #include <stdlib.h>
 
 #include "arena.h"
-#include "asm_generator.h"
+#include "x86_gen.h"
 #include "ast.h"
 #include "data.h"
 #include "file.h"
 #include "parser.h"
 #include "scanner.h"
-#include "ir_generator.h"
+#include "ir_gen.h"
 #include "token.h"
 
 int main (int argc, char **argv)
@@ -25,8 +25,8 @@ int main (int argc, char **argv)
 	char *source = readFile(arena, path);
 	Token *tokens = scan(arena, source);
 	Ast *ast = parse(arena, tokens);
-	Ir *ir = ir_generate(arena, ast);
-	asm_generate(arena, ir);
+	Ir *ir = gen_ir(arena, ast);
+	gen_x86(arena, ir);
 
 	arena_free(arena);
 

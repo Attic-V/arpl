@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ir_generator.h"
+#include "ir_gen.h"
 
 Ir *visitAst (Ast *ast);
 Ir *visitRoot (AstRoot *root);
@@ -17,7 +17,7 @@ typedef struct {
 
 static IrGenerator gen;
 
-Ir *ir_generate (Arena *arena, Ast *ast)
+Ir *gen_ir (Arena *arena, Ast *ast)
 {
 	gen.arena = arena;
 	gen.temp = 0;

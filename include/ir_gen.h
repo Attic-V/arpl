@@ -5,6 +5,6 @@
 #include "ast.h"
 #include "ir.h"
 
-Ir *ir_generate (Arena *arena, Ast *ast);
+Ir *gen_ir (Arena *arena, Ast *ast);
 
 #endif
