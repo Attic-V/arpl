@@ -31,5 +31,8 @@ int main (int argc, char **argv)
 
 	arena_free(arena);
 
+	system("nasm -felf64 out.s -oout.o");
+	system("ld out.o -oout");
+
 	return 0;
 }
