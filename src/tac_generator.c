@@ -13,14 +13,14 @@ Tac *visitExpressionNumber (AstExpressionNumber *number);
 typedef struct {
 	Arena *arena;
 	int temp;
-} Generator;
+} TacGenerator;
 
-Generator generator;
+static TacGenerator gen;
 
 Tac *tac_generate (Arena *arena, Ast *ast)
 {
-	generator.arena = arena;
-	generator.temp = 0;
+	gen.arena = arena;
+	gen.temp = 0;
 	return visitAst(ast);
 }
 
@@ -44,9 +44,9 @@ Tac *visitExpression (AstExpression *expression)
 
 Tac *visitExpressionNumber (AstExpressionNumber *number)
 {
-	char *tempbuf = arena_allocate(generator.arena, (int)log10f(generator.temp ? generator.temp : 1) + 2);
-	sprintf(tempbuf, "t%d", generator.temp++);
-	char *valbuf = arena_allocate(generator.arena, number->value.length + 1);
+	char *tempbuf = arena_allocate(gen.arena, (int)log10f(gen.temp ? gen.temp : 1) + 2);
+	sprintf(tempbuf, "t%d", gen.temp++);
+	char *valbuf = arena_allocate(gen.arena, number->value.length + 1);
 	sprintf(valbuf, "%.*s", number->value.length, number->value.lexeme);
-	return tac_initAssign(generator.arena, tempbuf, atoi(valbuf));
+	return tac_initAssign(gen.arena, tempbuf, atoi(valbuf));
 }

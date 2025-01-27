@@ -8,7 +8,6 @@
 #include "file.h"
 #include "parser.h"
 #include "scanner.h"
-#include "ssa_generator.h"
 #include "tac_generator.h"
 #include "token.h"
 
@@ -27,8 +26,7 @@ int main (int argc, char **argv)
 	Token *tokens = scan(arena, source);
 	Ast *ast = parse(arena, tokens);
 	Tac *tac = tac_generate(arena, ast);
-	Ssa *ssa = ssa_generate(arena, tac);
-	asm_generate(arena, ssa);
+	asm_generate(arena, tac);
 
 	arena_free(arena);
 

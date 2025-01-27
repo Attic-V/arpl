@@ -2,8 +2,8 @@
 #define asm_generator_h
 
 #include "arena.h"
-#include "ssa.h"
+#include "tac.h"
 
-void asm_generate (Arena *arena, Ssa *ssa);
+void asm_generate (Arena *arena, Tac *tac);
 
 #endif

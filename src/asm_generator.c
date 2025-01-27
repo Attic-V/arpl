@@ -10,9 +10,9 @@ typedef struct {
 	FILE *fp;
 } AsmGenerator;
 
-AsmGenerator gen;
+static AsmGenerator gen;
 
-void asm_generate (Arena *arena, Ssa *ssa)
+void asm_generate (Arena *arena, Tac *tac)
 {
 	const char *path = "out.s";
 	remove(path);
@@ -26,7 +26,7 @@ void asm_generate (Arena *arena, Ssa *ssa)
 	emit("\tglobal _start");
 	emit("");
 	emit("_start:");
-	emit("\tpush    %d", ssa->as.assign.value);
+	emit("\tpush    %d", tac->as.assign.value);
 	emit("\tmov     rax, 60");
 	emit("\tpop     rdi");
 	emit("\tsyscall");
