@@ -4,13 +4,13 @@
 
 #include "asm_generator.h"
 
+void emit (char *format, ...);
+
 typedef struct {
 	FILE *fp;
 } AsmGenerator;
 
 AsmGenerator gen;
-
-void emit (char *format, ...);
 
 void asm_generate (Arena *arena, Ssa *ssa)
 {
@@ -18,7 +18,7 @@ void asm_generate (Arena *arena, Ssa *ssa)
 	remove(path);
 	gen.fp = fopen(path, "ab");
 	if (gen.fp == NULL) {
-		fprintf(stderr, "could not open file");
+		fprintf(stderr, "could not open file\n");
 		exit(1);
 	}
 
