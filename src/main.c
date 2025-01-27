@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "arena.h"
+#include "asm_generator.h"
 #include "ast.h"
 #include "file.h"
 #include "parser.h"
@@ -26,8 +27,7 @@ int main (int argc, char **argv)
 	Ast *ast = parse(arena, tokens);
 	Tac *tac = tac_generate(arena, ast);
 	Ssa *ssa = ssa_generate(arena, tac);
-
-	(void)ssa;
+	asm_generate(arena, ssa);
 
 	arena_free(arena);
 
