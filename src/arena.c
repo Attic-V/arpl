@@ -58,6 +58,11 @@ void *arena_reallocate (Arena *arena, void *ptr, size_t size)
 	return newptr;
 }
 
+size_t arena_getFree (Arena *arena)
+{
+	return arena->size - arena->offset;
+}
+
 void *arena_allocate_raw (Arena *arena, size_t size)
 {
 	arena->previous = arena->memory + arena->offset;

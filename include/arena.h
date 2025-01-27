@@ -9,5 +9,6 @@ Arena *arena_init (size_t size);
 void arena_free (Arena *arena);
 void *arena_allocate (Arena *arena, size_t size);
 void *arena_reallocate (Arena *arena, void *ptr, size_t size);
+size_t arena_getFree (Arena *arena);
 
 #endif
