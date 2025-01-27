@@ -26,6 +26,6 @@ struct Tac {
 	Tac *previous;
 };
 
-Tac *tac_initAssign (Arena *arena, char *var, Token value);
+Tac *tac_initAssign (Arena *arena, char *var, int32_t value);
 
 #endif

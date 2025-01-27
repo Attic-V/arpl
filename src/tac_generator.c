@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "tac_generator.h"
@@ -43,7 +44,9 @@ Tac *visitExpression (AstExpression *expression)
 
 Tac *visitExpressionNumber (AstExpressionNumber *number)
 {
-	char *buffer = arena_allocate(generator.arena, (int)log10f(generator.temp ? generator.temp : 1) + 2);
-	sprintf(buffer, "t%d", generator.temp++);
-	return tac_initAssign(generator.arena, buffer, number->value);
+	char *tempbuf = arena_allocate(generator.arena, (int)log10f(generator.temp ? generator.temp : 1) + 2);
+	sprintf(tempbuf, "t%d", generator.temp++);
+	char *valbuf = arena_allocate(generator.arena, number->value.length + 1);
+	sprintf(valbuf, "%.*s", number->value.length, number->value.lexeme);
+	return tac_initAssign(generator.arena, tempbuf, atoi(valbuf));
 }
