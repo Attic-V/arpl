@@ -6,27 +6,26 @@
 #include "arena.h"
 #include "token.h"
 
+typedef struct {
+	char *var;
+	int32_t value;
+} TacAssign;
+
 typedef enum {
-	TacAssign,
+	Tac_Assign,
 } TacType;
 
-typedef struct {
+typedef struct Tac Tac;
+
+struct Tac {
 	TacType type;
 	union {
-		struct {
-			char *var;
-			int32_t value;
-		} assign;
+		TacAssign assign;
 	} as;
-} TacInstruction;
+	Tac *next;
+	Tac *previous;
+};
 
-typedef struct {
-	TacInstruction *head;
-} Tac;
-
-Tac *tac_init (Arena *arena);
-TacInstruction *tac_init_assign (Arena *arena, char *var, Token value);
-
-void tac_set_head (Tac *tac, TacInstruction *head);
+Tac *tac_initAssign (Arena *arena, char *var, Token value);
 
 #endif

@@ -5,9 +5,9 @@
 #include "tac_generator.h"
 
 Tac *visitAst (Ast *ast);
-TacInstruction *visitRoot (AstRoot *root);
-TacInstruction *visitExpression (AstExpression *expression);
-TacInstruction *visitExpressionNumber (AstExpressionNumber *number);
+Tac *visitRoot (AstRoot *root);
+Tac *visitExpression (AstExpression *expression);
+Tac *visitExpressionNumber (AstExpressionNumber *number);
 
 typedef struct {
 	Arena *arena;
@@ -25,18 +25,15 @@ Tac *tac_generate (Arena *arena, Ast *ast)
 
 Tac *visitAst (Ast *ast)
 {
-	Tac *tac = tac_init(generator.arena);
-	TacInstruction *next = visitRoot(ast->root);
-	tac_set_head(tac, next);
-	return tac;
+	return visitRoot(ast->root);
 }
 
-TacInstruction *visitRoot (AstRoot *root)
+Tac *visitRoot (AstRoot *root)
 {
 	return visitExpression(root->expression);
 }
 
-TacInstruction *visitExpression (AstExpression *expression)
+Tac *visitExpression (AstExpression *expression)
 {
 	if (expression->type == AstExpression_Number) {
 		return visitExpressionNumber(expression->as.number);
@@ -44,9 +41,9 @@ TacInstruction *visitExpression (AstExpression *expression)
 	return NULL;
 }
 
-TacInstruction *visitExpressionNumber (AstExpressionNumber *number)
+Tac *visitExpressionNumber (AstExpressionNumber *number)
 {
 	char *buffer = arena_allocate(generator.arena, (int)log10f(generator.temp ? generator.temp : 1) + 2);
 	sprintf(buffer, "t%d", generator.temp++);
-	return tac_init_assign(generator.arena, buffer, number->value);
+	return tac_initAssign(generator.arena, buffer, number->value);
 }
