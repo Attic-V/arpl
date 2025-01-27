@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "memory.h"
 #include "scanner.h"
 
 typedef struct {
-	Arena *arena;
 	char *start;
 	char *current;
 	Token *tokens;
@@ -19,11 +19,10 @@ static Scanner scanner;
 
 void addToken (TokenType type);
 
-Token *scan (Arena *arena, char *source)
+Token *scan (char *source)
 {
-	scanner.arena = arena;
 	scanner.current = source;
-	scanner.tokens = arena_allocate(arena, sizeof(Token));
+	scanner.tokens = mem_alloc(sizeof(Token));
 	scanner.count = 0;
 	scanner.line = 1;
 
@@ -66,5 +65,5 @@ void addToken (TokenType type)
 		.length = scanner.current - scanner.start,
 		.line = scanner.line,
 	};
-	scanner.tokens = arena_reallocate(scanner.arena, scanner.tokens, sizeof(Token) * (scanner.count + 1));
+	scanner.tokens = mem_realloc(scanner.tokens, sizeof(Token) * (scanner.count + 1));
 }

@@ -1,24 +1,25 @@
 #include "ast.h"
+#include "memory.h"
 
-Ast *ast_init (Arena *arena, AstRoot *root)
+Ast *ast_init (AstRoot *root)
 {
-	Ast *ast = arena_allocate(arena, sizeof(*ast));
+	Ast *ast = mem_alloc(sizeof(*ast));
 	ast->root = root;
 	return ast;
 }
 
-AstRoot *ast_initRoot (Arena *arena, AstExpression *expression)
+AstRoot *ast_initRoot (AstExpression *expression)
 {
-	AstRoot *root = arena_allocate(arena, sizeof(*root));
+	AstRoot *root = mem_alloc(sizeof(*root));
 	root->expression = expression;
 	return root;
 }
 
-AstExpression *ast_initExpressionNumber (Arena *arena, Token value)
+AstExpression *ast_initExpressionNumber (Token value)
 {
-	AstExpressionNumber *number = arena_allocate(arena, sizeof(*number));
+	AstExpressionNumber *number = mem_alloc(sizeof(*number));
 	number->value = value;
-	AstExpression *expression = arena_allocate(arena, sizeof(*expression));
+	AstExpression *expression = mem_alloc(sizeof(*expression));
 	expression->type = AstExpression_Number;
 	expression->as.number = number;
 	return expression;

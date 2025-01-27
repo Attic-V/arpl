@@ -1,7 +1,6 @@
 #ifndef ast_h
 #define ast_h
 
-#include "arena.h"
 #include "token.h"
 
 typedef struct {
@@ -27,8 +26,8 @@ typedef struct {
 	AstRoot *root;
 } Ast;
 
-Ast *ast_init (Arena *arena, AstRoot *root);
-AstRoot *ast_initRoot (Arena *arena, AstExpression *expression);
-AstExpression *ast_initExpressionNumber (Arena *arena, Token value);
+Ast *ast_init (AstRoot *root);
+AstRoot *ast_initRoot (AstExpression *expression);
+AstExpression *ast_initExpressionNumber (Token value);
 
 #endif

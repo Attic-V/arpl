@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 
-#include "arena.h"
 #include "token.h"
 
 typedef struct {
@@ -26,6 +25,6 @@ struct Ir {
 	Ir *previous;
 };
 
-Ir *ir_initAssign (Arena *arena, char *var, int32_t value);
+Ir *ir_initAssign (char *var, int32_t value);
 
 #endif

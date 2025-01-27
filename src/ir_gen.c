@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "ir_gen.h"
+#include "memory.h"
 
 Ir *visitAst (Ast *ast);
 Ir *visitRoot (AstRoot *root);
@@ -11,15 +12,13 @@ Ir *visitExpression (AstExpression *expression);
 Ir *visitExpressionNumber (AstExpressionNumber *number);
 
 typedef struct {
-	Arena *arena;
 	int temp;
 } IrGenerator;
 
 static IrGenerator gen;
 
-Ir *gen_ir (Arena *arena, Ast *ast)
+Ir *gen_ir (Ast *ast)
 {
-	gen.arena = arena;
 	gen.temp = 0;
 	return visitAst(ast);
 }
@@ -44,9 +43,9 @@ Ir *visitExpression (AstExpression *expression)
 
 Ir *visitExpressionNumber (AstExpressionNumber *number)
 {
-	char *tempbuf = arena_allocate(gen.arena, (int)log10f(gen.temp ? gen.temp : 1) + 2);
+	char *tempbuf = mem_alloc((int)log10f(gen.temp ? gen.temp : 1) + 2);
 	sprintf(tempbuf, "t%d", gen.temp++);
-	char *valbuf = arena_allocate(gen.arena, number->value.length + 1);
+	char *valbuf = mem_alloc(number->value.length + 1);
 	sprintf(valbuf, "%.*s", number->value.length, number->value.lexeme);
-	return ir_initAssign(gen.arena, tempbuf, atoi(valbuf));
+	return ir_initAssign(tempbuf, atoi(valbuf));
 }

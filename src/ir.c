@@ -1,8 +1,9 @@
 #include "ir.h"
+#include "memory.h"
 
-Ir *ir_initAssign (Arena *arena, char *var, int32_t value)
+Ir *ir_initAssign (char *var, int32_t value)
 {
-	Ir *ir = arena_allocate(arena, sizeof(*ir));
+	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Assign;
 	ir->as.assign.var = var;
 	ir->as.assign.value = value;

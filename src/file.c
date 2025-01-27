@@ -2,8 +2,9 @@
 #include <stdlib.h>
 
 #include "file.h"
+#include "memory.h"
 
-char *readFile (Arena *arena, char *path)
+char *readFile (char *path)
 {
 	FILE *file = fopen(path, "rb");
 	if (file == NULL) {
@@ -15,7 +16,7 @@ char *readFile (Arena *arena, char *path)
 	size_t size = ftell(file);
 	rewind(file);
 
-	char *buffer = (char *)arena_allocate(arena, size + 1);
+	char *buffer = (char *)mem_alloc(size + 1);
 	if (buffer == NULL) {
 		fprintf(stderr, "memory allocation failed\n");
 		exit(1);
