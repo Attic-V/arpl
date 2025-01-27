@@ -7,12 +7,12 @@
 #include "scanner.h"
 
 typedef struct {
+	Arena *arena;
 	char *start;
 	char *current;
-	int line;
 	Token *tokens;
 	int count;
-	Arena *arena;
+	int line;
 } Scanner;
 
 Scanner scanner;
@@ -21,11 +21,11 @@ void addToken (TokenType type);
 
 Token *scan (Arena *arena, char *source)
 {
+	scanner.arena = arena;
 	scanner.current = source;
-	scanner.line = 1;
 	scanner.tokens = arena_allocate(arena, sizeof(Token));
 	scanner.count = 0;
-	scanner.arena = arena;
+	scanner.line = 1;
 
 	for (;;) {
 		if (*scanner.current == '\0') break;
@@ -53,12 +53,7 @@ Token *scan (Arena *arena, char *source)
 		fprintf(stderr, "%d: error: unexpected character '%c'\n", scanner.line, ch);
 	}
 
-	scanner.tokens[scanner.count] = (Token){
-		.type = TT_EOF,
-		.lexeme = scanner.current,
-		.length = 1,
-		.line = scanner.line,
-	};
+	addToken(TT_EOF);
 
 	return scanner.tokens;
 }
