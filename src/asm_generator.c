@@ -12,7 +12,7 @@ typedef struct {
 
 static AsmGenerator gen;
 
-void asm_generate (Arena *arena, Tac *tac)
+void asm_generate (Arena *arena, Ir *ir)
 {
 	const char *path = "out.s";
 	remove(path);
@@ -26,7 +26,7 @@ void asm_generate (Arena *arena, Tac *tac)
 	emit("\tglobal _start");
 	emit("");
 	emit("_start:");
-	emit("\tpush    %d", tac->as.assign.value);
+	emit("\tpush    %d", ir->as.assign.value);
 	emit("\tmov     rax, 60");
 	emit("\tpop     rdi");
 	emit("\tsyscall");
