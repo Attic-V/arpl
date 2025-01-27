@@ -1,7 +1,8 @@
 #include "parser.h"
 
 AstRoot *getRoot (void);
-AstLiteral *getLiteral (void);
+AstExpression *getExpression (void);
+AstExpression *getExpressionNumber (void);
 
 typedef struct {
 	Arena *arena;
@@ -25,10 +26,15 @@ Ast *parse (Arena *arena, Token *tokens)
 
 AstRoot *getRoot (void)
 {
-	return ast_initRoot(parser.arena, getLiteral());
+	return ast_initRoot(parser.arena, getExpression());
 }
 
-AstLiteral *getLiteral (void)
+AstExpression *getExpression (void)
 {
-	return ast_initLiteral(parser.arena, parser.tokens[parser.current++]);
+	return getExpressionNumber();
+}
+
+AstExpression *getExpressionNumber (void)
+{
+	return ast_initExpressionNumber(parser.arena, parser.tokens[parser.current++]);
 }

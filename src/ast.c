@@ -7,16 +7,19 @@ Ast *ast_init (Arena *arena, AstRoot *root)
 	return ast;
 }
 
-AstLiteral *ast_initLiteral (Arena *arena, Token value)
+AstRoot *ast_initRoot (Arena *arena, AstExpression *expression)
 {
-	AstLiteral *node = arena_allocate(arena, sizeof(*node));
-	node->value = value;
-	return node;
+	AstRoot *root = arena_allocate(arena, sizeof(*root));
+	root->expression = expression;
+	return root;
 }
 
-AstRoot *ast_initRoot (Arena *arena, AstLiteral *literal)
+AstExpression *ast_initExpressionNumber (Arena *arena, Token value)
 {
-	AstRoot *node = arena_allocate(arena, sizeof(*node));
-	node->literal = literal;
-	return node;
+	AstExpressionNumber *number = arena_allocate(arena, sizeof(*number));
+	number->value = value;
+	AstExpression *expression = arena_allocate(arena, sizeof(*expression));
+	expression->type = AstExpression_Number;
+	expression->as.number = number;
+	return expression;
 }

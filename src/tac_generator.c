@@ -6,7 +6,8 @@
 
 Tac *visitAst (Ast *ast);
 TacInstruction *visitRoot (AstRoot *root);
-TacInstruction *visitLiteral (AstLiteral *literal);
+TacInstruction *visitExpression (AstExpression *expression);
+TacInstruction *visitExpressionNumber (AstExpressionNumber *number);
 
 typedef struct {
 	Arena *arena;
@@ -32,12 +33,20 @@ Tac *visitAst (Ast *ast)
 
 TacInstruction *visitRoot (AstRoot *root)
 {
-	return visitLiteral(root->literal);
+	return visitExpression(root->expression);
 }
 
-TacInstruction *visitLiteral (AstLiteral *literal)
+TacInstruction *visitExpression (AstExpression *expression)
+{
+	if (expression->type == AstExpression_Number) {
+		return visitExpressionNumber(expression->as.number);
+	}
+	return NULL;
+}
+
+TacInstruction *visitExpressionNumber (AstExpressionNumber *number)
 {
 	char *buffer = arena_allocate(generator.arena, (int)log10f(generator.temp ? generator.temp : 1) + 2);
 	sprintf(buffer, "t%d", generator.temp++);
-	return tac_init_assign(generator.arena, buffer, literal->value);
+	return tac_init_assign(generator.arena, buffer, number->value);
 }

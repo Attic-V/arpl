@@ -6,10 +6,21 @@
 
 typedef struct {
 	Token value;
-} AstLiteral;
+} AstExpressionNumber;
+
+typedef enum {
+	AstExpression_Number,
+} AstExpressionType;
 
 typedef struct {
-	AstLiteral *literal;
+	AstExpressionType type;
+	union {
+		AstExpressionNumber *number;
+	} as;
+} AstExpression;
+
+typedef struct {
+	AstExpression *expression;
 } AstRoot;
 
 typedef struct {
@@ -17,7 +28,7 @@ typedef struct {
 } Ast;
 
 Ast *ast_init (Arena *arena, AstRoot *root);
-AstLiteral *ast_initLiteral (Arena *arena, Token value);
-AstRoot *ast_initRoot (Arena *arena, AstLiteral *literal);
+AstRoot *ast_initRoot (Arena *arena, AstExpression *expression);
+AstExpression *ast_initExpressionNumber (Arena *arena, Token value);
 
 #endif
