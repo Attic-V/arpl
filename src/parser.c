@@ -10,7 +10,7 @@ typedef struct {
 	int current;
 } Parser;
 
-Parser parser;
+static Parser parser;
 
 Ast *parse (Arena *arena, Token *tokens)
 {

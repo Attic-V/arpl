@@ -15,7 +15,7 @@ typedef struct {
 	int line;
 } Scanner;
 
-Scanner scanner;
+static Scanner scanner;
 
 void addToken (TokenType type);
 
