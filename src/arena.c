@@ -4,15 +4,29 @@
 
 #include "arena.h"
 
-void *arena_allocate_raw (Arena *arena, size_t size);
-void arena_release_end (Arena *arena, size_t size);
+typedef struct Region Region;
 
-struct Arena {
+struct Region {
 	void *memory;
 	void *previous;
 	size_t offset;
 	size_t size;
+	Region *before;
 };
+
+struct Arena {
+	Region *region;
+	size_t regionsize;
+};
+
+void *arena_allocateRaw (Arena *arena, size_t size);
+
+Region *region_init (size_t size);
+void *region_allocate (Region *region, size_t size);
+void *region_allocateRaw (Region *region, size_t size);
+void *region_reallocate (Region *region, void *ptr, size_t size);
+void region_releaseEnd (Region *region, size_t size);
+size_t region_getFree (Region *region);
 
 Arena *arena_init (size_t size)
 {
@@ -20,61 +34,92 @@ Arena *arena_init (size_t size)
 	if (arena == NULL) {
 		return NULL;
 	}
-	arena->memory = malloc(size);
-	if (arena->memory == NULL) {
-		return NULL;
-	}
-	arena->previous = NULL;
-	arena->offset = 0;
-	arena->size = size;
+	arena->regionsize = size;
+	arena->region = region_init(arena->regionsize);
 	return arena;
 }
 
 void arena_free (Arena *arena)
 {
-	free(arena->memory);
+	for (Region *region = arena->region; region != NULL; region = region->before) {
+		free(region->memory);
+		free(region);
+	}
 	free(arena);
 }
 
 void *arena_allocate (Arena *arena, size_t size)
 {
-	*(size_t *)arena_allocate_raw(arena, sizeof(size)) = size;
-	return arena_allocate_raw(arena, size);
+	*(size_t *)arena_allocateRaw(arena, sizeof(size)) = size;
+	return arena_allocateRaw(arena, size);
 }
 
 void *arena_reallocate (Arena *arena, void *ptr, size_t size)
+{
+	return region_reallocate(arena->region, ptr, size);
+}
+
+void *arena_allocateRaw (Arena *arena, size_t size)
+{
+	if (size > region_getFree(arena->region)) {
+		Region *region = region_init(arena->regionsize);
+		region->before = arena->region;
+		arena->region = region;
+	}
+	void *ptr = region_allocateRaw(arena->region, size);
+	return ptr;
+}
+
+Region *region_init (size_t size)
+{
+	Region *region = malloc(sizeof(*region));
+	region->memory = malloc(size);
+	region->previous = NULL;
+	region->offset = 0;
+	region->size = size;
+	region->before = NULL;
+	return region;
+}
+
+void *region_allocate (Region *region, size_t size)
+{
+	*(size_t *)region_allocateRaw(region, sizeof(size)) = size;
+	return region_allocateRaw(region, size);
+}
+
+void *region_allocateRaw (Region *region, size_t size)
+{
+	region->previous = region->memory + region->offset;
+	if (region->offset + size > region->size) {
+		return NULL;
+	}
+	void *ptr = region->memory + region->offset;
+	region->offset += size;
+	return ptr;
+}
+
+void *region_reallocate (Region *region, void *ptr, size_t size)
 {
 	size_t oldsize = *(size_t *)(ptr - sizeof(oldsize));
 	if (size < oldsize) {
 		return ptr;
 	}
-	if (arena->previous == ptr) {
-		arena_release_end(arena, oldsize);
-		arena_release_end(arena, sizeof(oldsize));
-		return arena_allocate(arena, size);
+	if (region->previous == ptr) {
+		region_releaseEnd(region, oldsize);
+		region_releaseEnd(region, sizeof(oldsize));
+		return region_allocate(region, size);
 	}
-	void *newptr = arena_allocate(arena, size);
+	void *newptr = region_allocate(region, size);
 	memcpy(newptr, ptr, oldsize);
 	return newptr;
 }
 
-size_t arena_getFree (Arena *arena)
+void region_releaseEnd (Region *region, size_t size)
 {
-	return arena->size - arena->offset;
+	region->offset -= size;
 }
 
-void *arena_allocate_raw (Arena *arena, size_t size)
+size_t region_getFree (Region *region)
 {
-	arena->previous = arena->memory + arena->offset;
-	if (arena->offset + size > arena->size) {
-		return NULL;
-	}
-	void *ptr = arena->memory + arena->offset;
-	arena->offset += size;
-	return ptr;
-}
-
-void arena_release_end (Arena *arena, size_t size)
-{
-	arena->offset -= size;
+	return region->size - region->offset;
 }
