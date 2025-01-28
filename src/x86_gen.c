@@ -6,6 +6,8 @@
 #include "x86_gen.h"
 
 void emit (char *format, ...);
+void transform (Ir *r);
+void transformAssign (IrAssign *r);
 
 typedef struct {
 	FILE *fp;
@@ -27,12 +29,28 @@ void gen_x86 (Ir *ir)
 	emit("\tglobal _start");
 	emit("");
 	emit("_start:");
-	emit("\tpush    %d", ir->as.assign->value);
+
+	for (Ir *r = ir; r != NULL; r = r->next) {
+		transform(r);
+	}
+
 	emit("\tmov     rax, 60");
 	emit("\tpop     rdi");
 	emit("\tsyscall");
 
 	fclose(gen.fp);
+}
+
+void transform (Ir *r)
+{
+	switch (r->type) {
+		case Ir_Assign: transformAssign(r->as.assign); break;
+	}
+}
+
+void transformAssign (IrAssign *r)
+{
+	emit("\tpush    %d", r->value);
 }
 
 void emit (char *format, ...)
