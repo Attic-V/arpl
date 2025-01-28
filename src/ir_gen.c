@@ -43,7 +43,7 @@ Ir *visitExpression (AstExpression *expression)
 
 Ir *visitExpressionNumber (AstExpressionNumber *number)
 {
-	char *tempbuf = mem_alloc((int)log10f(gen.temp ? gen.temp : 1) + 2);
+	char *tempbuf = mem_alloc(gen.temp ? (int)log10f(gen.temp) + 3 : 3);
 	sprintf(tempbuf, "t%d", gen.temp++);
 	char *valbuf = mem_alloc(number->value.length + 1);
 	sprintf(valbuf, "%.*s", number->value.length, number->value.lexeme);
