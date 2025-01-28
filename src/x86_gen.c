@@ -27,7 +27,7 @@ void gen_x86 (Ir *ir)
 	emit("\tglobal _start");
 	emit("");
 	emit("_start:");
-	emit("\tpush    %d", ir->as.assign.value);
+	emit("\tpush    %d", ir->as.assign->value);
 	emit("\tmov     rax, 60");
 	emit("\tpop     rdi");
 	emit("\tsyscall");

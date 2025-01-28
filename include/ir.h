@@ -19,7 +19,7 @@ typedef struct Ir Ir;
 struct Ir {
 	IrType type;
 	union {
-		IrAssign assign;
+		IrAssign *assign;
 	} as;
 	Ir *next;
 	Ir *previous;
