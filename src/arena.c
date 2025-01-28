@@ -20,12 +20,15 @@ struct Arena {
 };
 
 void *arena_allocateRaw (Arena *arena, size_t size);
+void *arena_allocateSegment (Arena *arena, size_t size);
 
 Region *region_init (size_t size);
 void *region_allocate (Region *region, size_t size);
+void *region_allocateSegment (Region *region, size_t size);
 void *region_allocateRaw (Region *region, size_t size);
 void *region_reallocate (Region *region, void *ptr, size_t size);
-void region_releaseEnd (Region *region, size_t size);
+void region_releaseSegment (Region *region, size_t size);
+void region_release (Region *region, size_t size);
 size_t region_getFree (Region *region);
 
 Arena *arena_init (size_t size)
@@ -49,6 +52,11 @@ void arena_free (Arena *arena)
 }
 
 void *arena_allocate (Arena *arena, size_t size)
+{
+	return arena_allocateSegment(arena, size);
+}
+
+void *arena_allocateSegment (Arena *arena, size_t size)
 {
 	*(size_t *)arena_allocateRaw(arena, sizeof(size)) = size;
 	return arena_allocateRaw(arena, size);
@@ -83,6 +91,11 @@ Region *region_init (size_t size)
 
 void *region_allocate (Region *region, size_t size)
 {
+	return region_allocateSegment(region, size);
+}
+
+void *region_allocateSegment (Region *region, size_t size)
+{
 	*(size_t *)region_allocateRaw(region, sizeof(size)) = size;
 	return region_allocateRaw(region, size);
 }
@@ -105,8 +118,7 @@ void *region_reallocate (Region *region, void *ptr, size_t size)
 		return ptr;
 	}
 	if (region->previous == ptr) {
-		region_releaseEnd(region, oldsize);
-		region_releaseEnd(region, sizeof(oldsize));
+		region_releaseSegment(region, oldsize);
 		return region_allocate(region, size);
 	}
 	void *newptr = region_allocate(region, size);
@@ -114,7 +126,12 @@ void *region_reallocate (Region *region, void *ptr, size_t size)
 	return newptr;
 }
 
-void region_releaseEnd (Region *region, size_t size)
+void region_releaseSegment (Region *region, size_t size)
+{
+	region_release(region, size + sizeof(size));
+}
+
+void region_release (Region *region, size_t size)
 {
 	region->offset -= size;
 }
