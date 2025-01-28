@@ -35,10 +35,10 @@ Ir *visitRoot (AstRoot *root)
 
 Ir *visitExpression (AstExpression *expression)
 {
-	if (expression->type == AstExpression_Number) {
-		return visitExpressionNumber(expression->as.number);
+	switch (expression->type) {
+		case AstExpression_Number: return visitExpressionNumber(expression->as.number);
+		default: return NULL;
 	}
-	return NULL;
 }
 
 Ir *visitExpressionNumber (AstExpressionNumber *number)
