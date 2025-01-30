@@ -3,20 +3,30 @@
 
 #include "token.h"
 
+typedef struct AstExpression AstExpression;
+
+typedef struct {
+	AstExpression *a;
+	AstExpression *b;
+	Token operator;
+} AstExpressionBinary;
+
 typedef struct {
 	Token value;
 } AstExpressionNumber;
 
 typedef enum {
+	AstExpression_Binary,
 	AstExpression_Number,
 } AstExpressionType;
 
-typedef struct {
+struct AstExpression {
 	AstExpressionType type;
 	union {
+		AstExpressionBinary *binary;
 		AstExpressionNumber *number;
 	} as;
-} AstExpression;
+};
 
 typedef struct {
 	AstExpression *expression;
@@ -28,6 +38,7 @@ typedef struct {
 
 Ast *ast_init (AstRoot *root);
 AstRoot *ast_initRoot (AstExpression *expression);
+AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionNumber (Token value);
 
 #endif

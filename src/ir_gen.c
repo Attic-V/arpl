@@ -1,17 +1,20 @@
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "ir_gen.h"
 #include "memory.h"
 
-Ir *visitAst (Ast *ast);
-Ir *visitRoot (AstRoot *root);
-Ir *visitExpression (AstExpression *expression);
-Ir *visitExpressionNumber (AstExpressionNumber *number);
+void visitAst (Ast *ast);
+void visitRoot (AstRoot *root);
+void visitExpression (AstExpression *expression);
+void visitExpressionBinary (AstExpressionBinary *expression);
+void visitExpressionNumber (AstExpressionNumber *expression);
+
+void addInstruction (Ir *instruction);
+Ir *getFirstInstruction (Ir *ir);
 
 typedef struct {
+	Ir *ir;
 	int temp;
 } IrGenerator;
 
@@ -20,30 +23,59 @@ static IrGenerator gen;
 Ir *gen_ir (Ast *ast)
 {
 	gen.temp = 0;
-	return visitAst(ast);
+	gen.ir = NULL;
+
+	visitAst(ast);
+
+	return getFirstInstruction(gen.ir);
 }
 
-Ir *visitAst (Ast *ast)
+void visitAst (Ast *ast)
 {
-	return visitRoot(ast->root);
+	visitRoot(ast->root);
 }
 
-Ir *visitRoot (AstRoot *root)
+void visitRoot (AstRoot *root)
 {
-	return visitExpression(root->expression);
+	visitExpression(root->expression);
 }
 
-Ir *visitExpression (AstExpression *expression)
+void visitExpression (AstExpression *expression)
 {
 	switch (expression->type) {
-		case AstExpression_Number: return visitExpressionNumber(expression->as.number);
-		default: return NULL;
+		case AstExpression_Binary: visitExpressionBinary(expression->as.binary); break;
+		case AstExpression_Number: visitExpressionNumber(expression->as.number); break;
 	}
 }
 
-Ir *visitExpressionNumber (AstExpressionNumber *number)
+void visitExpressionBinary (AstExpressionBinary *expression)
 {
-	char *buffer = mem_alloc(number->value.length + 1);
-	sprintf(buffer, "%.*s", number->value.length, number->value.lexeme);
-	return ir_initPush(atoi(buffer));
+	visitExpression(expression->a);
+	visitExpression(expression->b);
+	addInstruction(ir_initAdd());
+}
+
+void visitExpressionNumber (AstExpressionNumber *expression)
+{
+	char *buffer = mem_alloc(expression->value.length + 1);
+	sprintf(buffer, "%.*s", expression->value.length, expression->value.lexeme);
+	addInstruction(ir_initPush(atoi(buffer)));
+}
+
+void addInstruction (Ir *instruction)
+{
+	if (gen.ir == NULL) {
+		gen.ir = instruction;
+		return;
+	}
+	gen.ir->next = instruction;
+	instruction->previous = gen.ir;
+	gen.ir = instruction;
+}
+
+Ir *getFirstInstruction (Ir *ir)
+{
+	Ir *r;
+	for (r = ir; r->previous != NULL; r = r->previous);
+	return r;
 }

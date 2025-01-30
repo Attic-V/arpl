@@ -39,6 +39,8 @@ Token *scan (char *source)
 			case '\t':
 			case ' ':
 				continue;
+
+			case '+': addToken(TT_Plus); continue;
 		}
 
 		if (isdigit(ch)) {

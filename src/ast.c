@@ -1,6 +1,7 @@
 #include "ast.h"
 #include "memory.h"
 
+AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpressionNumber *astExpression_initNumber (Token value);
 
 Ast *ast_init (AstRoot *root)
@@ -17,12 +18,29 @@ AstRoot *ast_initRoot (AstExpression *expression)
 	return root;
 }
 
+AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator)
+{
+	AstExpression *expression = mem_alloc(sizeof(*expression));
+	expression->type = AstExpression_Binary;
+	expression->as.binary = astExpression_initBinary(a, b, operator);
+	return expression;
+}
+
 AstExpression *ast_initExpressionNumber (Token value)
 {
 	AstExpression *expression = mem_alloc(sizeof(*expression));
 	expression->type = AstExpression_Number;
 	expression->as.number = astExpression_initNumber(value);
 	return expression;
+}
+
+AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator)
+{
+	AstExpressionBinary *binary = mem_alloc(sizeof(*binary));
+	binary->a = a;
+	binary->b = b;
+	binary->operator = operator;
+	return binary;
 }
 
 AstExpressionNumber *astExpression_initNumber (Token value)

@@ -3,6 +3,7 @@
 
 AstRoot *getRoot (void);
 AstExpression *getExpression (void);
+AstExpression *getExpressionBinary (void);
 AstExpression *getExpressionNumber (void);
 
 typedef struct {
@@ -30,7 +31,18 @@ AstRoot *getRoot (void)
 
 AstExpression *getExpression (void)
 {
-	return getExpressionNumber();
+	return getExpressionBinary();
+}
+
+AstExpression *getExpressionBinary (void)
+{
+	AstExpression *expression = getExpressionNumber();
+	while (parser.tokens[parser.current].type == TT_Plus) {
+		Token operator = parser.tokens[parser.current++];
+		AstExpression *right = getExpressionNumber();
+		expression = ast_initExpressionBinary(expression, right, operator);
+	}
+	return expression;
 }
 
 AstExpression *getExpressionNumber (void)

@@ -6,6 +6,7 @@
 typedef enum {
 	TT_EOF,
 	TT_Number,
+	TT_Plus,
 } TokenType;
 
 typedef struct {
