@@ -12,9 +12,13 @@ typedef struct {
 	int32_t value;
 } IrPush;
 
+typedef struct {
+} IrSub;
+
 typedef enum {
 	Ir_Add,
 	Ir_Push,
+	Ir_Sub,
 } IrType;
 
 typedef struct Ir Ir;
@@ -24,6 +28,7 @@ struct Ir {
 	union {
 		IrAdd *add;
 		IrPush *push;
+		IrSub *sub;
 	} as;
 	Ir *next;
 	Ir *previous;
@@ -31,5 +36,6 @@ struct Ir {
 
 Ir *ir_initAdd (void);
 Ir *ir_initPush (int32_t value);
+Ir *ir_initSub (void);
 
 #endif

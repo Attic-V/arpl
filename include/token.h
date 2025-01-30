@@ -5,6 +5,7 @@
 
 typedef enum {
 	TT_EOF,
+	TT_Minus,
 	TT_Number,
 	TT_Plus,
 } TokenType;

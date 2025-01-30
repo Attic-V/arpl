@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include "memory.h"
 #include "parser.h"
 
@@ -5,6 +7,8 @@ AstRoot *getRoot (void);
 AstExpression *getExpression (void);
 AstExpression *getExpressionBinary (void);
 AstExpression *getExpressionNumber (void);
+
+bool check (TokenType type);
 
 typedef struct {
 	Token *tokens;
@@ -37,7 +41,7 @@ AstExpression *getExpression (void)
 AstExpression *getExpressionBinary (void)
 {
 	AstExpression *expression = getExpressionNumber();
-	while (parser.tokens[parser.current].type == TT_Plus) {
+	while (check(TT_Plus) || check(TT_Minus)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpressionNumber();
 		expression = ast_initExpressionBinary(expression, right, operator);
@@ -48,4 +52,9 @@ AstExpression *getExpressionBinary (void)
 AstExpression *getExpressionNumber (void)
 {
 	return ast_initExpressionNumber(parser.tokens[parser.current++]);
+}
+
+bool check (TokenType type)
+{
+	return parser.tokens[parser.current].type == type;
 }

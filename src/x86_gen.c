@@ -9,6 +9,7 @@ void emit (char *format, ...);
 void transform (Ir *r);
 void transformAdd (IrAdd *instruction);
 void transformPush (IrPush *instruction);
+void transformSub (IrSub *instruction);
 
 typedef struct {
 	FILE *fp;
@@ -47,6 +48,7 @@ void transform (Ir *r)
 	switch (r->type) {
 		case Ir_Add: transformAdd(r->as.add); break;
 		case Ir_Push: transformPush(r->as.push); break;
+		case Ir_Sub: transformSub(r->as.sub); break;
 	}
 }
 
@@ -61,6 +63,14 @@ void transformAdd (IrAdd *instruction)
 void transformPush (IrPush *instruction)
 {
 	emit("\tpush    %d", instruction->value);
+}
+
+void transformSub (IrSub *instruction)
+{
+	emit("\tpop     r9");
+	emit("\tpop     r8");
+	emit("\tsub     r8d, r9d");
+	emit("\tpush    r8");
 }
 
 void emit (char *format, ...)

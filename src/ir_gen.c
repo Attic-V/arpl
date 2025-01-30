@@ -52,7 +52,11 @@ void visitExpressionBinary (AstExpressionBinary *expression)
 {
 	visitExpression(expression->a);
 	visitExpression(expression->b);
-	addInstruction(ir_initAdd());
+	switch (expression->operator.type) {
+		case TT_Plus: addInstruction(ir_initAdd()); break;
+		case TT_Minus: addInstruction(ir_initSub()); break;
+		default:
+	}
 }
 
 void visitExpressionNumber (AstExpressionNumber *expression)
