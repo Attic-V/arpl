@@ -52,8 +52,8 @@ void transform (Ir *r)
 
 void transformAdd (IrAdd *instruction)
 {
-	emit("\tpop     r8");
 	emit("\tpop     r9");
+	emit("\tpop     r8");
 	emit("\tadd     r8d, r9d");
 	emit("\tpush    r8");
 }
