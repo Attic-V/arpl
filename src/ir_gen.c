@@ -64,11 +64,9 @@ void visitExpressionNumber (AstExpressionNumber *expression)
 
 void addInstruction (Ir *instruction)
 {
-	if (gen.ir == NULL) {
-		gen.ir = instruction;
-		return;
+	if (gen.ir != NULL) {
+		gen.ir->next = instruction;
 	}
-	gen.ir->next = instruction;
 	instruction->previous = gen.ir;
 	gen.ir = instruction;
 }
