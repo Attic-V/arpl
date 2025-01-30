@@ -7,7 +7,7 @@
 
 void emit (char *format, ...);
 void transform (Ir *r);
-void transformAssign (IrAssign *r);
+void transformPush (IrPush *r);
 
 typedef struct {
 	FILE *fp;
@@ -44,11 +44,11 @@ void gen_x86 (Ir *ir)
 void transform (Ir *r)
 {
 	switch (r->type) {
-		case Ir_Assign: transformAssign(r->as.assign); break;
+		case Ir_Push: transformPush(r->as.push); break;
 	}
 }
 
-void transformAssign (IrAssign *r)
+void transformPush (IrPush *r)
 {
 	emit("\tpush    %d", r->value);
 }

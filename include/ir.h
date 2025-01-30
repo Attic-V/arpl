@@ -6,12 +6,11 @@
 #include "token.h"
 
 typedef struct {
-	char *var;
 	int32_t value;
-} IrAssign;
+} IrPush;
 
 typedef enum {
-	Ir_Assign,
+	Ir_Push,
 } IrType;
 
 typedef struct Ir Ir;
@@ -19,12 +18,12 @@ typedef struct Ir Ir;
 struct Ir {
 	IrType type;
 	union {
-		IrAssign *assign;
+		IrPush *push;
 	} as;
 	Ir *next;
 	Ir *previous;
 };
 
-Ir *ir_initAssign (char *var, int32_t value);
+Ir *ir_initPush (int32_t value);
 
 #endif

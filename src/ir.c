@@ -1,22 +1,21 @@
 #include "ir.h"
 #include "memory.h"
 
-IrAssign *irAssign_init (char *var, int32_t value);
+IrPush *irPush_init (int32_t value);
 
-Ir *ir_initAssign (char *var, int32_t value)
+Ir *ir_initPush (int32_t value)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
-	ir->type = Ir_Assign;
-	ir->as.assign = irAssign_init(var, value);
+	ir->type = Ir_Push;
+	ir->as.push = irPush_init(value);
 	ir->next = NULL;
 	ir->previous = NULL;
 	return ir;
 }
 
-IrAssign *irAssign_init (char *var, int32_t value)
+IrPush *irPush_init (int32_t value)
 {
-	IrAssign *assign = mem_alloc(sizeof(*assign));
-	assign->var = var;
+	IrPush *assign = mem_alloc(sizeof(*assign));
 	assign->value = value;
 	return assign;
 }
