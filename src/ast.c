@@ -3,6 +3,7 @@
 
 AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpressionNumber *astExpression_initNumber (Token value);
+AstExpressionUnary *astExpression_initUnary (Token operator, AstExpression *right);
 
 Ast *ast_init (AstRoot *root)
 {
@@ -34,6 +35,14 @@ AstExpression *ast_initExpressionNumber (Token value)
 	return expression;
 }
 
+AstExpression *ast_initExpressionUnary (Token operator, AstExpression *right)
+{
+	AstExpression *expression = mem_alloc(sizeof(*expression));
+	expression->type = AstExpression_Unary;
+	expression->as.unary = astExpression_initUnary(operator, right);
+	return expression;
+}
+
 AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator)
 {
 	AstExpressionBinary *binary = mem_alloc(sizeof(*binary));
@@ -48,4 +57,12 @@ AstExpressionNumber *astExpression_initNumber (Token value)
 	AstExpressionNumber *number = mem_alloc(sizeof(*number));
 	number->value = value;
 	return number;
+}
+
+AstExpressionUnary *astExpression_initUnary (Token operator, AstExpression *right)
+{
+	AstExpressionUnary *unary = mem_alloc(sizeof(*unary));
+	unary->operator = operator;
+	unary->right = right;
+	return unary;
 }
