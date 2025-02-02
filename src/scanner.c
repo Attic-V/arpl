@@ -52,7 +52,7 @@ Token *scan (char *source)
 			continue;
 		}
 
-		fprintf(stderr, "%d: error: unexpected character '%c'\n", scanner.line, ch);
+		fprintf(stderr, "%d: error at '%c': unexpected character\n", scanner.line, ch);
 	}
 
 	addToken(TT_EOF);

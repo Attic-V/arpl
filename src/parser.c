@@ -1,4 +1,6 @@
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "memory.h"
 #include "parser.h"
@@ -51,7 +53,12 @@ AstExpression *getExpressionBinary (void)
 
 AstExpression *getExpressionNumber (void)
 {
-	return ast_initExpressionNumber(parser.tokens[parser.current++]);
+	Token token = parser.tokens[parser.current++];
+	if (token.type != TT_Number) {
+		fprintf(stderr, "%d: error at '%.*s': expected number\n", token.line, token.length, token.lexeme);
+		exit(1);
+	}
+	return ast_initExpressionNumber(token);
 }
 
 bool check (TokenType type)
