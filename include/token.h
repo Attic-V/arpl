@@ -8,6 +8,7 @@ typedef enum {
 	TT_Minus,
 	TT_Number,
 	TT_Plus,
+	TT_Star,
 } TokenType;
 
 typedef struct {

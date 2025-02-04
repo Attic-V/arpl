@@ -57,6 +57,7 @@ void visitExpressionBinary (AstExpressionBinary *expression)
 	switch (expression->operator.type) {
 		case TT_Plus: addInstruction(ir_initAdd()); break;
 		case TT_Minus: addInstruction(ir_initSub()); break;
+		case TT_Star: addInstruction(ir_initMul()); break;
 		default:
 	}
 }

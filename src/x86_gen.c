@@ -8,6 +8,7 @@
 void emit (char *format, ...);
 void transform (Ir *r);
 void transformAdd (IrAdd *instruction);
+void transformMul (IrMul *instruction);
 void transformNeg (IrNeg *instruction);
 void transformPush (IrPush *instruction);
 void transformSub (IrSub *instruction);
@@ -48,6 +49,7 @@ void transform (Ir *r)
 {
 	switch (r->type) {
 		case Ir_Add: transformAdd(r->as.add); break;
+		case Ir_Mul: transformMul(r->as.mul); break;
 		case Ir_Neg: transformNeg(r->as.neg); break;
 		case Ir_Push: transformPush(r->as.push); break;
 		case Ir_Sub: transformSub(r->as.sub); break;
@@ -59,6 +61,14 @@ void transformAdd (IrAdd *instruction)
 	emit("\tpop     r9");
 	emit("\tpop     r8");
 	emit("\tadd     r8d, r9d");
+	emit("\tpush    r8");
+}
+
+void transformMul (IrMul *instruction)
+{
+	emit("\tpop     r9");
+	emit("\tpop     r8");
+	emit("\timul    r8d, r9d");
 	emit("\tpush    r8");
 }
 

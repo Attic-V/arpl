@@ -7,8 +7,9 @@
 
 AstRoot *getRoot (void);
 AstExpression *getExpression (void);
-AstExpression *getExpressionBinary (void);
 AstExpression *getExpressionNumber (void);
+AstExpression *getExpressionProduct (void);
+AstExpression *getExpressionSum (void);
 AstExpression *getExpressionUnary (void);
 
 bool check (TokenType type);
@@ -38,13 +39,24 @@ AstRoot *getRoot (void)
 
 AstExpression *getExpression (void)
 {
-	return getExpressionBinary();
+	return getExpressionSum();
 }
 
-AstExpression *getExpressionBinary (void)
+AstExpression *getExpressionSum (void)
+{
+	AstExpression *expression = getExpressionProduct();
+	while (check(TT_Plus) || check(TT_Minus)) {
+		Token operator = parser.tokens[parser.current++];
+		AstExpression *right = getExpressionProduct();
+		expression = ast_initExpressionBinary(expression, right, operator);
+	}
+	return expression;
+}
+
+AstExpression *getExpressionProduct (void)
 {
 	AstExpression *expression = getExpressionUnary();
-	while (check(TT_Plus) || check(TT_Minus)) {
+	while (check(TT_Star)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpressionUnary();
 		expression = ast_initExpressionBinary(expression, right, operator);
