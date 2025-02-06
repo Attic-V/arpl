@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "ir_gen.h"
+#include "linked_list.h"
 #include "memory.h"
 
 void visitAst (Ast *ast);
@@ -12,10 +13,9 @@ void visitExpressionNumber (AstExpressionNumber *expression);
 void visitExpressionUnary (AstExpressionUnary *expression);
 
 void addInstruction (Ir *instruction);
-Ir *getFirstInstruction (Ir *ir);
 
 typedef struct {
-	Ir *ir;
+	Ir *current;
 	int temp;
 } IrGenerator;
 
@@ -24,11 +24,13 @@ static IrGenerator gen;
 Ir *gen_ir (Ast *ast)
 {
 	gen.temp = 0;
-	gen.ir = NULL;
+	gen.current = NULL;
 
 	visitAst(ast);
 
-	return getFirstInstruction(gen.ir);
+	Ir *ir;
+	for (ir = gen.current; ir->previous != NULL; ir = ir->previous);
+	return ir;
 }
 
 void visitAst (Ast *ast)
@@ -80,16 +82,6 @@ void visitExpressionUnary (AstExpressionUnary *expression)
 
 void addInstruction (Ir *instruction)
 {
-	if (gen.ir != NULL) {
-		gen.ir->next = instruction;
-	}
-	instruction->previous = gen.ir;
-	gen.ir = instruction;
-}
-
-Ir *getFirstInstruction (Ir *ir)
-{
-	Ir *r;
-	for (r = ir; r->previous != NULL; r = r->previous);
-	return r;
+	dll_insert(gen.current, instruction);
+	gen.current = instruction;
 }
