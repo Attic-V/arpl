@@ -5,9 +5,11 @@
 
 typedef enum {
 	TT_EOF,
+	TT_LParen,
 	TT_Minus,
 	TT_Number,
 	TT_Plus,
+	TT_RParen,
 	TT_Star,
 } TokenType;
 

@@ -40,8 +40,10 @@ Token *scan (char *source)
 			case ' ':
 				continue;
 
+			case '(': addToken(TT_LParen); continue;
 			case '-': addToken(TT_Minus); continue;
 			case '+': addToken(TT_Plus); continue;
+			case ')': addToken(TT_RParen); continue;
 			case '*': addToken(TT_Star); continue;
 		}
 
