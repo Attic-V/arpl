@@ -1,4 +1,5 @@
 #include "ir.h"
+#include "linked_list.h"
 #include "memory.h"
 
 IrAdd *irAdd_init (void);
@@ -12,8 +13,7 @@ Ir *ir_initAdd (void)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Add;
 	ir->as.add = irAdd_init();
-	ir->next = NULL;
-	ir->previous = NULL;
+	dll_init(ir);
 	return ir;
 }
 
@@ -22,8 +22,7 @@ Ir *ir_initMul (void)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Mul;
 	ir->as.mul = irMul_init();
-	ir->next = NULL;
-	ir->previous = NULL;
+	dll_init(ir);
 	return ir;
 }
 
@@ -32,8 +31,7 @@ Ir *ir_initNeg (void)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Neg;
 	ir->as.neg = irNeg_init();
-	ir->next = NULL;
-	ir->previous = NULL;
+	dll_init(ir);
 	return ir;
 }
 
@@ -42,8 +40,7 @@ Ir *ir_initPush (int32_t value)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Push;
 	ir->as.push = irPush_init(value);
-	ir->next = NULL;
-	ir->previous = NULL;
+	dll_init(ir);
 	return ir;
 }
 
@@ -52,8 +49,7 @@ Ir *ir_initSub (void)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Sub;
 	ir->as.sub = irSub_init();
-	ir->next = NULL;
-	ir->previous = NULL;
+	dll_init(ir);
 	return ir;
 }
 
