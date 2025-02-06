@@ -16,14 +16,12 @@ void addInstruction (Ir *instruction);
 
 typedef struct {
 	Ir *current;
-	int temp;
 } IrGenerator;
 
 static IrGenerator gen;
 
 Ir *gen_ir (Ast *ast)
 {
-	gen.temp = 0;
 	gen.current = NULL;
 
 	visitAst(ast);
