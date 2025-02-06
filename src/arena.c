@@ -3,15 +3,17 @@
 #include <string.h>
 
 #include "arena.h"
+#include "linked_list.h"
 
 typedef struct Region Region;
 
 struct Region {
 	void *memory;
-	void *previous;
+	void *previousMem;
 	size_t offset;
 	size_t size;
-	Region *before;
+	Region *next;
+	Region *previous;
 };
 
 struct Arena {
@@ -44,7 +46,7 @@ Arena *arena_init (size_t size)
 
 void arena_free (Arena *arena)
 {
-	for (Region *region = arena->region; region != NULL; region = region->before) {
+	for (Region *region = arena->region; region != NULL; region = region->previous) {
 		free(region->memory);
 		free(region);
 	}
@@ -71,7 +73,7 @@ void *arena_allocateRaw (Arena *arena, size_t size)
 {
 	if (size > region_getFree(arena->region)) {
 		Region *region = region_init(arena->regionsize);
-		region->before = arena->region;
+		region->previous = arena->region;
 		arena->region = region;
 	}
 	void *ptr = region_allocateRaw(arena->region, size);
@@ -82,10 +84,10 @@ Region *region_init (size_t size)
 {
 	Region *region = malloc(sizeof(*region));
 	region->memory = malloc(size);
-	region->previous = NULL;
+	region->previousMem = NULL;
 	region->offset = 0;
 	region->size = size;
-	region->before = NULL;
+	dll_init(region);
 	return region;
 }
 
@@ -102,7 +104,7 @@ void *region_allocateSegment (Region *region, size_t size)
 
 void *region_allocateRaw (Region *region, size_t size)
 {
-	region->previous = region->memory + region->offset;
+	region->previousMem = region->memory + region->offset;
 	if (region->offset + size > region->size) {
 		return NULL;
 	}
@@ -117,7 +119,7 @@ void *region_reallocate (Region *region, void *ptr, size_t size)
 	if (size < oldsize) {
 		return ptr;
 	}
-	if (region->previous == ptr) {
+	if (region->previousMem == ptr) {
 		region_releaseSegment(region, oldsize);
 		return region_allocate(region, size);
 	}
