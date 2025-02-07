@@ -5,6 +5,7 @@
 
 typedef enum {
 	TT_EOF,
+	TT_Equal_Equal,
 	TT_LParen,
 	TT_Minus,
 	TT_Number,

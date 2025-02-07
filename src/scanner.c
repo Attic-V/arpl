@@ -40,6 +40,13 @@ Token *scan (char *source)
 			case ' ':
 				continue;
 
+			case '=':
+				if (*scanner.current == '=') {
+					scanner.current++;
+					addToken(TT_Equal_Equal);
+					continue;
+				}
+				break;
 			case '(': addToken(TT_LParen); continue;
 			case '-': addToken(TT_Minus); continue;
 			case '+': addToken(TT_Plus); continue;

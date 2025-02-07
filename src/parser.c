@@ -8,6 +8,7 @@
 
 AstRoot *getRoot (void);
 AstExpression *getExpression (void);
+AstExpression *getExpressionEquality (void);
 AstExpression *getExpressionPrimary (void);
 AstExpression *getExpressionProduct (void);
 AstExpression *getExpressionSum (void);
@@ -43,7 +44,18 @@ AstRoot *getRoot (void)
 
 AstExpression *getExpression (void)
 {
-	return getExpressionSum();
+	return getExpressionEquality();
+}
+
+AstExpression *getExpressionEquality (void)
+{
+	AstExpression *expression = getExpressionSum();
+	while (check(TT_Equal_Equal)) {
+		Token operator = parser.tokens[parser.current++];
+		AstExpression *right = getExpressionSum();
+		expression = ast_initExpressionBinary(expression, right, operator);
+	}
+	return expression;
 }
 
 AstExpression *getExpressionSum (void)
