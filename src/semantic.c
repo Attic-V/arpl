@@ -1,0 +1,87 @@
+#include <stdio.h>
+
+#include "error.h"
+#include "semantic.h"
+
+static void visitAst (Ast *ast);
+static void visitRoot (AstRoot *node);
+static void visitExpression (AstExpression *node);
+static void visitExpressionBinary (AstExpressionBinary *node);
+static void visitExpressionNumber (AstExpressionNumber *node);
+static void visitExpressionUnary (AstExpressionUnary *node);
+
+void analyze (Ast *ast)
+{
+	visitAst(ast);
+}
+
+static void visitAst (Ast *ast)
+{
+	visitRoot(ast->root);
+}
+
+static void visitRoot (AstRoot *node)
+{
+	visitExpression(node->expression);
+}
+
+static void visitExpression (AstExpression *node)
+{
+	switch (node->type) {
+		case AstExpression_Binary:
+			switch (node->as.binary->operator.type) {
+				case TT_Plus:
+				case TT_Minus:
+				case TT_Star:
+					node->dataType = DT_Number;
+					break;
+				case TT_Equal_Equal:
+					node->dataType = DT_Boolean;
+					break;
+				default:
+			}
+			visitExpressionBinary(node->as.binary);
+			break;
+		case AstExpression_Number:
+			node->dataType = DT_Number;
+			visitExpressionNumber(node->as.number);
+			break;
+		case AstExpression_Unary:
+			node->dataType = DT_Number;
+			visitExpressionUnary(node->as.unary);
+			break;
+	}
+}
+
+static void visitExpressionBinary (AstExpressionBinary *node)
+{
+	visitExpression(node->a);
+	visitExpression(node->b);
+	switch (node->operator.type) {
+		case TT_Plus:
+		case TT_Minus:
+		case TT_Star:
+			if (node->a->dataType != DT_Number || node->b->dataType != DT_Number) {
+				error(node->operator, "operand must be a number");
+			}
+			break;
+		case TT_Equal_Equal:
+			break;
+		default:
+	}
+	if (node->a->dataType != node->b->dataType) {
+		error(node->operator, "operands must have the same type");
+	}
+}
+
+static void visitExpressionNumber (AstExpressionNumber *node)
+{
+}
+
+static void visitExpressionUnary (AstExpressionUnary *node)
+{
+	visitExpression(node->right);
+	if (node->right->dataType != DT_Number) {
+		error(node->operator, "operand must be a number");
+	}
+}

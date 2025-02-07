@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "error.h"
 #include "memory.h"
 #include "parser.h"
 
@@ -16,8 +17,6 @@ AstExpression *getExpressionUnary (void);
 
 bool check (TokenType type);
 Token consume (TokenType type, char *format, ...);
-void error (Token location, char *format, ...);
-void verror (Token location, char *format, va_list args);
 
 typedef struct {
 	Token *tokens;
@@ -122,25 +121,4 @@ Token consume (TokenType type, char *format, ...)
 		exit(1);
 	}
 	return token;
-}
-
-void error (Token location, char *format, ...)
-{
-	va_list args;
-	va_start(args, format);
-	verror(location, format, args);
-	va_end(args);
-}
-
-void verror (Token location, char *format, va_list args)
-{
-	fprintf(stderr, "%d: error at ", location.line);
-	if (location.type == TT_EOF) {
-		fprintf(stderr, "EOF");
-	} else {
-		fprintf(stderr, "'%.*s'", location.length, location.lexeme);
-	}
-	fprintf(stderr, ": ");
-	vfprintf(stderr, format, args);
-	fprintf(stderr, "\n");
 }

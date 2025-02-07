@@ -1,6 +1,7 @@
 #ifndef ast_h
 #define ast_h
 
+#include "data_type.h"
 #include "token.h"
 
 typedef struct AstExpression AstExpression;
@@ -33,6 +34,7 @@ struct AstExpression {
 		AstExpressionNumber *number;
 		AstExpressionUnary *unary;
 	} as;
+	DataType dataType;
 };
 
 typedef struct {
