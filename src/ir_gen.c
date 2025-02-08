@@ -81,6 +81,7 @@ void visitExpressionUnary (AstExpressionUnary *expression)
 {
 	visitExpression(expression->right);
 	switch (expression->operator.type) {
+		case TT_Bang: addInstruction(ir_initNot()); break;
 		case TT_Minus: addInstruction(ir_initNeg()); break;
 		default:
 	}

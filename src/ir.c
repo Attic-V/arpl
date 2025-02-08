@@ -6,6 +6,7 @@ IrAdd *irAdd_init (void);
 IrEqu *irEqu_init (void);
 IrMul *irMul_init (void);
 IrNeg *irNeg_init (void);
+IrNot *irNot_init (void);
 IrPush *irPush_init (int32_t value);
 IrSub *irSub_init (void);
 
@@ -41,6 +42,15 @@ Ir *ir_initNeg (void)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Neg;
 	ir->as.neg = irNeg_init();
+	dll_init(ir);
+	return ir;
+}
+
+Ir *ir_initNot (void)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_Not;
+	ir->as.not = irNot_init();
 	dll_init(ir);
 	return ir;
 }
@@ -85,6 +95,12 @@ IrNeg *irNeg_init (void)
 {
 	IrNeg *neg = mem_alloc(sizeof(*neg));
 	return neg;
+}
+
+IrNot *irNot_init (void)
+{
+	IrNot *not = mem_alloc(sizeof(*not));
+	return not;
 }
 
 IrPush *irPush_init (int32_t value)

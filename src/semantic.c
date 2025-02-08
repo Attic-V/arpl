@@ -52,7 +52,15 @@ static void visitExpression (AstExpression *node)
 			visitExpressionNumber(node->as.number);
 			break;
 		case AstExpression_Unary:
-			node->dataType = DT_Number;
+			switch (node->as.unary->operator.type) {
+				case TT_Bang:
+					node->dataType = DT_Boolean;
+					break;
+				case TT_Minus:
+					node->dataType = DT_Number;
+					break;
+				default:
+			}
 			visitExpressionUnary(node->as.unary);
 			break;
 	}
@@ -88,7 +96,17 @@ static void visitExpressionNumber (AstExpressionNumber *node)
 static void visitExpressionUnary (AstExpressionUnary *node)
 {
 	visitExpression(node->right);
-	if (node->right->dataType != DT_Number) {
-		error(node->operator, "operand must be a number");
+	switch (node->operator.type) {
+		case TT_Bang:
+			if (node->right->dataType != DT_Boolean) {
+				error(node->operator, "operand must be a boolean");
+			}
+			break;
+		case TT_Minus:
+			if (node->right->dataType != DT_Number) {
+				error(node->operator, "operand must be a number");
+			}
+			break;
+		default:
 	}
 }

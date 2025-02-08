@@ -81,7 +81,7 @@ AstExpression *getExpressionProduct (void)
 
 AstExpression *getExpressionUnary (void)
 {
-	if (check(TT_Minus)) {
+	if (check(TT_Minus) || check(TT_Bang)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpressionUnary();
 		return ast_initExpressionUnary(operator, right);
