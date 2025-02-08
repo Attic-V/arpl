@@ -42,7 +42,7 @@ Token *scan (char *source)
 			case ' ':
 				continue;
 
-			case '&': addToken(TT_And); continue;
+			case '&': addToken(match('&') ? TT_And_And : TT_And); continue;
 			case '!':	addToken(match('=') ? TT_Bang_Equal : TT_Bang); continue;
 			case '^': addToken(TT_Caret); continue;
 			case '=':

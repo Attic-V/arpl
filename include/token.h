@@ -5,6 +5,7 @@
 
 typedef enum {
 	TT_And,
+	TT_And_And,
 	TT_Bang,
 	TT_Bang_Equal,
 	TT_Caret,

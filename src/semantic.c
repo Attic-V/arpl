@@ -39,6 +39,7 @@ static void visitExpression (AstExpression *node)
 				case TT_Star:
 					node->dataType = DT_Number;
 					break;
+				case TT_And_And:
 				case TT_Bang_Equal:
 				case TT_Equal_Equal:
 					node->dataType = DT_Boolean;
@@ -84,6 +85,11 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 		case TT_Star:
 			if (node->a->dataType != DT_Number || node->b->dataType != DT_Number) {
 				error(node->operator, "operand must be a number");
+			}
+			break;
+		case TT_And_And:
+			if (node->a->dataType != DT_Boolean || node->b->dataType != DT_Boolean) {
+				error(node->operator, "operand must be a boolean");
 			}
 			break;
 		case TT_Bang_Equal:
