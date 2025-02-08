@@ -17,6 +17,7 @@ static void transformNotEqu (IrNotEqu *instruction);
 static void transformOr (IrOr *instruction);
 static void transformPush (IrPush *instruction);
 static void transformSub (IrSub *instruction);
+static void transformXor (IrXor *instruction);
 
 typedef struct {
 	FILE *fp;
@@ -63,6 +64,7 @@ static void transform (Ir *r)
 		case Ir_Or: transformOr(r->as.or); break;
 		case Ir_Push: transformPush(r->as.push); break;
 		case Ir_Sub: transformSub(r->as.sub); break;
+		case Ir_Xor: transformXor(r->as.xor); break;
 	}
 }
 
@@ -140,6 +142,14 @@ static void transformSub (IrSub *instruction)
 	emit("\tpop     r9");
 	emit("\tpop     r8");
 	emit("\tsub     r8d, r9d");
+	emit("\tpush    r8");
+}
+
+static void transformXor (IrXor *instruction)
+{
+	emit("\tpop     r9");
+	emit("\tpop     r8");
+	emit("\txor     r8d, r9d");
 	emit("\tpush    r8");
 }
 

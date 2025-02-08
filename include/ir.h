@@ -36,6 +36,9 @@ typedef struct {
 typedef struct {
 } IrSub;
 
+typedef struct {
+} IrXor;
+
 typedef enum {
 	Ir_Add,
 	Ir_And,
@@ -47,6 +50,7 @@ typedef enum {
 	Ir_Or,
 	Ir_Push,
 	Ir_Sub,
+	Ir_Xor,
 } IrType;
 
 typedef struct Ir Ir;
@@ -64,6 +68,7 @@ struct Ir {
 		IrOr *or;
 		IrPush *push;
 		IrSub *sub;
+		IrXor *xor;
 	} as;
 	Ir *next;
 	Ir *previous;
@@ -79,5 +84,6 @@ Ir *ir_initOr (void);
 Ir *ir_initNotEqu (void);
 Ir *ir_initPush (int32_t value);
 Ir *ir_initSub (void);
+Ir *ir_initXor (void);
 
 #endif

@@ -16,6 +16,7 @@ static AstExpression *getExpressionPrimary (void);
 static AstExpression *getExpressionProduct (void);
 static AstExpression *getExpressionSum (void);
 static AstExpression *getExpressionUnary (void);
+static AstExpression *getExpressionXor (void);
 
 static bool check (TokenType type);
 static Token consume (TokenType type, char *format, ...);
@@ -61,8 +62,19 @@ static AstExpression *getExpressionEquality (void)
 
 static AstExpression *getExpressionOrBitwise (void)
 {
-	AstExpression *expression = getExpressionAndBitwise();
+	AstExpression *expression = getExpressionXor();
 	while (check(TT_Pipe)) {
+		Token operator = parser.tokens[parser.current++];
+		AstExpression *right = getExpressionXor();
+		expression = ast_initExpressionBinary(expression, right, operator);
+	}
+	return expression;
+}
+
+static AstExpression *getExpressionXor (void)
+{
+	AstExpression *expression = getExpressionAndBitwise();
+	while (check(TT_Caret)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpressionAndBitwise();
 		expression = ast_initExpressionBinary(expression, right, operator);
