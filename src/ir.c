@@ -5,6 +5,8 @@
 static IrAdd *irAdd_init (void);
 static IrAnd *irAnd_init (void);
 static IrEqu *irEqu_init (void);
+static IrLess *irLess_init (void);
+static IrLessEqu *irLessEqu_init (void);
 static IrMul *irMul_init (void);
 static IrNeg *irNeg_init (void);
 static IrNot *irNot_init (void);
@@ -37,6 +39,24 @@ Ir *ir_initEqu (void)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Equ;
 	ir->as.equ = irEqu_init();
+	dll_init(ir);
+	return ir;
+}
+
+Ir *ir_initLess (void)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_Less;
+	ir->as.less = irLess_init();
+	dll_init(ir);
+	return ir;
+}
+
+Ir *ir_initLessEqu (void)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_LessEqu;
+	ir->as.lessEqu = irLessEqu_init();
 	dll_init(ir);
 	return ir;
 }
@@ -129,6 +149,18 @@ static IrEqu *irEqu_init (void)
 {
 	IrEqu *equ = mem_alloc(sizeof(*equ));
 	return equ;
+}
+
+static IrLess *irLess_init (void)
+{
+	IrLess *less = mem_alloc(sizeof(*less));
+	return less;
+}
+
+static IrLessEqu *irLessEqu_init (void)
+{
+	IrLessEqu *lessEqu = mem_alloc(sizeof(*lessEqu));
+	return lessEqu;
 }
 
 static IrMul *irMul_init (void)

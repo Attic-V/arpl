@@ -10,6 +10,8 @@ static void transform (Ir *r);
 static void transformAdd (IrAdd *instruction);
 static void transformAnd (IrAnd *instruction);
 static void transformEqu (IrEqu *instruction);
+static void transformLess (IrLess *instruction);
+static void transformLessEqu (IrLessEqu *instruction);
 static void transformMul (IrMul *instruction);
 static void transformNeg (IrNeg *instruction);
 static void transformNot (IrNot *instruction);
@@ -57,6 +59,8 @@ static void transform (Ir *r)
 		case Ir_Add: transformAdd(r->as.add); break;
 		case Ir_And: transformAnd(r->as.and); break;
 		case Ir_Equ: transformEqu(r->as.equ); break;
+		case Ir_Less: transformLess(r->as.less); break;
+		case Ir_LessEqu: transformLessEqu(r->as.lessEqu); break;
 		case Ir_Mul: transformMul(r->as.mul); break;
 		case Ir_Neg: transformNeg(r->as.neg); break;
 		case Ir_Not: transformNot(r->as.not); break;
@@ -90,6 +94,24 @@ static void transformEqu (IrEqu *instruction)
 	emit("\tpop     r8");
 	emit("\tcmp     r8, r9");
 	emit("\tsete    r8b");
+	emit("\tpush    r8");
+}
+
+static void transformLess (IrLess *instruction)
+{
+	emit("\tpop     r9");
+	emit("\tpop     r8");
+	emit("\tcmp     r8, r9");
+	emit("\tsetl    r8b");
+	emit("\tpush    r8");
+}
+
+static void transformLessEqu (IrLessEqu *instruction)
+{
+	emit("\tpop     r9");
+	emit("\tpop     r8");
+	emit("\tcmp     r8, r9");
+	emit("\tsetle   r8b");
 	emit("\tpush    r8");
 }
 

@@ -37,11 +37,12 @@ static void visitExpression (AstExpression *node)
 				case TT_Plus:
 				case TT_Minus:
 				case TT_Star:
-					node->dataType = DT_Number;
-					break;
+				node->dataType = DT_Number;
+				break;
 				case TT_And_And:
 				case TT_Bang_Equal:
 				case TT_Equal_Equal:
+				case TT_Less:
 				case TT_Pipe_Pipe:
 					node->dataType = DT_Boolean;
 					break;
@@ -80,6 +81,7 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 	switch (node->operator.type) {
 		case TT_And:
 		case TT_Caret:
+		case TT_Less:
 		case TT_Pipe:
 		case TT_Plus:
 		case TT_Minus:

@@ -15,6 +15,12 @@ typedef struct {
 } IrEqu;
 
 typedef struct {
+} IrLess;
+
+typedef struct {
+} IrLessEqu;
+
+typedef struct {
 } IrMul;
 
 typedef struct {
@@ -43,6 +49,8 @@ typedef enum {
 	Ir_Add,
 	Ir_And,
 	Ir_Equ,
+	Ir_Less,
+	Ir_LessEqu,
 	Ir_Mul,
 	Ir_Neg,
 	Ir_Not,
@@ -61,6 +69,8 @@ struct Ir {
 		IrAdd *add;
 		IrAnd *and;
 		IrEqu *equ;
+		IrLess *less;
+		IrLessEqu *lessEqu;
 		IrMul *mul;
 		IrNeg *neg;
 		IrNot *not;
@@ -77,11 +87,13 @@ struct Ir {
 Ir *ir_initAdd (void);
 Ir *ir_initAnd (void);
 Ir *ir_initEqu (void);
+Ir *ir_initLess (void);
+Ir *ir_initLessEqu (void);
 Ir *ir_initMul (void);
 Ir *ir_initNeg (void);
 Ir *ir_initNot (void);
-Ir *ir_initOr (void);
 Ir *ir_initNotEqu (void);
+Ir *ir_initOr (void);
 Ir *ir_initPush (int32_t value);
 Ir *ir_initSub (void);
 Ir *ir_initXor (void);

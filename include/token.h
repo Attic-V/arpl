@@ -13,6 +13,8 @@ typedef enum {
 	TT_Equal_Equal,
 	TT_False,
 	TT_Identifier,
+	TT_Less,
+	TT_Less_Equal,
 	TT_LParen,
 	TT_Minus,
 	TT_Number,
