@@ -5,17 +5,17 @@
 #include "memory.h"
 #include "x86_gen.h"
 
-void emit (char *format, ...);
-void transform (Ir *r);
-void transformAdd (IrAdd *instruction);
-void transformAnd (IrAnd *instruction);
-void transformEqu (IrEqu *instruction);
-void transformMul (IrMul *instruction);
-void transformNeg (IrNeg *instruction);
-void transformNot (IrNot *instruction);
-void transformNotEqu (IrNotEqu *instruction);
-void transformPush (IrPush *instruction);
-void transformSub (IrSub *instruction);
+static void emit (char *format, ...);
+static void transform (Ir *r);
+static void transformAdd (IrAdd *instruction);
+static void transformAnd (IrAnd *instruction);
+static void transformEqu (IrEqu *instruction);
+static void transformMul (IrMul *instruction);
+static void transformNeg (IrNeg *instruction);
+static void transformNot (IrNot *instruction);
+static void transformNotEqu (IrNotEqu *instruction);
+static void transformPush (IrPush *instruction);
+static void transformSub (IrSub *instruction);
 
 typedef struct {
 	FILE *fp;
@@ -49,7 +49,7 @@ void gen_x86 (Ir *ir)
 	fclose(gen.fp);
 }
 
-void transform (Ir *r)
+static void transform (Ir *r)
 {
 	switch (r->type) {
 		case Ir_Add: transformAdd(r->as.add); break;
@@ -64,7 +64,7 @@ void transform (Ir *r)
 	}
 }
 
-void transformAdd (IrAdd *instruction)
+static void transformAdd (IrAdd *instruction)
 {
 	emit("\tpop     r9");
 	emit("\tpop     r8");
@@ -72,7 +72,7 @@ void transformAdd (IrAdd *instruction)
 	emit("\tpush    r8");
 }
 
-void transformAnd (IrAnd *instruction)
+static void transformAnd (IrAnd *instruction)
 {
 	emit("\tpop     r9");
 	emit("\tpop     r8");
@@ -80,7 +80,7 @@ void transformAnd (IrAnd *instruction)
 	emit("\tpush    r8");
 }
 
-void transformEqu (IrEqu *instruction)
+static void transformEqu (IrEqu *instruction)
 {
 	emit("\tpop     r9");
 	emit("\tpop     r8");
@@ -89,7 +89,7 @@ void transformEqu (IrEqu *instruction)
 	emit("\tpush    r8");
 }
 
-void transformMul (IrMul *instruction)
+static void transformMul (IrMul *instruction)
 {
 	emit("\tpop     r9");
 	emit("\tpop     r8");
@@ -97,21 +97,21 @@ void transformMul (IrMul *instruction)
 	emit("\tpush    r8");
 }
 
-void transformNeg (IrNeg *instruction)
+static void transformNeg (IrNeg *instruction)
 {
 	emit("\tpop     r9");
 	emit("\tneg     r9d");
 	emit("\tpush    r9");
 }
 
-void transformNot (IrNot *instruction)
+static void transformNot (IrNot *instruction)
 {
 	emit("\tpop     r8");
 	emit("\tnot     r8d");
 	emit("\tpush    r8");
 }
 
-void transformNotEqu (IrNotEqu *instruction)
+static void transformNotEqu (IrNotEqu *instruction)
 {
 	emit("\tpop     r9");
 	emit("\tpop     r8");
@@ -120,12 +120,12 @@ void transformNotEqu (IrNotEqu *instruction)
 	emit("\tpush    r8");
 }
 
-void transformPush (IrPush *instruction)
+static void transformPush (IrPush *instruction)
 {
 	emit("\tpush    %d", instruction->value);
 }
 
-void transformSub (IrSub *instruction)
+static void transformSub (IrSub *instruction)
 {
 	emit("\tpop     r9");
 	emit("\tpop     r8");
@@ -133,7 +133,7 @@ void transformSub (IrSub *instruction)
 	emit("\tpush    r8");
 }
 
-void emit (char *format, ...)
+static void emit (char *format, ...)
 {
 	va_list args;
 	va_start(args, format);

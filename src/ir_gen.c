@@ -5,15 +5,15 @@
 #include "linked_list.h"
 #include "memory.h"
 
-void visitAst (Ast *ast);
-void visitRoot (AstRoot *root);
-void visitExpression (AstExpression *expression);
-void visitExpressionBinary (AstExpressionBinary *expression);
-void visitExpressionBoolean (AstExpressionBoolean *expression);
-void visitExpressionNumber (AstExpressionNumber *expression);
-void visitExpressionUnary (AstExpressionUnary *expression);
+static void visitAst (Ast *ast);
+static void visitRoot (AstRoot *root);
+static void visitExpression (AstExpression *expression);
+static void visitExpressionBinary (AstExpressionBinary *expression);
+static void visitExpressionBoolean (AstExpressionBoolean *expression);
+static void visitExpressionNumber (AstExpressionNumber *expression);
+static void visitExpressionUnary (AstExpressionUnary *expression);
 
-void addInstruction (Ir *instruction);
+static void addInstruction (Ir *instruction);
 
 typedef struct {
 	Ir *current;
@@ -32,17 +32,17 @@ Ir *gen_ir (Ast *ast)
 	return ir;
 }
 
-void visitAst (Ast *ast)
+static void visitAst (Ast *ast)
 {
 	visitRoot(ast->root);
 }
 
-void visitRoot (AstRoot *root)
+static void visitRoot (AstRoot *root)
 {
 	visitExpression(root->expression);
 }
 
-void visitExpression (AstExpression *expression)
+static void visitExpression (AstExpression *expression)
 {
 	switch (expression->type) {
 		case AstExpression_Binary: visitExpressionBinary(expression->as.binary); break;
@@ -52,7 +52,7 @@ void visitExpression (AstExpression *expression)
 	}
 }
 
-void visitExpressionBinary (AstExpressionBinary *expression)
+static void visitExpressionBinary (AstExpressionBinary *expression)
 {
 	visitExpression(expression->a);
 	visitExpression(expression->b);
@@ -67,19 +67,19 @@ void visitExpressionBinary (AstExpressionBinary *expression)
 	}
 }
 
-void visitExpressionBoolean (AstExpressionBoolean *expression)
+static void visitExpressionBoolean (AstExpressionBoolean *expression)
 {
 	addInstruction(ir_initPush(expression->value));
 }
 
-void visitExpressionNumber (AstExpressionNumber *expression)
+static void visitExpressionNumber (AstExpressionNumber *expression)
 {
 	char *buffer = mem_alloc(expression->value.length + 1);
 	sprintf(buffer, "%.*s", expression->value.length, expression->value.lexeme);
 	addInstruction(ir_initPush(atoi(buffer)));
 }
 
-void visitExpressionUnary (AstExpressionUnary *expression)
+static void visitExpressionUnary (AstExpressionUnary *expression)
 {
 	visitExpression(expression->right);
 	switch (expression->operator.type) {
@@ -94,7 +94,7 @@ void visitExpressionUnary (AstExpressionUnary *expression)
 	}
 }
 
-void addInstruction (Ir *instruction)
+static void addInstruction (Ir *instruction)
 {
 	dll_insert(gen.current, instruction);
 	gen.current = instruction;

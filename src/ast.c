@@ -1,10 +1,10 @@
 #include "ast.h"
 #include "memory.h"
 
-AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
-AstExpressionBoolean *astExpression_initBoolean (bool value);
-AstExpressionNumber *astExpression_initNumber (Token value);
-AstExpressionUnary *astExpression_initUnary (Token operator, AstExpression *right);
+static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
+static AstExpressionBoolean *astExpression_initBoolean (bool value);
+static AstExpressionNumber *astExpression_initNumber (Token value);
+static AstExpressionUnary *astExpression_initUnary (Token operator, AstExpression *right);
 
 Ast *ast_init (AstRoot *root)
 {
@@ -52,7 +52,7 @@ AstExpression *ast_initExpressionUnary (Token operator, AstExpression *right)
 	return expression;
 }
 
-AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator)
+static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator)
 {
 	AstExpressionBinary *binary = mem_alloc(sizeof(*binary));
 	binary->a = a;
@@ -61,21 +61,21 @@ AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *
 	return binary;
 }
 
-AstExpressionBoolean *astExpression_initBoolean (bool value)
+static AstExpressionBoolean *astExpression_initBoolean (bool value)
 {
 	AstExpressionBoolean *boolean = mem_alloc(sizeof(*boolean));
 	boolean->value = value;
 	return boolean;
 }
 
-AstExpressionNumber *astExpression_initNumber (Token value)
+static AstExpressionNumber *astExpression_initNumber (Token value)
 {
 	AstExpressionNumber *number = mem_alloc(sizeof(*number));
 	number->value = value;
 	return number;
 }
 
-AstExpressionUnary *astExpression_initUnary (Token operator, AstExpression *right)
+static AstExpressionUnary *astExpression_initUnary (Token operator, AstExpression *right)
 {
 	AstExpressionUnary *unary = mem_alloc(sizeof(*unary));
 	unary->operator = operator;

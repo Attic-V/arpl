@@ -21,17 +21,17 @@ struct Arena {
 	size_t regionsize;
 };
 
-void *arena_allocateRaw (Arena *arena, size_t size);
-void *arena_allocateSegment (Arena *arena, size_t size);
+static void *arena_allocateRaw (Arena *arena, size_t size);
+static void *arena_allocateSegment (Arena *arena, size_t size);
 
-Region *region_init (size_t size);
-void *region_allocate (Region *region, size_t size);
-void *region_allocateSegment (Region *region, size_t size);
-void *region_allocateRaw (Region *region, size_t size);
-void *region_reallocate (Region *region, void *ptr, size_t size);
-void region_releaseSegment (Region *region, size_t size);
-void region_release (Region *region, size_t size);
-size_t region_getFree (Region *region);
+static Region *region_init (size_t size);
+static void *region_allocate (Region *region, size_t size);
+static void *region_allocateSegment (Region *region, size_t size);
+static void *region_allocateRaw (Region *region, size_t size);
+static void *region_reallocate (Region *region, void *ptr, size_t size);
+static void region_releaseSegment (Region *region, size_t size);
+static void region_release (Region *region, size_t size);
+static size_t region_getFree (Region *region);
 
 Arena *arena_init (size_t size)
 {
@@ -58,7 +58,7 @@ void *arena_allocate (Arena *arena, size_t size)
 	return arena_allocateSegment(arena, size);
 }
 
-void *arena_allocateSegment (Arena *arena, size_t size)
+static void *arena_allocateSegment (Arena *arena, size_t size)
 {
 	*(size_t *)arena_allocateRaw(arena, sizeof(size)) = size;
 	return arena_allocateRaw(arena, size);
@@ -69,7 +69,7 @@ void *arena_reallocate (Arena *arena, void *ptr, size_t size)
 	return region_reallocate(arena->region, ptr, size);
 }
 
-void *arena_allocateRaw (Arena *arena, size_t size)
+static void *arena_allocateRaw (Arena *arena, size_t size)
 {
 	if (size > region_getFree(arena->region)) {
 		Region *region = region_init(arena->regionsize);
@@ -80,7 +80,7 @@ void *arena_allocateRaw (Arena *arena, size_t size)
 	return ptr;
 }
 
-Region *region_init (size_t size)
+static Region *region_init (size_t size)
 {
 	Region *region = malloc(sizeof(*region));
 	region->memory = malloc(size);
@@ -91,18 +91,18 @@ Region *region_init (size_t size)
 	return region;
 }
 
-void *region_allocate (Region *region, size_t size)
+static void *region_allocate (Region *region, size_t size)
 {
 	return region_allocateSegment(region, size);
 }
 
-void *region_allocateSegment (Region *region, size_t size)
+static void *region_allocateSegment (Region *region, size_t size)
 {
 	*(size_t *)region_allocateRaw(region, sizeof(size)) = size;
 	return region_allocateRaw(region, size);
 }
 
-void *region_allocateRaw (Region *region, size_t size)
+static void *region_allocateRaw (Region *region, size_t size)
 {
 	region->previousMem = region->memory + region->offset;
 	if (region->offset + size > region->size) {
@@ -113,7 +113,7 @@ void *region_allocateRaw (Region *region, size_t size)
 	return ptr;
 }
 
-void *region_reallocate (Region *region, void *ptr, size_t size)
+static void *region_reallocate (Region *region, void *ptr, size_t size)
 {
 	size_t oldsize = *(size_t *)(ptr - sizeof(oldsize));
 	if (size < oldsize) {
@@ -128,17 +128,17 @@ void *region_reallocate (Region *region, void *ptr, size_t size)
 	return newptr;
 }
 
-void region_releaseSegment (Region *region, size_t size)
+static void region_releaseSegment (Region *region, size_t size)
 {
 	region_release(region, size + sizeof(size));
 }
 
-void region_release (Region *region, size_t size)
+static void region_release (Region *region, size_t size)
 {
 	region->offset -= size;
 }
 
-size_t region_getFree (Region *region)
+static size_t region_getFree (Region *region)
 {
 	return region->size - region->offset;
 }

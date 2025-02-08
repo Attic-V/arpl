@@ -17,7 +17,7 @@ typedef struct {
 
 static Scanner scanner;
 
-void addToken (TokenType type);
+static void addToken (TokenType type);
 static bool check (char ch);
 static bool match (char ch);
 
@@ -94,7 +94,7 @@ Token *scan (char *source)
 	return scanner.tokens;
 }
 
-void addToken (TokenType type)
+static void addToken (TokenType type)
 {
 	scanner.tokens[scanner.count++] = (Token){
 		.type = type,

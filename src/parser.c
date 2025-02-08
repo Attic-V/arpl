@@ -7,17 +7,17 @@
 #include "memory.h"
 #include "parser.h"
 
-AstRoot *getRoot (void);
-AstExpression *getExpression (void);
-AstExpression *getExpressionAndBitwise (void);
-AstExpression *getExpressionEquality (void);
-AstExpression *getExpressionPrimary (void);
-AstExpression *getExpressionProduct (void);
-AstExpression *getExpressionSum (void);
-AstExpression *getExpressionUnary (void);
+static AstRoot *getRoot (void);
+static AstExpression *getExpression (void);
+static AstExpression *getExpressionAndBitwise (void);
+static AstExpression *getExpressionEquality (void);
+static AstExpression *getExpressionPrimary (void);
+static AstExpression *getExpressionProduct (void);
+static AstExpression *getExpressionSum (void);
+static AstExpression *getExpressionUnary (void);
 
-bool check (TokenType type);
-Token consume (TokenType type, char *format, ...);
+static bool check (TokenType type);
+static Token consume (TokenType type, char *format, ...);
 
 typedef struct {
 	Token *tokens;
@@ -37,17 +37,17 @@ Ast *parse (Token *tokens)
 	return ast;
 }
 
-AstRoot *getRoot (void)
+static AstRoot *getRoot (void)
 {
 	return ast_initRoot(getExpression());
 }
 
-AstExpression *getExpression (void)
+static AstExpression *getExpression (void)
 {
 	return getExpressionEquality();
 }
 
-AstExpression *getExpressionEquality (void)
+static AstExpression *getExpressionEquality (void)
 {
 	AstExpression *expression = getExpressionAndBitwise();
 	while (check(TT_Equal_Equal) || check(TT_Bang_Equal)) {
@@ -58,7 +58,7 @@ AstExpression *getExpressionEquality (void)
 	return expression;
 }
 
-AstExpression *getExpressionAndBitwise (void)
+static AstExpression *getExpressionAndBitwise (void)
 {
 	AstExpression *expression = getExpressionSum();
 	while (check(TT_And)) {
@@ -69,7 +69,7 @@ AstExpression *getExpressionAndBitwise (void)
 	return expression;
 }
 
-AstExpression *getExpressionSum (void)
+static AstExpression *getExpressionSum (void)
 {
 	AstExpression *expression = getExpressionProduct();
 	while (check(TT_Plus) || check(TT_Minus)) {
@@ -80,7 +80,7 @@ AstExpression *getExpressionSum (void)
 	return expression;
 }
 
-AstExpression *getExpressionProduct (void)
+static AstExpression *getExpressionProduct (void)
 {
 	AstExpression *expression = getExpressionUnary();
 	while (check(TT_Star)) {
@@ -91,7 +91,7 @@ AstExpression *getExpressionProduct (void)
 	return expression;
 }
 
-AstExpression *getExpressionUnary (void)
+static AstExpression *getExpressionUnary (void)
 {
 	if (check(TT_Minus) || check(TT_Bang) || check(TT_Tilde)) {
 		Token operator = parser.tokens[parser.current++];
@@ -101,7 +101,7 @@ AstExpression *getExpressionUnary (void)
 	return getExpressionPrimary();
 }
 
-AstExpression *getExpressionPrimary (void)
+static AstExpression *getExpressionPrimary (void)
 {
 	Token token = parser.tokens[parser.current++];
 	switch (token.type) {
@@ -121,12 +121,12 @@ AstExpression *getExpressionPrimary (void)
 	exit(1);
 }
 
-bool check (TokenType type)
+static bool check (TokenType type)
 {
 	return parser.tokens[parser.current].type == type;
 }
 
-Token consume (TokenType type, char *format, ...)
+static Token consume (TokenType type, char *format, ...)
 {
 	Token token = parser.tokens[parser.current++];
 	if (token.type != type) {
