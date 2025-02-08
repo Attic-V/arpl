@@ -57,6 +57,7 @@ static void visitExpression (AstExpression *node)
 					node->dataType = DT_Boolean;
 					break;
 				case TT_Minus:
+				case TT_Tilde:
 					node->dataType = DT_Number;
 					break;
 				default:
@@ -103,6 +104,7 @@ static void visitExpressionUnary (AstExpressionUnary *node)
 			}
 			break;
 		case TT_Minus:
+		case TT_Tilde:
 			if (node->right->dataType != DT_Number) {
 				error(node->operator, "operand must be a number");
 			}

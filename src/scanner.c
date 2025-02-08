@@ -53,6 +53,7 @@ Token *scan (char *source)
 			case '+': addToken(TT_Plus); continue;
 			case ')': addToken(TT_RParen); continue;
 			case '*': addToken(TT_Star); continue;
+			case '~': addToken(TT_Tilde); continue;
 		}
 
 		if (isdigit(ch)) {

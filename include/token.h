@@ -15,6 +15,7 @@ typedef enum {
 	TT_Plus,
 	TT_RParen,
 	TT_Star,
+	TT_Tilde,
 	TT_True,
 } TokenType;
 

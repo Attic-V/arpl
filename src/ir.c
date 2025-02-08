@@ -3,6 +3,7 @@
 #include "memory.h"
 
 IrAdd *irAdd_init (void);
+IrAnd *irAnd_init (void);
 IrEqu *irEqu_init (void);
 IrMul *irMul_init (void);
 IrNeg *irNeg_init (void);
@@ -15,6 +16,15 @@ Ir *ir_initAdd (void)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Add;
 	ir->as.add = irAdd_init();
+	dll_init(ir);
+	return ir;
+}
+
+Ir *ir_initAnd (void)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_And;
+	ir->as.and = irAnd_init();
 	dll_init(ir);
 	return ir;
 }
@@ -77,6 +87,12 @@ IrAdd *irAdd_init (void)
 {
 	IrAdd *add = mem_alloc(sizeof(*add));
 	return add;
+}
+
+IrAnd *irAnd_init (void)
+{
+	IrAnd *and = mem_alloc(sizeof(*and));
+	return and;
 }
 
 IrEqu *irEqu_init (void)
