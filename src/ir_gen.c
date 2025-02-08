@@ -9,6 +9,7 @@ void visitAst (Ast *ast);
 void visitRoot (AstRoot *root);
 void visitExpression (AstExpression *expression);
 void visitExpressionBinary (AstExpressionBinary *expression);
+void visitExpressionBoolean (AstExpressionBoolean *expression);
 void visitExpressionNumber (AstExpressionNumber *expression);
 void visitExpressionUnary (AstExpressionUnary *expression);
 
@@ -45,6 +46,7 @@ void visitExpression (AstExpression *expression)
 {
 	switch (expression->type) {
 		case AstExpression_Binary: visitExpressionBinary(expression->as.binary); break;
+		case AstExpression_Boolean: visitExpressionBoolean(expression->as.boolean); break;
 		case AstExpression_Number: visitExpressionNumber(expression->as.number); break;
 		case AstExpression_Unary: visitExpressionUnary(expression->as.unary); break;
 	}
@@ -61,6 +63,11 @@ void visitExpressionBinary (AstExpressionBinary *expression)
 		case TT_Star: addInstruction(ir_initMul()); break;
 		default:
 	}
+}
+
+void visitExpressionBoolean (AstExpressionBoolean *expression)
+{
+	addInstruction(ir_initPush(expression->value));
 }
 
 void visitExpressionNumber (AstExpressionNumber *expression)

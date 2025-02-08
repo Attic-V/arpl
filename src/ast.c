@@ -2,6 +2,7 @@
 #include "memory.h"
 
 AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
+AstExpressionBoolean *astExpression_initBoolean (bool value);
 AstExpressionNumber *astExpression_initNumber (Token value);
 AstExpressionUnary *astExpression_initUnary (Token operator, AstExpression *right);
 
@@ -24,6 +25,14 @@ AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Tok
 	AstExpression *expression = mem_alloc(sizeof(*expression));
 	expression->type = AstExpression_Binary;
 	expression->as.binary = astExpression_initBinary(a, b, operator);
+	return expression;
+}
+
+AstExpression *ast_initExpressionBoolean (bool value)
+{
+	AstExpression *expression = mem_alloc(sizeof(*expression));
+	expression->type = AstExpression_Boolean;
+	expression->as.boolean = astExpression_initBoolean(value);
 	return expression;
 }
 
@@ -50,6 +59,13 @@ AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *
 	binary->b = b;
 	binary->operator = operator;
 	return binary;
+}
+
+AstExpressionBoolean *astExpression_initBoolean (bool value)
+{
+	AstExpressionBoolean *boolean = mem_alloc(sizeof(*boolean));
+	boolean->value = value;
+	return boolean;
 }
 
 AstExpressionNumber *astExpression_initNumber (Token value)

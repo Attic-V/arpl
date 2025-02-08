@@ -62,6 +62,25 @@ Token *scan (char *source)
 			continue;
 		}
 
+		if (isalpha(ch)) {
+			while (isalnum(*scanner.current)) {
+				scanner.current++;
+			}
+			addToken(TT_Identifier);
+			Token *token = &scanner.tokens[scanner.count - 1];
+			char *buffer = mem_alloc(token->length + 1);
+			sprintf(buffer, "%.*s", token->length, token->lexeme);
+			if (!strcmp(buffer, "true")) {
+				token->type = TT_True;
+				continue;
+			}
+			if (!strcmp(buffer, "false")) {
+				token->type = TT_False;
+				continue;
+			}
+			continue;
+		}
+
 		fprintf(stderr, "%d: error at '%c': unexpected character\n", scanner.line, ch);
 	}
 

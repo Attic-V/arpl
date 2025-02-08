@@ -7,6 +7,7 @@ static void visitAst (Ast *ast);
 static void visitRoot (AstRoot *node);
 static void visitExpression (AstExpression *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
+static void visitExpressionBoolean (AstExpressionBoolean *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
 static void visitExpressionUnary (AstExpressionUnary *node);
 
@@ -42,6 +43,10 @@ static void visitExpression (AstExpression *node)
 			}
 			visitExpressionBinary(node->as.binary);
 			break;
+		case AstExpression_Boolean:
+			node->dataType = DT_Boolean;
+			visitExpressionBoolean(node->as.boolean);
+			break;
 		case AstExpression_Number:
 			node->dataType = DT_Number;
 			visitExpressionNumber(node->as.number);
@@ -74,9 +79,11 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 	}
 }
 
+static void visitExpressionBoolean (AstExpressionBoolean *node)
+{ }
+
 static void visitExpressionNumber (AstExpressionNumber *node)
-{
-}
+{ }
 
 static void visitExpressionUnary (AstExpressionUnary *node)
 {

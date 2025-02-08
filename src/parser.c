@@ -99,6 +99,10 @@ AstExpression *getExpressionPrimary (void)
 			AstExpression *expression = getExpression();
 			consume(TT_RParen, "expected ')'");
 			return expression;
+		case TT_True:
+			return ast_initExpressionBoolean(true);
+		case TT_False:
+			return ast_initExpressionBoolean(false);
 		default:
 	}
 	error(token, "expected expression");

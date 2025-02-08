@@ -1,6 +1,8 @@
 #ifndef ast_h
 #define ast_h
 
+#include <stdbool.h>
+
 #include "data_type.h"
 #include "token.h"
 
@@ -13,6 +15,10 @@ typedef struct {
 } AstExpressionBinary;
 
 typedef struct {
+	bool value;
+} AstExpressionBoolean;
+
+typedef struct {
 	Token value;
 } AstExpressionNumber;
 
@@ -23,6 +29,7 @@ typedef struct {
 
 typedef enum {
 	AstExpression_Binary,
+	AstExpression_Boolean,
 	AstExpression_Number,
 	AstExpression_Unary,
 } AstExpressionType;
@@ -31,6 +38,7 @@ struct AstExpression {
 	AstExpressionType type;
 	union {
 		AstExpressionBinary *binary;
+		AstExpressionBoolean *boolean;
 		AstExpressionNumber *number;
 		AstExpressionUnary *unary;
 	} as;
@@ -48,6 +56,7 @@ typedef struct {
 Ast *ast_init (AstRoot *root);
 AstRoot *ast_initRoot (AstExpression *expression);
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator);
+AstExpression *ast_initExpressionBoolean (bool value);
 AstExpression *ast_initExpressionNumber (Token value);
 AstExpression *ast_initExpressionUnary (Token operator, AstExpression *right);
 

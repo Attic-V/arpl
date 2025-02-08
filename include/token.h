@@ -6,12 +6,15 @@
 typedef enum {
 	TT_EOF,
 	TT_Equal_Equal,
+	TT_False,
+	TT_Identifier,
 	TT_LParen,
 	TT_Minus,
 	TT_Number,
 	TT_Plus,
 	TT_RParen,
 	TT_Star,
+	TT_True,
 } TokenType;
 
 typedef struct {
