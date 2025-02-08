@@ -16,14 +16,12 @@ void transformSub (IrSub *instruction);
 
 typedef struct {
 	FILE *fp;
-	uint64_t label;
 } AsmGenerator;
 
 static AsmGenerator gen;
 
 void gen_x86 (Ir *ir)
 {
-	gen.label = 0;
 	const char *path = "out.s";
 	remove(path);
 	gen.fp = fopen(path, "ab");
@@ -70,17 +68,11 @@ void transformAdd (IrAdd *instruction)
 
 void transformEqu (IrEqu *instruction)
 {
-	int l0 = gen.label++;
-	int l1 = gen.label++;
 	emit("\tpop     r9");
 	emit("\tpop     r8");
 	emit("\tcmp     r8, r9");
-	emit("\tje      .%d", l0);
-	emit("\tpush    0");
-	emit("\tjmp     .%d", l1);
-	emit(".%d:", l0);
-	emit("\tpush    1");
-	emit(".%d:", l1);
+	emit("\tsete    r8b");
+	emit("\tpush    r8");
 }
 
 void transformMul (IrMul *instruction)
