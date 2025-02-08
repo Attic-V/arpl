@@ -24,6 +24,9 @@ typedef struct {
 } IrNot;
 
 typedef struct {
+} IrNotEqu;
+
+typedef struct {
 	int32_t value;
 } IrPush;
 
@@ -37,6 +40,7 @@ typedef enum {
 	Ir_Mul,
 	Ir_Neg,
 	Ir_Not,
+	Ir_NotEqu,
 	Ir_Push,
 	Ir_Sub,
 } IrType;
@@ -52,6 +56,7 @@ struct Ir {
 		IrMul *mul;
 		IrNeg *neg;
 		IrNot *not;
+		IrNotEqu *notEqu;
 		IrPush *push;
 		IrSub *sub;
 	} as;
@@ -65,6 +70,7 @@ Ir *ir_initEqu (void);
 Ir *ir_initMul (void);
 Ir *ir_initNeg (void);
 Ir *ir_initNot (void);
+Ir *ir_initNotEqu (void);
 Ir *ir_initPush (int32_t value);
 Ir *ir_initSub (void);
 

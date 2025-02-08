@@ -58,6 +58,7 @@ void visitExpressionBinary (AstExpressionBinary *expression)
 	visitExpression(expression->b);
 	switch (expression->operator.type) {
 		case TT_And: addInstruction(ir_initAnd()); break;
+		case TT_Bang_Equal: addInstruction(ir_initNotEqu()); break;
 		case TT_Equal_Equal: addInstruction(ir_initEqu()); break;
 		case TT_Plus: addInstruction(ir_initAdd()); break;
 		case TT_Minus: addInstruction(ir_initSub()); break;

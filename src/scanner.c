@@ -41,7 +41,14 @@ Token *scan (char *source)
 				continue;
 
 			case '&': addToken(TT_And); continue;
-			case '!': addToken(TT_Bang); continue;
+			case '!':
+				if (*scanner.current == '=') {
+					scanner.current++;
+					addToken(TT_Bang_Equal);
+					continue;
+				}
+				addToken(TT_Bang);
+				continue;
 			case '=':
 				if (*scanner.current == '=') {
 					scanner.current++;

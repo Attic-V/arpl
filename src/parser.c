@@ -50,7 +50,7 @@ AstExpression *getExpression (void)
 AstExpression *getExpressionEquality (void)
 {
 	AstExpression *expression = getExpressionAndBitwise();
-	while (check(TT_Equal_Equal)) {
+	while (check(TT_Equal_Equal) || check(TT_Bang_Equal)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpressionAndBitwise();
 		expression = ast_initExpressionBinary(expression, right, operator);
