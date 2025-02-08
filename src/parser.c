@@ -11,6 +11,7 @@ static AstRoot *getRoot (void);
 static AstExpression *getExpression (void);
 static AstExpression *getExpressionAndBitwise (void);
 static AstExpression *getExpressionEquality (void);
+static AstExpression *getExpressionOrBitwise (void);
 static AstExpression *getExpressionPrimary (void);
 static AstExpression *getExpressionProduct (void);
 static AstExpression *getExpressionSum (void);
@@ -49,8 +50,19 @@ static AstExpression *getExpression (void)
 
 static AstExpression *getExpressionEquality (void)
 {
-	AstExpression *expression = getExpressionAndBitwise();
+	AstExpression *expression = getExpressionOrBitwise();
 	while (check(TT_Equal_Equal) || check(TT_Bang_Equal)) {
+		Token operator = parser.tokens[parser.current++];
+		AstExpression *right = getExpressionOrBitwise();
+		expression = ast_initExpressionBinary(expression, right, operator);
+	}
+	return expression;
+}
+
+static AstExpression *getExpressionOrBitwise (void)
+{
+	AstExpression *expression = getExpressionAndBitwise();
+	while (check(TT_Pipe)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpressionAndBitwise();
 		expression = ast_initExpressionBinary(expression, right, operator);
