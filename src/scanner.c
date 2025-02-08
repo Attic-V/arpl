@@ -40,6 +40,7 @@ Token *scan (char *source)
 			case ' ':
 				continue;
 
+			case '&': addToken(TT_And); continue;
 			case '!': addToken(TT_Bang); continue;
 			case '=':
 				if (*scanner.current == '=') {

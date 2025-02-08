@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 typedef enum {
+	TT_And,
 	TT_Bang,
 	TT_EOF,
 	TT_Equal_Equal,
