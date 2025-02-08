@@ -42,6 +42,7 @@ static void visitExpression (AstExpression *node)
 				case TT_And_And:
 				case TT_Bang_Equal:
 				case TT_Equal_Equal:
+				case TT_Pipe_Pipe:
 					node->dataType = DT_Boolean;
 					break;
 				default:
@@ -88,6 +89,7 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 			}
 			break;
 		case TT_And_And:
+		case TT_Pipe_Pipe:
 			if (node->a->dataType != DT_Boolean || node->b->dataType != DT_Boolean) {
 				error(node->operator, "operand must be a boolean");
 			}

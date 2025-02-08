@@ -17,6 +17,7 @@ typedef enum {
 	TT_Minus,
 	TT_Number,
 	TT_Pipe,
+	TT_Pipe_Pipe,
 	TT_Plus,
 	TT_RParen,
 	TT_Star,

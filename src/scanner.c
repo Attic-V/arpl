@@ -54,7 +54,7 @@ Token *scan (char *source)
 				break;
 			case '(': addToken(TT_LParen); continue;
 			case '-': addToken(TT_Minus); continue;
-			case '|': addToken(TT_Pipe); continue;
+			case '|': addToken(match('|') ? TT_Pipe_Pipe : TT_Pipe); continue;
 			case '+': addToken(TT_Plus); continue;
 			case ')': addToken(TT_RParen); continue;
 			case '*': addToken(TT_Star); continue;
