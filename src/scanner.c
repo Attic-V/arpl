@@ -18,6 +18,8 @@ typedef struct {
 static Scanner scanner;
 
 void addToken (TokenType type);
+static bool check (char ch);
+static bool match (char ch);
 
 Token *scan (char *source)
 {
@@ -41,16 +43,9 @@ Token *scan (char *source)
 				continue;
 
 			case '&': addToken(TT_And); continue;
-			case '!':
-				if (*scanner.current == '=') {
-					scanner.current++;
-					addToken(TT_Bang_Equal);
-					continue;
-				}
-				addToken(TT_Bang);
-				continue;
+			case '!':	addToken(match('=') ? TT_Bang_Equal : TT_Bang); continue;
 			case '=':
-				if (*scanner.current == '=') {
+				if (check('=')) {
 					scanner.current++;
 					addToken(TT_Equal_Equal);
 					continue;
@@ -108,4 +103,18 @@ void addToken (TokenType type)
 		.line = scanner.line,
 	};
 	scanner.tokens = mem_realloc(scanner.tokens, sizeof(Token) * (scanner.count + 1));
+}
+
+static bool check (char ch)
+{
+	return *scanner.current == ch;
+}
+
+static bool match (char ch)
+{
+	if (check(ch)) {
+		scanner.current++;
+		return true;
+	}
+	return false;
 }
