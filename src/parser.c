@@ -52,7 +52,9 @@ static AstRoot *getRoot (void)
 
 static AstStatement *getStatement (void)
 {
-	return ast_initStatementExpr(getExpression());
+	AstStatement *statement = ast_initStatementExpr(getExpression());
+	consume(TT_Semicolon, "expected ';'");
+	return statement;
 }
 
 static AstExpression *getExpression (void)
