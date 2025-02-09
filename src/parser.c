@@ -17,6 +17,7 @@ static AstExpression *getExpressionOrLogical (void);
 static AstExpression *getExpressionPrimary (void);
 static AstExpression *getExpressionProduct (void);
 static AstExpression *getExpressionRelational (void);
+static AstExpression *getExpressionShift (void);
 static AstExpression *getExpressionSum (void);
 static AstExpression *getExpressionUnary (void);
 static AstExpression *getExpressionXor (void);
@@ -87,11 +88,22 @@ static AstExpression *getExpressionEquality (void)
 
 static AstExpression *getExpressionRelational (void)
 {
-	AstExpression *expression = getExpressionOrBitwise();
+	AstExpression *expression = getExpressionShift();
 	while (check(TT_Less) || check(TT_Less_Equal)) {
 		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionOrBitwise();
+		AstExpression *right = getExpressionShift();
 		expression = ast_initExpressionBinary(expression, right, operator);
+	}
+	return expression;
+}
+
+static AstExpression *getExpressionShift (void)
+{
+	AstExpression *expression = getExpressionOrBitwise();
+	while (check(TT_Less_Less) || check(TT_Greater_Greater)) {
+		Token operator = parser.tokens[parser.current++];
+		AstExpression *right = getExpressionOrBitwise();
+		expression  = ast_initExpressionBinary(expression, right, operator);
 	}
 	return expression;
 }

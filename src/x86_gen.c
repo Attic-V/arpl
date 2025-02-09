@@ -18,6 +18,8 @@ static void transformNot (IrNot *instruction);
 static void transformNotEqu (IrNotEqu *instruction);
 static void transformOr (IrOr *instruction);
 static void transformPush (IrPush *instruction);
+static void transformSar (IrSar *instruction);
+static void transformShl (IrShl *instruction);
 static void transformSub (IrSub *instruction);
 static void transformXor (IrXor *instruction);
 
@@ -67,6 +69,8 @@ static void transform (Ir *r)
 		case Ir_NotEqu: transformNotEqu(r->as.notEqu); break;
 		case Ir_Or: transformOr(r->as.or); break;
 		case Ir_Push: transformPush(r->as.push); break;
+		case Ir_Sar: transformSar(r->as.sar); break;
+		case Ir_Shl: transformShl(r->as.shl); break;
 		case Ir_Sub: transformSub(r->as.sub); break;
 		case Ir_Xor: transformXor(r->as.xor); break;
 	}
@@ -157,6 +161,22 @@ static void transformOr (IrOr *instruction)
 static void transformPush (IrPush *instruction)
 {
 	emit("\tpush    %d", instruction->value);
+}
+
+static void transformSar (IrSar *instruction)
+{
+	emit("\tpop     rcx");
+	emit("\tpop     r8");
+	emit("\tsar     r8d, cl");
+	emit("\tpush    r8");
+}
+
+static void transformShl (IrShl *instruction)
+{
+	emit("\tpop     rcx");
+	emit("\tpop     r8");
+	emit("\tshl     r8d, cl");
+	emit("\tpush    r8");
 }
 
 static void transformSub (IrSub *instruction)

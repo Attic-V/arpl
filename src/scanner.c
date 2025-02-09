@@ -52,7 +52,14 @@ Token *scan (char *source)
 					continue;
 				}
 				break;
-			case '<': addToken(match('=') ? TT_Less_Equal : TT_Less); continue;
+			case '>':
+				if (check('>')) {
+					scanner.current++;
+					addToken(TT_Greater_Greater);
+					continue;
+				}
+				break;
+			case '<': addToken(match('<') ? TT_Less_Less : match('=') ? TT_Less_Equal : TT_Less); continue;
 			case '(': addToken(TT_LParen); continue;
 			case '-': addToken(TT_Minus); continue;
 			case '|': addToken(match('|') ? TT_Pipe_Pipe : TT_Pipe); continue;

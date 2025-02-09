@@ -13,6 +13,8 @@ static IrNot *irNot_init (void);
 static IrNotEqu *irNotEqu_init (void);
 static IrOr *irOr_init (void);
 static IrPush *irPush_init (int32_t value);
+static IrSar *irSar_init (void);
+static IrShl *irShl_init (void);
 static IrSub *irSub_init (void);
 static IrXor *irXor_init (void);
 
@@ -115,6 +117,24 @@ Ir *ir_initPush (int32_t value)
 	return ir;
 }
 
+Ir *ir_initSar (void)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_Sar;
+	ir->as.sar = irSar_init();
+	dll_init(ir);
+	return ir;
+}
+
+Ir *ir_initShl (void)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_Shl;
+	ir->as.shl = irShl_init();
+	dll_init(ir);
+	return ir;
+}
+
 Ir *ir_initSub (void)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
@@ -198,6 +218,18 @@ static IrPush *irPush_init (int32_t value)
 	IrPush *push = mem_alloc(sizeof(*push));
 	push->value = value;
 	return push;
+}
+
+static IrSar *irSar_init (void)
+{
+	IrSar *sar = mem_alloc(sizeof(*sar));
+	return sar;
+}
+
+static IrShl *irShl_init (void)
+{
+	IrShl *shl = mem_alloc(sizeof(*shl));
+	return shl;
 }
 
 static IrSub *irSub_init (void)

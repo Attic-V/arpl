@@ -62,8 +62,10 @@ static void visitExpressionBinary (AstExpressionBinary *expression)
 		case TT_Bang_Equal: addInstruction(ir_initNotEqu()); break;
 		case TT_Caret: addInstruction(ir_initXor()); break;
 		case TT_Equal_Equal: addInstruction(ir_initEqu()); break;
+		case TT_Greater_Greater: addInstruction(ir_initSar()); break;
 		case TT_Less: addInstruction(ir_initLess()); break;
 		case TT_Less_Equal: addInstruction(ir_initLessEqu()); break;
+		case TT_Less_Less: addInstruction(ir_initShl()); break;
 		case TT_Pipe: addInstruction(ir_initOr()); break;
 		case TT_Pipe_Pipe: addInstruction(ir_initOr()); break;
 		case TT_Plus: addInstruction(ir_initAdd()); break;
