@@ -5,6 +5,10 @@
 
 static void visitAst (Ast *ast);
 static void visitRoot (AstRoot *node);
+
+static void visitStatement (AstStatement *node);
+static void visitStatementExpr (AstStatementExpr *node);
+
 static void visitExpression (AstExpression *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
 static void visitExpressionBoolean (AstExpressionBoolean *node);
@@ -23,6 +27,18 @@ static void visitAst (Ast *ast)
 }
 
 static void visitRoot (AstRoot *node)
+{
+	visitStatement(node->statement);
+}
+
+static void visitStatement (AstStatement *node)
+{
+	switch (node->type) {
+		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
+	}
+}
+
+static void visitStatementExpr (AstStatementExpr *node)
 {
 	visitExpression(node->expression);
 }

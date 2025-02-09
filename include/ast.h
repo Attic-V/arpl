@@ -54,8 +54,25 @@ struct AstExpression {
 	DataType dataType;
 };
 
+typedef struct AstStatement AstStatement;
+
 typedef struct {
 	AstExpression *expression;
+} AstStatementExpr;
+
+typedef enum {
+	AstStatement_Expr,
+} AstStatementType;
+
+struct AstStatement {
+	AstStatementType type;
+	union {
+		AstStatementExpr *expr;
+	} as;
+};
+
+typedef struct {
+	AstStatement *statement;
 } AstRoot;
 
 typedef struct {
@@ -63,7 +80,10 @@ typedef struct {
 } Ast;
 
 Ast *ast_init (AstRoot *root);
-AstRoot *ast_initRoot (AstExpression *expression);
+AstRoot *ast_initRoot (AstStatement *statement);
+
+AstStatement *ast_initStatementExpr (AstExpression *expression);
+
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBoolean (bool value);
 AstExpression *ast_initExpressionNumber (Token value);

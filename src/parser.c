@@ -8,6 +8,7 @@
 #include "parser.h"
 
 static AstRoot *getRoot (void);
+static AstStatement *getStatement(void);
 static AstExpression *getExpression (void);
 static AstExpression *getExpressionAndBitwise (void);
 static AstExpression *getExpressionAndLogical (void);
@@ -46,7 +47,12 @@ Ast *parse (Token *tokens)
 
 static AstRoot *getRoot (void)
 {
-	return ast_initRoot(getExpression());
+	return ast_initRoot(getStatement());
+}
+
+static AstStatement *getStatement (void)
+{
+	return ast_initStatementExpr(getExpression());
 }
 
 static AstExpression *getExpression (void)

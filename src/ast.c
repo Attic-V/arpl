@@ -1,6 +1,8 @@
 #include "ast.h"
 #include "memory.h"
 
+static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
+
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBoolean *astExpression_initBoolean (bool value);
 static AstExpressionNumber *astExpression_initNumber (Token value);
@@ -14,11 +16,19 @@ Ast *ast_init (AstRoot *root)
 	return ast;
 }
 
-AstRoot *ast_initRoot (AstExpression *expression)
+AstRoot *ast_initRoot (AstStatement *statement)
 {
 	AstRoot *root = mem_alloc(sizeof(*root));
-	root->expression = expression;
+	root->statement = statement;
 	return root;
+}
+
+AstStatement *ast_initStatementExpr (AstExpression *expression)
+{
+	AstStatement *statement = mem_alloc(sizeof(*statement));
+	statement->type = AstStatement_Expr;
+	statement->as.expr = astStatement_initExpr(expression);
+	return statement;
 }
 
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator)
@@ -59,6 +69,13 @@ AstExpression *ast_initExpressionUnary (Token operator, AstExpression *right)
 	expression->type = AstExpression_Unary;
 	expression->as.unary = astExpression_initUnary(operator, right);
 	return expression;
+}
+
+static AstStatementExpr *astStatement_initExpr (AstExpression *expression)
+{
+	AstStatementExpr *expr = mem_alloc(sizeof(*expr));
+	expr->expression = expression;
+	return expr;
 }
 
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator)

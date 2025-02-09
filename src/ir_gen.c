@@ -7,6 +7,10 @@
 
 static void visitAst (Ast *ast);
 static void visitRoot (AstRoot *root);
+
+static void visitStatement (AstStatement *statement);
+static void visitStatementExpr (AstStatementExpr *statement);
+
 static void visitExpression (AstExpression *expression);
 static void visitExpressionBinary (AstExpressionBinary *expression);
 static void visitExpressionBoolean (AstExpressionBoolean *expression);
@@ -42,7 +46,19 @@ static void visitAst (Ast *ast)
 
 static void visitRoot (AstRoot *root)
 {
-	visitExpression(root->expression);
+	visitStatement(root->statement);
+}
+
+static void visitStatement (AstStatement *statement)
+{
+	switch (statement->type) {
+		case AstStatement_Expr: visitStatementExpr(statement->as.expr); break;
+	}
+}
+
+static void visitStatementExpr (AstStatementExpr *statement)
+{
+	visitExpression(statement->expression);
 }
 
 static void visitExpression (AstExpression *expression)
