@@ -9,6 +9,7 @@ static void visitExpression (AstExpression *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
 static void visitExpressionBoolean (AstExpressionBoolean *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
+static void visitExpressionTernary (AstExpressionTernary *node);
 static void visitExpressionUnary (AstExpressionUnary *node);
 
 void analyze (Ast *ast)
@@ -59,6 +60,10 @@ static void visitExpression (AstExpression *node)
 		case AstExpression_Number:
 			node->dataType = DT_Number;
 			visitExpressionNumber(node->as.number);
+			break;
+		case AstExpression_Ternary:
+			visitExpressionTernary(node->as.ternary);
+			node->dataType = node->as.ternary->a->dataType;
 			break;
 		case AstExpression_Unary:
 			switch (node->as.unary->operator.type) {
@@ -115,6 +120,19 @@ static void visitExpressionBoolean (AstExpressionBoolean *node)
 
 static void visitExpressionNumber (AstExpressionNumber *node)
 { }
+
+static void visitExpressionTernary (AstExpressionTernary *node)
+{
+	visitExpression(node->condition);
+	visitExpression(node->a);
+	visitExpression(node->b);
+	if (node->condition->dataType != DT_Boolean) {
+		error(node->operator, "condition must be a boolean");
+	}
+	if (node->a->dataType != node->b->dataType) {
+		error(node->operator, "operands must have the same type");
+	}
+}
 
 static void visitExpressionUnary (AstExpressionUnary *node)
 {

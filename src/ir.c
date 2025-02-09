@@ -5,6 +5,9 @@
 static IrAdd *irAdd_init (void);
 static IrAnd *irAnd_init (void);
 static IrEqu *irEqu_init (void);
+static IrJmp *irJmp_init (int n);
+static IrJmpFalse *irJmpFalse_init (int n);
+static IrLabel *irLabel_init (int n);
 static IrLess *irLess_init (void);
 static IrLessEqu *irLessEqu_init (void);
 static IrMul *irMul_init (void);
@@ -41,6 +44,33 @@ Ir *ir_initEqu (void)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Equ;
 	ir->as.equ = irEqu_init();
+	dll_init(ir);
+	return ir;
+}
+
+Ir *ir_initJmp (int n)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_Jmp;
+	ir->as.jmp = irJmp_init(n);
+	dll_init(ir);
+	return ir;
+}
+
+Ir *ir_initJmpFalse (int n)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_JmpFalse;
+	ir->as.jmpFalse = irJmpFalse_init(n);
+	dll_init(ir);
+	return ir;
+}
+
+Ir *ir_initLabel (int n)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_Label;
+	ir->as.label = irLabel_init(n);
 	dll_init(ir);
 	return ir;
 }
@@ -169,6 +199,27 @@ static IrEqu *irEqu_init (void)
 {
 	IrEqu *equ = mem_alloc(sizeof(*equ));
 	return equ;
+}
+
+static IrJmp *irJmp_init (int n)
+{
+	IrJmp *jmp = mem_alloc(sizeof(*jmp));
+	jmp->n = n;
+	return jmp;
+}
+
+static IrJmpFalse *irJmpFalse_init (int n)
+{
+	IrJmpFalse *jmpFalse = mem_alloc(sizeof(*jmpFalse));
+	jmpFalse->n = n;
+	return jmpFalse;
+}
+
+static IrLabel *irLabel_init (int n)
+{
+	IrLabel *label = mem_alloc(sizeof(*label));
+	label->n = n;
+	return label;
 }
 
 static IrLess *irLess_init (void)

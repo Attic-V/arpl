@@ -23,6 +23,13 @@ typedef struct {
 } AstExpressionNumber;
 
 typedef struct {
+	AstExpression *condition;
+	AstExpression *a;
+	AstExpression *b;
+	Token operator;
+} AstExpressionTernary;
+
+typedef struct {
 	Token operator;
 	AstExpression *right;
 } AstExpressionUnary;
@@ -31,6 +38,7 @@ typedef enum {
 	AstExpression_Binary,
 	AstExpression_Boolean,
 	AstExpression_Number,
+	AstExpression_Ternary,
 	AstExpression_Unary,
 } AstExpressionType;
 
@@ -40,6 +48,7 @@ struct AstExpression {
 		AstExpressionBinary *binary;
 		AstExpressionBoolean *boolean;
 		AstExpressionNumber *number;
+		AstExpressionTernary *ternary;
 		AstExpressionUnary *unary;
 	} as;
 	DataType dataType;
@@ -58,6 +67,7 @@ AstRoot *ast_initRoot (AstExpression *expression);
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBoolean (bool value);
 AstExpression *ast_initExpressionNumber (Token value);
+AstExpression *ast_initExpressionTernary (AstExpression *condition, AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionUnary (Token operator, AstExpression *right);
 
 #endif

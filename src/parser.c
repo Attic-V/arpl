@@ -19,6 +19,7 @@ static AstExpression *getExpressionProduct (void);
 static AstExpression *getExpressionRelational (void);
 static AstExpression *getExpressionShift (void);
 static AstExpression *getExpressionSum (void);
+static AstExpression *getExpressionTernary (void);
 static AstExpression *getExpressionUnary (void);
 static AstExpression *getExpressionXor (void);
 
@@ -50,7 +51,20 @@ static AstRoot *getRoot (void)
 
 static AstExpression *getExpression (void)
 {
-	return getExpressionOrLogical();
+	return getExpressionTernary();
+}
+
+static AstExpression *getExpressionTernary (void)
+{
+	AstExpression *expression = getExpressionOrLogical();
+	if (check(TT_Question)) {
+		Token operator = parser.tokens[parser.current++];
+		AstExpression *a = getExpressionOrLogical();
+		consume(TT_Colon, "expected ':'");
+		AstExpression *b = getExpressionTernary();
+		expression = ast_initExpressionTernary(expression, a, b, operator);
+	}
+	return expression;
 }
 
 static AstExpression *getExpressionOrLogical (void)

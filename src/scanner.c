@@ -45,6 +45,7 @@ Token *scan (char *source)
 			case '&': addToken(match('&') ? TT_And_And : TT_And); continue;
 			case '!':	addToken(match('=') ? TT_Bang_Equal : TT_Bang); continue;
 			case '^': addToken(TT_Caret); continue;
+			case ':': addToken(TT_Colon); continue;
 			case '=':
 				if (check('=')) {
 					scanner.current++;
@@ -64,6 +65,7 @@ Token *scan (char *source)
 			case '-': addToken(TT_Minus); continue;
 			case '|': addToken(match('|') ? TT_Pipe_Pipe : TT_Pipe); continue;
 			case '+': addToken(TT_Plus); continue;
+			case '?': addToken(TT_Question); continue;
 			case ')': addToken(TT_RParen); continue;
 			case '*': addToken(TT_Star); continue;
 			case '~': addToken(TT_Tilde); continue;

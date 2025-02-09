@@ -10,6 +10,9 @@ static void transform (Ir *r);
 static void transformAdd (IrAdd *instruction);
 static void transformAnd (IrAnd *instruction);
 static void transformEqu (IrEqu *instruction);
+static void transformJmp (IrJmp *instruction);
+static void transformJmpFalse (IrJmpFalse *instruction);
+static void transformLabel (IrLabel *instruction);
 static void transformLess (IrLess *instruction);
 static void transformLessEqu (IrLessEqu *instruction);
 static void transformMul (IrMul *instruction);
@@ -61,6 +64,9 @@ static void transform (Ir *r)
 		case Ir_Add: transformAdd(r->as.add); break;
 		case Ir_And: transformAnd(r->as.and); break;
 		case Ir_Equ: transformEqu(r->as.equ); break;
+		case Ir_Jmp: transformJmp(r->as.jmp); break;
+		case Ir_JmpFalse: transformJmpFalse(r->as.jmpFalse); break;
+		case Ir_Label: transformLabel(r->as.label); break;
 		case Ir_Less: transformLess(r->as.less); break;
 		case Ir_LessEqu: transformLessEqu(r->as.lessEqu); break;
 		case Ir_Mul: transformMul(r->as.mul); break;
@@ -99,6 +105,23 @@ static void transformEqu (IrEqu *instruction)
 	emit("\tcmp     r8, r9");
 	emit("\tsete    r8b");
 	emit("\tpush    r8");
+}
+
+static void transformJmp (IrJmp *instruction)
+{
+	emit("\tjmp     .LB%d", instruction->n);
+}
+
+static void transformJmpFalse (IrJmpFalse *instruction)
+{
+	emit("\tpop     r8");
+	emit("\ttest    r8d, r8d");
+	emit("\tjz      .LB%d", instruction->n);
+}
+
+static void transformLabel (IrLabel *instruction)
+{
+	emit(".LB%d:", instruction->n);
 }
 
 static void transformLess (IrLess *instruction)

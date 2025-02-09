@@ -11,12 +11,14 @@ static void visitExpression (AstExpression *expression);
 static void visitExpressionBinary (AstExpressionBinary *expression);
 static void visitExpressionBoolean (AstExpressionBoolean *expression);
 static void visitExpressionNumber (AstExpressionNumber *expression);
+static void visitExpressionTernary (AstExpressionTernary *expression);
 static void visitExpressionUnary (AstExpressionUnary *expression);
 
 static void addInstruction (Ir *instruction);
 
 typedef struct {
 	Ir *current;
+	int label;
 } IrGenerator;
 
 static IrGenerator gen;
@@ -24,6 +26,7 @@ static IrGenerator gen;
 Ir *gen_ir (Ast *ast)
 {
 	gen.current = NULL;
+	gen.label = 0;
 
 	visitAst(ast);
 
@@ -48,6 +51,7 @@ static void visitExpression (AstExpression *expression)
 		case AstExpression_Binary: visitExpressionBinary(expression->as.binary); break;
 		case AstExpression_Boolean: visitExpressionBoolean(expression->as.boolean); break;
 		case AstExpression_Number: visitExpressionNumber(expression->as.number); break;
+		case AstExpression_Ternary: visitExpressionTernary(expression->as.ternary); break;
 		case AstExpression_Unary: visitExpressionUnary(expression->as.unary); break;
 	}
 }
@@ -85,6 +89,19 @@ static void visitExpressionNumber (AstExpressionNumber *expression)
 	char *buffer = mem_alloc(expression->value.length + 1);
 	sprintf(buffer, "%.*s", expression->value.length, expression->value.lexeme);
 	addInstruction(ir_initPush(atoi(buffer)));
+}
+
+static void visitExpressionTernary (AstExpressionTernary *expression)
+{
+	int l0 = gen.label++;
+	int l1 = gen.label++;
+	visitExpression(expression->condition);
+	addInstruction(ir_initJmpFalse(l0));
+	visitExpression(expression->a);
+	addInstruction(ir_initJmp(l1));
+	addInstruction(ir_initLabel(l0));
+	visitExpression(expression->b);
+	addInstruction(ir_initLabel(l1));
 }
 
 static void visitExpressionUnary (AstExpressionUnary *expression)
