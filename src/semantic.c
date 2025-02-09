@@ -7,6 +7,7 @@ static void visitAst (Ast *ast);
 static void visitRoot (AstRoot *node);
 
 static void visitStatement (AstStatement *node);
+static void visitStatementBlock (AstStatementBlock *node);
 static void visitStatementExpr (AstStatementExpr *node);
 
 static void visitExpression (AstExpression *node);
@@ -34,7 +35,15 @@ static void visitRoot (AstRoot *node)
 static void visitStatement (AstStatement *node)
 {
 	switch (node->type) {
+		case AstStatement_Block: visitStatementBlock(node->as.block); break;
 		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
+	}
+}
+
+static void visitStatementBlock (AstStatementBlock *node)
+{
+	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
+		visitStatement(stmt);
 	}
 }
 

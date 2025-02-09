@@ -60,12 +60,14 @@ Token *scan (char *source)
 					continue;
 				}
 				break;
+			case '{': addToken(TT_LBrace); continue;
 			case '<': addToken(match('<') ? TT_Less_Less : match('=') ? TT_Less_Equal : TT_Less); continue;
 			case '(': addToken(TT_LParen); continue;
 			case '-': addToken(TT_Minus); continue;
 			case '|': addToken(match('|') ? TT_Pipe_Pipe : TT_Pipe); continue;
 			case '+': addToken(TT_Plus); continue;
 			case '?': addToken(TT_Question); continue;
+			case '}': addToken(TT_RBrace); continue;
 			case ')': addToken(TT_RParen); continue;
 			case ';': addToken(TT_Semicolon); continue;
 			case '*': addToken(TT_Star); continue;

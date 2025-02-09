@@ -2,6 +2,7 @@
 #include "linked_list.h"
 #include "memory.h"
 
+static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
 
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
@@ -22,6 +23,15 @@ AstRoot *ast_initRoot (AstStatement *statement)
 	AstRoot *root = mem_alloc(sizeof(*root));
 	root->statement = statement;
 	return root;
+}
+
+AstStatement *ast_initStatementBlock (AstStatement *children)
+{
+	AstStatement *statement = mem_alloc(sizeof(*statement));
+	statement->type = AstStatement_Block;
+	statement->as.block = astStatement_initBlock(children);
+	dll_init(statement);
+	return statement;
 }
 
 AstStatement *ast_initStatementExpr (AstExpression *expression)
@@ -71,6 +81,13 @@ AstExpression *ast_initExpressionUnary (Token operator, AstExpression *right)
 	expression->type = AstExpression_Unary;
 	expression->as.unary = astExpression_initUnary(operator, right);
 	return expression;
+}
+
+static AstStatementBlock *astStatement_initBlock (AstStatement *children)
+{
+	AstStatementBlock *block = mem_alloc(sizeof(*block));
+	block->children = children;
+	return block;
 }
 
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression)

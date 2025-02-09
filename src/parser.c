@@ -9,7 +9,11 @@
 #include "parser.h"
 
 static AstRoot *getRoot (void);
+
 static AstStatement *getStatement(void);
+static AstStatement *getStatementBlock (void);
+static AstStatement *getStatementExpr (void);
+
 static AstExpression *getExpression (void);
 static AstExpression *getExpressionAndBitwise (void);
 static AstExpression *getExpressionAndLogical (void);
@@ -48,17 +52,32 @@ Ast *parse (Token *tokens)
 
 static AstRoot *getRoot (void)
 {
+	return ast_initRoot(getStatement());
+}
+
+static AstStatement *getStatement (void)
+{
+	if (check(TT_LBrace)) {
+		return getStatementBlock();
+	}
+	return getStatementExpr();
+}
+
+static AstStatement *getStatementBlock (void)
+{
+	consume(TT_LBrace, "expected '{'");
 	AstStatement *statements = NULL;
-	while (!check(TT_Semicolon) /* temporary */) {
+	while (!check(TT_RBrace)) {
 		AstStatement *statement = getStatement();
 		dll_insert(statements, statement);
 		statements = statement;
 	}
+	consume(TT_RBrace, "expected '}'");
 	for (; statements->previous != NULL; statements = statements->previous);
-	return ast_initRoot(statements);
+	return ast_initStatementBlock(statements);
 }
 
-static AstStatement *getStatement (void)
+static AstStatement *getStatementExpr (void)
 {
 	AstStatement *statement = ast_initStatementExpr(getExpression());
 	consume(TT_Semicolon, "expected ';'");
