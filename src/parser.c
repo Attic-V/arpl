@@ -13,6 +13,7 @@ static AstRoot *getRoot (void);
 static AstStatement *getStatement(void);
 static AstStatement *getStatementBlock (void);
 static AstStatement *getStatementExpr (void);
+static AstStatement *getStatementIfE (void);
 
 static AstExpression *getExpression (void);
 static AstExpression *getExpressionAndBitwise (void);
@@ -57,9 +58,8 @@ static AstRoot *getRoot (void)
 
 static AstStatement *getStatement (void)
 {
-	if (check(TT_LBrace)) {
-		return getStatementBlock();
-	}
+	if (check(TT_If)) return getStatementIfE();
+	if (check(TT_LBrace)) return getStatementBlock();
 	return getStatementExpr();
 }
 
@@ -82,6 +82,21 @@ static AstStatement *getStatementExpr (void)
 	AstStatement *statement = ast_initStatementExpr(getExpression());
 	consume(TT_Semicolon, "expected ';'");
 	return statement;
+}
+
+static AstStatement *getStatementIfE (void)
+{
+	consume(TT_If, "expected 'if'");
+	consume(TT_LParen, "expected '('");
+	AstExpression *condition = getExpression();
+	consume(TT_RParen, "expected ')'");
+	AstStatement *a = getStatement();
+	AstStatement *b = NULL;
+	if (check(TT_Else)) {
+		parser.current++;
+		b = getStatement();
+	}
+	return ast_initStatementIfE(condition, a, b);
 }
 
 static AstExpression *getExpression (void)

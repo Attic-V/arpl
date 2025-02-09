@@ -11,6 +11,7 @@ static void visitRoot (AstRoot *root);
 static void visitStatement (AstStatement *statement);
 static void visitStatementBlock (AstStatementBlock *statement);
 static void visitStatementExpr (AstStatementExpr *statement);
+static void visitStatementIfE (AstStatementIfE *statement);
 
 static void visitExpression (AstExpression *expression);
 static void visitExpressionBinary (AstExpressionBinary *expression);
@@ -55,6 +56,7 @@ static void visitStatement (AstStatement *statement)
 	switch (statement->type) {
 		case AstStatement_Block: visitStatementBlock(statement->as.block); break;
 		case AstStatement_Expr: visitStatementExpr(statement->as.expr); break;
+		case AstStatement_IfE: visitStatementIfE(statement->as.ifE); break;
 	}
 }
 
@@ -68,6 +70,23 @@ static void visitStatementBlock (AstStatementBlock *statement)
 static void visitStatementExpr (AstStatementExpr *statement)
 {
 	visitExpression(statement->expression);
+}
+
+static void visitStatementIfE (AstStatementIfE *statement)
+{
+	int l0 = gen.label++;
+	int l1 = gen.label++;
+	visitExpression(statement->condition);
+	addInstruction(ir_initJmpFalse(l0));
+	visitStatement(statement->a);
+	if (statement->b != NULL) {
+		addInstruction(ir_initJmp(l1));
+	}
+	addInstruction(ir_initLabel(l0));
+	if (statement->b != NULL) {
+		visitStatement(statement->b);
+		addInstruction(ir_initLabel(l1));
+	}
 }
 
 static void visitExpression (AstExpression *expression)

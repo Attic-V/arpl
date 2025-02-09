@@ -64,9 +64,16 @@ typedef struct {
 	AstExpression *expression;
 } AstStatementExpr;
 
+typedef struct {
+	AstExpression *condition;
+	AstStatement *a;
+	AstStatement *b;
+} AstStatementIfE;
+
 typedef enum {
 	AstStatement_Block,
 	AstStatement_Expr,
+	AstStatement_IfE,
 } AstStatementType;
 
 struct AstStatement {
@@ -74,6 +81,7 @@ struct AstStatement {
 	union {
 		AstStatementBlock *block;
 		AstStatementExpr *expr;
+		AstStatementIfE *ifE;
 	} as;
 	AstStatement* next;
 	AstStatement* previous;
@@ -92,6 +100,7 @@ AstRoot *ast_initRoot (AstStatement *statement);
 
 AstStatement *ast_initStatementBlock (AstStatement *children);
 AstStatement *ast_initStatementExpr (AstExpression *expression);
+AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, AstStatement *b);
 
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBoolean (bool value);
