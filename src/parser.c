@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "error.h"
+#include "linked_list.h"
 #include "memory.h"
 #include "parser.h"
 
@@ -47,7 +48,14 @@ Ast *parse (Token *tokens)
 
 static AstRoot *getRoot (void)
 {
-	return ast_initRoot(getStatement());
+	AstStatement *statements = NULL;
+	while (!check(TT_Semicolon) /* temporary */) {
+		AstStatement *statement = getStatement();
+		dll_insert(statements, statement);
+		statements = statement;
+	}
+	for (; statements->previous != NULL; statements = statements->previous);
+	return ast_initRoot(statements);
 }
 
 static AstStatement *getStatement (void)

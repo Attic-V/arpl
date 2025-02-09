@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "linked_list.h"
 #include "memory.h"
 
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
@@ -28,6 +29,7 @@ AstStatement *ast_initStatementExpr (AstExpression *expression)
 	AstStatement *statement = mem_alloc(sizeof(*statement));
 	statement->type = AstStatement_Expr;
 	statement->as.expr = astStatement_initExpr(expression);
+	dll_init(statement);
 	return statement;
 }
 

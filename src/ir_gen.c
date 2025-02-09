@@ -46,7 +46,9 @@ static void visitAst (Ast *ast)
 
 static void visitRoot (AstRoot *root)
 {
-	visitStatement(root->statement);
+	for (; root->statement != NULL; root->statement = root->statement->next) {
+		visitStatement(root->statement);
+	}
 }
 
 static void visitStatement (AstStatement *statement)

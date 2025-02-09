@@ -69,6 +69,8 @@ struct AstStatement {
 	union {
 		AstStatementExpr *expr;
 	} as;
+	AstStatement* next;
+	AstStatement* previous;
 };
 
 typedef struct {
