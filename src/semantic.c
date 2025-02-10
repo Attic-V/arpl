@@ -10,6 +10,7 @@ static void visitStatement (AstStatement *node);
 static void visitStatementBlock (AstStatementBlock *node);
 static void visitStatementExpr (AstStatementExpr *node);
 static void visitStatementIfE (AstStatementIfE *node);
+static void visitStatementVar (AstStatementVar *node);
 
 static void visitExpression (AstExpression *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
@@ -17,6 +18,12 @@ static void visitExpressionBoolean (AstExpressionBoolean *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
 static void visitExpressionTernary (AstExpressionTernary *node);
 static void visitExpressionUnary (AstExpressionUnary *node);
+
+typedef struct {
+	Table *table;
+} Analyzer;
+
+static Analyzer analyzer;
 
 void analyze (Ast *ast)
 {
@@ -39,11 +46,13 @@ static void visitStatement (AstStatement *node)
 		case AstStatement_Block: visitStatementBlock(node->as.block); break;
 		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
 		case AstStatement_IfE: visitStatementIfE(node->as.ifE); break;
+		case AstStatement_Var: visitStatementVar(node->as.var); break;
 	}
 }
 
 static void visitStatementBlock (AstStatementBlock *node)
 {
+	analyzer.table = node->table = table_init(256);
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
 	}
@@ -60,6 +69,13 @@ static void visitStatementIfE (AstStatementIfE *node)
 	visitStatement(node->a);
 	if (node->b != NULL) {
 		visitStatement(node->b);
+	}
+}
+
+static void visitStatementVar (AstStatementVar *node)
+{
+	if (!table_add(analyzer.table, symbol_init(node->identifier))) {
+		error(node->identifier, "variable has already been declared in scope");
 	}
 }
 

@@ -5,6 +5,7 @@
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
 static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b);
+static AstStatementVar *astStatement_initVar (Token identifier, Token type);
 
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBoolean *astExpression_initBoolean (bool value);
@@ -49,6 +50,15 @@ AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, A
 	AstStatement *statement = mem_alloc(sizeof(*statement));
 	statement->type = AstStatement_IfE;
 	statement->as.ifE = astStatement_initIfE(condition, a, b);
+	dll_init(statement);
+	return statement;
+}
+
+AstStatement *ast_initStatementVar (Token identifier, Token type)
+{
+	AstStatement *statement = mem_alloc(sizeof(*statement));
+	statement->type = AstStatement_Var;
+	statement->as.var = astStatement_initVar(identifier, type);
 	dll_init(statement);
 	return statement;
 }
@@ -114,6 +124,14 @@ static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstState
 	ifE->a = a;
 	ifE->b = b;
 	return ifE;
+}
+
+static AstStatementVar *astStatement_initVar (Token identifier, Token type)
+{
+	AstStatementVar *var = mem_alloc(sizeof(*var));
+	var->identifier = identifier;
+	var->type = type;
+	return var;
 }
 
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator)

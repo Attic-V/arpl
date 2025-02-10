@@ -17,6 +17,7 @@ typedef enum {
 	TT_Greater_Greater,
 	TT_Identifier,
 	TT_If,
+	TT_Int,
 	TT_LBrace,
 	TT_Less,
 	TT_Less_Equal,
@@ -34,6 +35,7 @@ typedef enum {
 	TT_Star,
 	TT_Tilde,
 	TT_True,
+	TT_Var,
 } TokenType;
 
 typedef struct {

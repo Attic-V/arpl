@@ -4,6 +4,7 @@
 #include "ir_gen.h"
 #include "linked_list.h"
 #include "memory.h"
+#include "table.h"
 
 static void visitAst (Ast *ast);
 static void visitRoot (AstRoot *root);
@@ -12,6 +13,7 @@ static void visitStatement (AstStatement *statement);
 static void visitStatementBlock (AstStatementBlock *statement);
 static void visitStatementExpr (AstStatementExpr *statement);
 static void visitStatementIfE (AstStatementIfE *statement);
+static void visitStatementVar (AstStatementVar *statement);
 
 static void visitExpression (AstExpression *expression);
 static void visitExpressionBinary (AstExpressionBinary *expression);
@@ -37,7 +39,7 @@ Ir *gen_ir (Ast *ast)
 	visitAst(ast);
 
 	Ir *ir;
-	for (ir = gen.current; ir->previous != NULL; ir = ir->previous);
+	for (ir = gen.current; ir != NULL && ir->previous != NULL; ir = ir->previous);
 	return ir;
 }
 
@@ -57,11 +59,18 @@ static void visitStatement (AstStatement *statement)
 		case AstStatement_Block: visitStatementBlock(statement->as.block); break;
 		case AstStatement_Expr: visitStatementExpr(statement->as.expr); break;
 		case AstStatement_IfE: visitStatementIfE(statement->as.ifE); break;
+		case AstStatement_Var: visitStatementVar(statement->as.var); break;
 	}
+}
+
+static void reserveSymbol (Symbol *symbol)
+{
+	addInstruction(ir_initReserve(4));
 }
 
 static void visitStatementBlock (AstStatementBlock *statement)
 {
+	table_apply(statement->table, reserveSymbol);
 	for (AstStatement *stmt = statement->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
 	}
@@ -88,6 +97,9 @@ static void visitStatementIfE (AstStatementIfE *statement)
 		addInstruction(ir_initLabel(l1));
 	}
 }
+
+static void visitStatementVar (AstStatementVar *statement)
+{ }
 
 static void visitExpression (AstExpression *expression)
 {

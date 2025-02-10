@@ -14,6 +14,7 @@ static AstStatement *getStatement(void);
 static AstStatement *getStatementBlock (void);
 static AstStatement *getStatementExpr (void);
 static AstStatement *getStatementIfE (void);
+static AstStatement *getStatementVar (void);
 
 static AstExpression *getExpression (void);
 static AstExpression *getExpressionAndBitwise (void);
@@ -53,13 +54,14 @@ Ast *parse (Token *tokens)
 
 static AstRoot *getRoot (void)
 {
-	return ast_initRoot(getStatement());
+	return ast_initRoot(getStatementBlock());
 }
 
 static AstStatement *getStatement (void)
 {
 	if (check(TT_If)) return getStatementIfE();
 	if (check(TT_LBrace)) return getStatementBlock();
+	if (check(TT_Var)) return getStatementVar();
 	return getStatementExpr();
 }
 
@@ -73,7 +75,7 @@ static AstStatement *getStatementBlock (void)
 		statements = statement;
 	}
 	consume(TT_RBrace, "expected '}'");
-	for (; statements->previous != NULL; statements = statements->previous);
+	for (; statements != NULL && statements->previous != NULL; statements = statements->previous);
 	return ast_initStatementBlock(statements);
 }
 
@@ -97,6 +99,15 @@ static AstStatement *getStatementIfE (void)
 		b = getStatement();
 	}
 	return ast_initStatementIfE(condition, a, b);
+}
+
+static AstStatement *getStatementVar (void)
+{
+	consume(TT_Var, "expected 'var'");
+	Token identifier = consume(TT_Identifier, "expected identifier");
+	Token type = consume(TT_Int, "expected 'int'");
+	consume(TT_Semicolon, "expected ';'");
+	return ast_initStatementVar(identifier, type);
 }
 
 static AstExpression *getExpression (void)

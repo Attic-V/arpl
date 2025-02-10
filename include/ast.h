@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "data_type.h"
+#include "table.h"
 #include "token.h"
 
 typedef struct AstExpression AstExpression;
@@ -58,6 +59,7 @@ typedef struct AstStatement AstStatement;
 
 typedef struct {
 	AstStatement *children;
+	Table *table;
 } AstStatementBlock;
 
 typedef struct {
@@ -70,10 +72,16 @@ typedef struct {
 	AstStatement *b;
 } AstStatementIfE;
 
+typedef struct {
+	Token identifier;
+	Token type;
+} AstStatementVar;
+
 typedef enum {
 	AstStatement_Block,
 	AstStatement_Expr,
 	AstStatement_IfE,
+	AstStatement_Var,
 } AstStatementType;
 
 struct AstStatement {
@@ -82,6 +90,7 @@ struct AstStatement {
 		AstStatementBlock *block;
 		AstStatementExpr *expr;
 		AstStatementIfE *ifE;
+		AstStatementVar *var;
 	} as;
 	AstStatement* next;
 	AstStatement* previous;
@@ -101,6 +110,7 @@ AstRoot *ast_initRoot (AstStatement *statement);
 AstStatement *ast_initStatementBlock (AstStatement *children);
 AstStatement *ast_initStatementExpr (AstExpression *expression);
 AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, AstStatement *b);
+AstStatement *ast_initStatementVar (Token identifier, Token type);
 
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBoolean (bool value);
