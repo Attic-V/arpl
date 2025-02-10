@@ -13,6 +13,12 @@ typedef struct {
 	AstExpression *a;
 	AstExpression *b;
 	Token operator;
+} AstExpressionAssign;
+
+typedef struct {
+	AstExpression *a;
+	AstExpression *b;
+	Token operator;
 } AstExpressionBinary;
 
 typedef struct {
@@ -35,22 +41,30 @@ typedef struct {
 	AstExpression *right;
 } AstExpressionUnary;
 
+typedef struct {
+	Token identifier;
+} AstExpressionVar;
+
 typedef enum {
+	AstExpression_Assign,
 	AstExpression_Binary,
 	AstExpression_Boolean,
 	AstExpression_Number,
 	AstExpression_Ternary,
 	AstExpression_Unary,
+	AstExpression_Var,
 } AstExpressionType;
 
 struct AstExpression {
 	AstExpressionType type;
 	union {
+		AstExpressionAssign *assign;
 		AstExpressionBinary *binary;
 		AstExpressionBoolean *boolean;
 		AstExpressionNumber *number;
 		AstExpressionTernary *ternary;
 		AstExpressionUnary *unary;
+		AstExpressionVar *var;
 	} as;
 	DataType dataType;
 };
@@ -112,10 +126,12 @@ AstStatement *ast_initStatementExpr (AstExpression *expression);
 AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, AstStatement *b);
 AstStatement *ast_initStatementVar (Token identifier, Token type);
 
+AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBoolean (bool value);
 AstExpression *ast_initExpressionNumber (Token value);
 AstExpression *ast_initExpressionTernary (AstExpression *condition, AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionUnary (Token operator, AstExpression *right);
+AstExpression *ast_initExpressionVar (Token identifier);
 
 #endif

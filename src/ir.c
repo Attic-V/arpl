@@ -4,6 +4,7 @@
 
 static IrAdd *irAdd_init (void);
 static IrAnd *irAnd_init (void);
+static IrAssign *irAssign_init (void);
 static IrEqu *irEqu_init (void);
 static IrJmp *irJmp_init (int n);
 static IrJmpFalse *irJmpFalse_init (int n);
@@ -16,6 +17,7 @@ static IrNot *irNot_init (void);
 static IrNotEqu *irNotEqu_init (void);
 static IrOr *irOr_init (void);
 static IrPush *irPush_init (int32_t value);
+static IrRef *irRef_init (size_t idx);
 static IrReserve *irReserve_init (size_t bytes);
 static IrSar *irSar_init (void);
 static IrShl *irShl_init (void);
@@ -36,6 +38,15 @@ Ir *ir_initAnd (void)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_And;
 	ir->as.and = irAnd_init();
+	dll_init(ir);
+	return ir;
+}
+
+Ir *ir_initAssign (void)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_Assign;
+	ir->as.assign = irAssign_init();
 	dll_init(ir);
 	return ir;
 }
@@ -148,6 +159,15 @@ Ir *ir_initPush (int32_t value)
 	return ir;
 }
 
+Ir *ir_initRef (size_t idx)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_Ref;
+	ir->as.ref = irRef_init(idx);
+	dll_init(ir);
+	return ir;
+}
+
 Ir *ir_initReserve (size_t bytes)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
@@ -203,6 +223,12 @@ static IrAnd *irAnd_init (void)
 {
 	IrAnd *and = mem_alloc(sizeof(*and));
 	return and;
+}
+
+static IrAssign *irAssign_init (void)
+{
+	IrAssign *assign = mem_alloc(sizeof(*assign));
+	return assign;
 }
 
 static IrEqu *irEqu_init (void)
@@ -279,6 +305,13 @@ static IrPush *irPush_init (int32_t value)
 	IrPush *push = mem_alloc(sizeof(*push));
 	push->value = value;
 	return push;
+}
+
+static IrRef *irRef_init (size_t idx)
+{
+	IrRef *ref = mem_alloc(sizeof(*ref));
+	ref->idx = idx;
+	return ref;
 }
 
 static IrReserve *irReserve_init (size_t bytes)

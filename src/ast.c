@@ -7,11 +7,13 @@ static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
 static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b);
 static AstStatementVar *astStatement_initVar (Token identifier, Token type);
 
+static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBoolean *astExpression_initBoolean (bool value);
 static AstExpressionNumber *astExpression_initNumber (Token value);
 static AstExpressionTernary *astExpression_initTernary (AstExpression *condition, AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionUnary *astExpression_initUnary (Token operator, AstExpression *right);
+static AstExpressionVar *astExpression_initVar (Token identifier);
 
 Ast *ast_init (AstRoot *root)
 {
@@ -63,6 +65,14 @@ AstStatement *ast_initStatementVar (Token identifier, Token type)
 	return statement;
 }
 
+AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator)
+{
+	AstExpression *expression = mem_alloc(sizeof(*expression));
+	expression->type = AstExpression_Assign;
+	expression->as.assign = astExpression_initAssign(a, b, operator);
+	return expression;
+}
+
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator)
 {
 	AstExpression *expression = mem_alloc(sizeof(*expression));
@@ -103,6 +113,14 @@ AstExpression *ast_initExpressionUnary (Token operator, AstExpression *right)
 	return expression;
 }
 
+AstExpression *ast_initExpressionVar (Token identifier)
+{
+	AstExpression *expression = mem_alloc(sizeof(*expression));
+	expression->type = AstExpression_Var;
+	expression->as.var = astExpression_initVar(identifier);
+	return expression;
+}
+
 static AstStatementBlock *astStatement_initBlock (AstStatement *children)
 {
 	AstStatementBlock *block = mem_alloc(sizeof(*block));
@@ -132,6 +150,15 @@ static AstStatementVar *astStatement_initVar (Token identifier, Token type)
 	var->identifier = identifier;
 	var->type = type;
 	return var;
+}
+
+static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator)
+{
+	AstExpressionAssign *assign = mem_alloc(sizeof(*assign));
+	assign->a = a;
+	assign->b = b;
+	assign->operator = operator;
+	return assign;
 }
 
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator)
@@ -173,4 +200,11 @@ static AstExpressionUnary *astExpression_initUnary (Token operator, AstExpressio
 	unary->operator = operator;
 	unary->right = right;
 	return unary;
+}
+
+static AstExpressionVar *astExpression_initVar (Token identifier)
+{
+	AstExpressionVar *var = mem_alloc(sizeof(*var));
+	var->identifier = identifier;
+	return var;
 }

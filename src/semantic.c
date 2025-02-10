@@ -13,11 +13,13 @@ static void visitStatementIfE (AstStatementIfE *node);
 static void visitStatementVar (AstStatementVar *node);
 
 static void visitExpression (AstExpression *node);
+static void visitExpressionAssign (AstExpressionAssign *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
 static void visitExpressionBoolean (AstExpressionBoolean *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
 static void visitExpressionTernary (AstExpressionTernary *node);
 static void visitExpressionUnary (AstExpressionUnary *node);
+static void visitExpressionVar (AstExpressionVar *node);
 
 typedef struct {
 	Table *table;
@@ -55,6 +57,7 @@ static void visitStatementBlock (AstStatementBlock *node)
 	analyzer.table = node->table = table_init(256);
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
+		analyzer.table = node->table;
 	}
 }
 
@@ -74,7 +77,7 @@ static void visitStatementIfE (AstStatementIfE *node)
 
 static void visitStatementVar (AstStatementVar *node)
 {
-	if (!table_add(analyzer.table, symbol_init(node->identifier))) {
+	if (!table_add(analyzer.table, symbol_init(node->identifier, node->type))) {
 		error(node->identifier, "variable has already been declared in scope");
 	}
 }
@@ -82,6 +85,10 @@ static void visitStatementVar (AstStatementVar *node)
 static void visitExpression (AstExpression *node)
 {
 	switch (node->type) {
+		case AstExpression_Assign:
+			visitExpressionAssign(node->as.assign);
+			node->dataType = node->as.assign->b->dataType;
+			break;
 		case AstExpression_Binary:
 			switch (node->as.binary->operator.type) {
 				case TT_And:
@@ -130,6 +137,23 @@ static void visitExpression (AstExpression *node)
 			}
 			visitExpressionUnary(node->as.unary);
 			break;
+		case AstExpression_Var:
+			Symbol *symbol = table_get(analyzer.table, node->as.var->identifier);
+			switch (symbol->type.type) {
+				case TT_Int: node->dataType = DT_Number; break;
+				default:
+			}
+			visitExpressionVar(node->as.var);
+			break;
+	}
+}
+
+static void visitExpressionAssign (AstExpressionAssign *node)
+{
+	visitExpression(node->a);
+	visitExpression(node->b);
+	if (node->a->dataType != node->b->dataType) {
+		error(node->operator, "operands must have the same type");
 	}
 }
 
@@ -204,3 +228,6 @@ static void visitExpressionUnary (AstExpressionUnary *node)
 		default:
 	}
 }
+
+static void visitExpressionVar (AstExpressionVar *node)
+{ }

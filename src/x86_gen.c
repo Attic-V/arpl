@@ -9,6 +9,7 @@ static void emit (char *format, ...);
 static void transform (Ir *r);
 static void transformAdd (IrAdd *instruction);
 static void transformAnd (IrAnd *instruction);
+static void transformAssign (IrAssign *instruction);
 static void transformEqu (IrEqu *instruction);
 static void transformJmp (IrJmp *instruction);
 static void transformJmpFalse (IrJmpFalse *instruction);
@@ -21,6 +22,7 @@ static void transformNot (IrNot *instruction);
 static void transformNotEqu (IrNotEqu *instruction);
 static void transformOr (IrOr *instruction);
 static void transformPush (IrPush *instruction);
+static void transformRef (IrRef *instruction);
 static void transformReserve (IrReserve *instruction);
 static void transformSar (IrSar *instruction);
 static void transformShl (IrShl *instruction);
@@ -47,14 +49,25 @@ void gen_x86 (Ir *ir)
 	emit("\tglobal _start");
 	emit("");
 	emit("_start:");
+	emit("\tcall    main");
+	emit("\tmov     rdi, rax");
+	emit("\tmov     rax, 60");
+	emit("\tsyscall");
+
+	emit("");
+
+	emit("main:");
+	emit("\tpush    rbp");
+	emit("\tmov     rbp, rsp");
 
 	for (Ir *r = ir; r != NULL; r = r->next) {
 		transform(r);
 	}
 
-	emit("\tmov     rax, 60");
-	emit("\tpop     rdi");
-	emit("\tsyscall");
+	emit("\tpop     rax");
+	emit("\tmov     rsp, rbp");
+	emit("\tpop     rbp");
+	emit("\tret");
 
 	fclose(gen.fp);
 }
@@ -64,6 +77,7 @@ static void transform (Ir *r)
 	switch (r->type) {
 		case Ir_Add: transformAdd(r->as.add); break;
 		case Ir_And: transformAnd(r->as.and); break;
+		case Ir_Assign: transformAssign(r->as.assign); break;
 		case Ir_Equ: transformEqu(r->as.equ); break;
 		case Ir_Jmp: transformJmp(r->as.jmp); break;
 		case Ir_JmpFalse: transformJmpFalse(r->as.jmpFalse); break;
@@ -76,6 +90,7 @@ static void transform (Ir *r)
 		case Ir_NotEqu: transformNotEqu(r->as.notEqu); break;
 		case Ir_Or: transformOr(r->as.or); break;
 		case Ir_Push: transformPush(r->as.push); break;
+		case Ir_Ref: transformRef(r->as.ref); break;
 		case Ir_Reserve: transformReserve(r->as.reserve); break;
 		case Ir_Sar: transformSar(r->as.sar); break;
 		case Ir_Shl: transformShl(r->as.shl); break;
@@ -97,6 +112,14 @@ static void transformAnd (IrAnd *instruction)
 	emit("\tpop     r9");
 	emit("\tpop     r8");
 	emit("\tand     r8d, r9d");
+	emit("\tpush    r8");
+}
+
+static void transformAssign (IrAssign *instruction)
+{
+	emit("\tpop     r9");
+	emit("\tpop     r8");
+	emit("\tmov     [r8], r9");
 	emit("\tpush    r8");
 }
 
@@ -186,6 +209,12 @@ static void transformOr (IrOr *instruction)
 static void transformPush (IrPush *instruction)
 {
 	emit("\tpush    %d", instruction->value);
+}
+
+static void transformRef (IrRef *instruction)
+{
+	emit("\tlea     r9, [rbp - %d]", instruction->idx + 4);
+	emit("\tpush    r9");
 }
 
 static void transformReserve (IrReserve *instruction)

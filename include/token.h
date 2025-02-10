@@ -12,6 +12,7 @@ typedef enum {
 	TT_Colon,
 	TT_Else,
 	TT_EOF,
+	TT_Equal,
 	TT_Equal_Equal,
 	TT_False,
 	TT_Greater_Greater,

@@ -16,11 +16,13 @@ static void visitStatementIfE (AstStatementIfE *statement);
 static void visitStatementVar (AstStatementVar *statement);
 
 static void visitExpression (AstExpression *expression);
+static void visitExpressionAssign (AstExpressionAssign *expression);
 static void visitExpressionBinary (AstExpressionBinary *expression);
 static void visitExpressionBoolean (AstExpressionBoolean *expression);
 static void visitExpressionNumber (AstExpressionNumber *expression);
 static void visitExpressionTernary (AstExpressionTernary *expression);
 static void visitExpressionUnary (AstExpressionUnary *expression);
+static void visitExpressionVar (AstExpressionVar *expression);
 
 static void addInstruction (Ir *instruction);
 
@@ -28,6 +30,7 @@ typedef struct {
 	Ir *current;
 	int label;
 	size_t reservedBytes;
+	Table *table;
 } IrGenerator;
 
 static IrGenerator gen;
@@ -79,9 +82,11 @@ static void reserveSymbol (Symbol *symbol)
 
 static void visitStatementBlock (AstStatementBlock *statement)
 {
-	table_apply(statement->table, reserveSymbol);
+	gen.table = statement->table;
+	table_apply(gen.table, reserveSymbol);
 	for (AstStatement *stmt = statement->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
+		gen.table = statement->table;
 	}
 }
 
@@ -113,12 +118,21 @@ static void visitStatementVar (AstStatementVar *statement)
 static void visitExpression (AstExpression *expression)
 {
 	switch (expression->type) {
+		case AstExpression_Assign: visitExpressionAssign(expression->as.assign); break;
 		case AstExpression_Binary: visitExpressionBinary(expression->as.binary); break;
 		case AstExpression_Boolean: visitExpressionBoolean(expression->as.boolean); break;
 		case AstExpression_Number: visitExpressionNumber(expression->as.number); break;
 		case AstExpression_Ternary: visitExpressionTernary(expression->as.ternary); break;
 		case AstExpression_Unary: visitExpressionUnary(expression->as.unary); break;
+		case AstExpression_Var: visitExpressionVar(expression->as.var); break;
 	}
+}
+
+static void visitExpressionAssign (AstExpressionAssign *expression)
+{
+	visitExpression(expression->a);
+	visitExpression(expression->b);
+	addInstruction(ir_initAssign());
 }
 
 static void visitExpressionBinary (AstExpressionBinary *expression)
@@ -182,6 +196,11 @@ static void visitExpressionUnary (AstExpressionUnary *expression)
 		case TT_Tilde: addInstruction(ir_initNot()); break;
 		default:
 	}
+}
+
+static void visitExpressionVar (AstExpressionVar *expression)
+{
+	addInstruction(ir_initRef(table_get(gen.table, expression->identifier)->index));
 }
 
 static void addInstruction (Ir *instruction)

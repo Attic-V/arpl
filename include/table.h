@@ -9,6 +9,8 @@ typedef struct Table Table;
 
 typedef struct {
 	Token identifier;
+	Token type;
+	size_t index;
 } Symbol;
 
 Table *table_init (int capacity);
@@ -17,6 +19,6 @@ bool table_add (Table *table, Symbol *symbol);
 Symbol *table_get (Table *table, Token identifier);
 void table_apply (Table *table, void (*callback)(Symbol *symbol));
 
-Symbol *symbol_init (Token identifier);
+Symbol *symbol_init (Token identifier, Token type);
 
 #endif

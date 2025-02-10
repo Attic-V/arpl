@@ -19,6 +19,7 @@ static AstStatement *getStatementVar (void);
 static AstExpression *getExpression (void);
 static AstExpression *getExpressionAndBitwise (void);
 static AstExpression *getExpressionAndLogical (void);
+static AstExpression *getExpressionAssign (void);
 static AstExpression *getExpressionEquality (void);
 static AstExpression *getExpressionOrBitwise (void);
 static AstExpression *getExpressionOrLogical (void);
@@ -112,7 +113,18 @@ static AstStatement *getStatementVar (void)
 
 static AstExpression *getExpression (void)
 {
-	return getExpressionTernary();
+	return getExpressionAssign();
+}
+
+static AstExpression *getExpressionAssign (void)
+{
+	AstExpression *expression = getExpressionTernary();
+	while (check(TT_Equal)) {
+		Token operator = parser.tokens[parser.current++];
+		AstExpression *right = getExpression();
+		expression = ast_initExpressionAssign(expression, right, operator);
+	}
+	return expression;
 }
 
 static AstExpression *getExpressionTernary (void)
@@ -262,6 +274,8 @@ static AstExpression *getExpressionPrimary (void)
 			return ast_initExpressionBoolean(true);
 		case TT_False:
 			return ast_initExpressionBoolean(false);
+		case TT_Identifier:
+			return ast_initExpressionVar(token);
 		default:
 	}
 	error(token, "expected expression");

@@ -46,13 +46,7 @@ Token *scan (char *source)
 			case '!':	addToken(match('=') ? TT_Bang_Equal : TT_Bang); continue;
 			case '^': addToken(TT_Caret); continue;
 			case ':': addToken(TT_Colon); continue;
-			case '=':
-				if (check('=')) {
-					scanner.current++;
-					addToken(TT_Equal_Equal);
-					continue;
-				}
-				break;
+			case '=': addToken(match('=') ? TT_Equal_Equal : TT_Equal); continue;
 			case '>':
 				if (check('>')) {
 					scanner.current++;

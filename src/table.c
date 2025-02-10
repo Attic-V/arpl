@@ -45,8 +45,8 @@ bool table_add (Table *table, Symbol *symbol)
 		return false;
 	}
 	for (; table->symbols[idx] != NULL; idx++, idx %= table->capacity);
+	symbol->index = table->count++;
 	table->symbols[idx] = symbol;
-	table->count++;
 	if (table->count * 2 >= table->capacity) {
 		table_grow(table);
 	}
@@ -89,9 +89,11 @@ void table_grow (Table *table)
 	table = new;
 }
 
-Symbol *symbol_init (Token identifier)
+Symbol *symbol_init (Token identifier, Token type)
 {
 	Symbol *symbol = mem_alloc(sizeof(*symbol));
+	symbol->index = ~0;
 	symbol->identifier = identifier;
+	symbol->type = type;
 	return symbol;
 }
