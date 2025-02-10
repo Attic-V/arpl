@@ -27,6 +27,7 @@ static void addInstruction (Ir *instruction);
 typedef struct {
 	Ir *current;
 	int label;
+	size_t reservedBytes;
 } IrGenerator;
 
 static IrGenerator gen;
@@ -35,11 +36,19 @@ Ir *gen_ir (Ast *ast)
 {
 	gen.current = NULL;
 	gen.label = 0;
+	gen.reservedBytes = 0;
 
 	visitAst(ast);
 
+	if (gen.current == NULL) return NULL;
+
 	Ir *ir;
-	for (ir = gen.current; ir != NULL && ir->previous != NULL; ir = ir->previous);
+	for (ir = gen.current; ir->previous != NULL; ir = ir->previous);
+
+	Ir *reserve = ir_initReserve(gen.reservedBytes);
+	dll_insert(reserve, ir);
+	ir = reserve;
+
 	return ir;
 }
 
@@ -65,7 +74,7 @@ static void visitStatement (AstStatement *statement)
 
 static void reserveSymbol (Symbol *symbol)
 {
-	addInstruction(ir_initReserve(4));
+	gen.reservedBytes += 4;
 }
 
 static void visitStatementBlock (AstStatementBlock *statement)
