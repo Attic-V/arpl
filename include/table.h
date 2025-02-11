@@ -3,13 +3,14 @@
 
 #include <stdbool.h>
 
+#include "data_type.h"
 #include "token.h"
 
 typedef struct Table Table;
 
 typedef struct {
 	Token identifier;
-	Token type;
+	DataType type;
 	size_t index;
 } Symbol;
 
@@ -19,6 +20,6 @@ bool table_add (Table *table, Symbol *symbol);
 Symbol *table_get (Table *table, Token identifier);
 void table_apply (Table *table, void (*callback)(Symbol *symbol));
 
-Symbol *symbol_init (Token identifier, Token type);
+Symbol *symbol_init (Token identifier, DataType type);
 
 #endif

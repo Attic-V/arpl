@@ -89,7 +89,7 @@ void table_grow (Table *table)
 	table = new;
 }
 
-Symbol *symbol_init (Token identifier, Token type)
+Symbol *symbol_init (Token identifier, DataType type)
 {
 	Symbol *symbol = mem_alloc(sizeof(*symbol));
 	symbol->index = ~0;

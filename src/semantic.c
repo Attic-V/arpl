@@ -77,7 +77,7 @@ static void visitStatementIfE (AstStatementIfE *node)
 
 static void visitStatementVar (AstStatementVar *node)
 {
-	if (!table_add(analyzer.table, symbol_init(node->identifier, node->type))) {
+	if (!table_add(analyzer.table, symbol_init(node->identifier, getTypeFromKey(node->type)))) {
 		error(node->identifier, "variable has already been declared in scope");
 	}
 }
@@ -139,8 +139,8 @@ static void visitExpression (AstExpression *node)
 			break;
 		case AstExpression_Var:
 			Symbol *symbol = table_get(analyzer.table, node->as.var->identifier);
-			switch (symbol->type.type) {
-				case TT_Int: node->dataType = DT_Number; break;
+			switch (symbol->type) {
+				case DT_Number: node->dataType = DT_Number; break;
 				default:
 			}
 			visitExpressionVar(node->as.var);
