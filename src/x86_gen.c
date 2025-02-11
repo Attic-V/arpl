@@ -121,7 +121,7 @@ static void transformAssign (IrAssign *instruction)
 {
 	emit("\tpop     r9");
 	emit("\tpop     r8");
-	emit("\tmov     [r8], r9");
+	emit("\tmov     dword [r8], r9d");
 	emit("\tpush    r8");
 }
 
