@@ -12,6 +12,7 @@ struct Table {
 	Symbol **symbols;
 	int count;
 	int capacity;
+	int currentIdx;
 };
 
 void table_grow (Table *table);
@@ -28,6 +29,7 @@ Table *table_init (int capacity)
 	for (int i = 0; i < table->capacity; i++) {
 		table->symbols[i] = NULL;
 	}
+	table->currentIdx = 0;
 
 	return table;
 }
@@ -45,7 +47,11 @@ bool table_add (Table *table, Symbol *symbol)
 		return false;
 	}
 	for (; table->symbols[idx] != NULL; idx++, idx %= table->capacity);
-	symbol->index = table->count++;
+
+	symbol->n = table->count++;
+	symbol->index = table->currentIdx;
+	table->currentIdx += getDtSize(symbol->type);
+
 	table->symbols[idx] = symbol;
 	if (table->count * 2 >= table->capacity) {
 		table_grow(table);
@@ -92,7 +98,7 @@ void table_grow (Table *table)
 Symbol *symbol_init (Token identifier, DataType type)
 {
 	Symbol *symbol = mem_alloc(sizeof(*symbol));
-	symbol->index = ~0;
+	symbol->n = ~0;
 	symbol->identifier = identifier;
 	symbol->type = type;
 	return symbol;

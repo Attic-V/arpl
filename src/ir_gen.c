@@ -77,7 +77,7 @@ static void visitStatement (AstStatement *statement)
 
 static void reserveSymbol (Symbol *symbol)
 {
-	gen.reservedBytes += 4;
+	gen.reservedBytes += getDtSize(symbol->type);
 }
 
 static void visitStatementBlock (AstStatementBlock *statement)

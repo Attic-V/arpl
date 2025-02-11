@@ -215,7 +215,7 @@ static void transformPush (IrPush *instruction)
 
 static void transformRef (IrRef *instruction)
 {
-	emit("\tlea     r9, [rbp - %d]", instruction->idx * 4 + 4);
+	emit("\tlea     r9, [rbp - %d]", instruction->idx + 4);
 	emit("\tpush    r9");
 }
 
@@ -250,7 +250,7 @@ static void transformSub (IrSub *instruction)
 
 static void transformVal (IrVal *instruction)
 {
-	emit("\tmov     r9d, dword [rbp - %d]", instruction->idx * 4 + 4);
+	emit("\tmov     r9d, dword [rbp - %d]", instruction->idx + 4);
 	emit("\tpush    r9");
 }
 

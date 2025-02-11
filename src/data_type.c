@@ -9,3 +9,12 @@ DataType getTypeFromKey (Token keyword)
 	}
 	return -1;
 }
+
+size_t getDtSize (DataType type)
+{
+	switch (type) {
+		case DT_Boolean: return 1;
+		case DT_Number: return 4;
+	}
+	return -1;
+}

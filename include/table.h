@@ -11,6 +11,7 @@ typedef struct Table Table;
 typedef struct {
 	Token identifier;
 	DataType type;
+	size_t n;
 	size_t index;
 } Symbol;
 
