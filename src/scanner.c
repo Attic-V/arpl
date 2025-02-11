@@ -84,6 +84,7 @@ Token *scan (char *source)
 			Token *token = &scanner.tokens[scanner.count - 1];
 			char *buffer = mem_alloc(token->length + 1);
 			sprintf(buffer, "%.*s", token->length, token->lexeme);
+			if (!strcmp(buffer, "bool")) { token->type = TT_Bool; continue; }
 			if (!strcmp(buffer, "else")) { token->type = TT_Else; continue; }
 			if (!strcmp(buffer, "false")) { token->type = TT_False; continue; }
 			if (!strcmp(buffer, "if")) { token->type = TT_If; continue; }

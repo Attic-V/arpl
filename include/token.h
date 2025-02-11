@@ -8,6 +8,7 @@ typedef enum {
 	TT_And_And,
 	TT_Bang,
 	TT_Bang_Equal,
+	TT_Bool,
 	TT_Caret,
 	TT_Colon,
 	TT_Else,

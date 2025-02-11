@@ -106,7 +106,12 @@ static AstStatement *getStatementVar (void)
 {
 	consume(TT_Var, "expected 'var'");
 	Token identifier = consume(TT_Identifier, "expected identifier");
-	Token type = consume(TT_Int, "expected 'int'");
+	Token type;
+	if (check(TT_Int) || check(TT_Bool)) {
+		type = parser.tokens[parser.current++];
+	} else {
+		error(parser.tokens[parser.current++], "expected 'int' or 'bool'");
+	}
 	consume(TT_Semicolon, "expected ';'");
 	return ast_initStatementVar(identifier, type);
 }
