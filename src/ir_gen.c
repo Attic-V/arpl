@@ -130,7 +130,7 @@ static void visitExpression (AstExpression *expression)
 
 static void visitExpressionAssign (AstExpressionAssign *expression)
 {
-	visitExpression(expression->a);
+	addInstruction(ir_initRef(table_get(gen.table, expression->a->as.var->identifier)->index));
 	visitExpression(expression->b);
 	addInstruction(ir_initAssign());
 }
@@ -200,7 +200,7 @@ static void visitExpressionUnary (AstExpressionUnary *expression)
 
 static void visitExpressionVar (AstExpressionVar *expression)
 {
-	addInstruction(ir_initRef(table_get(gen.table, expression->identifier)->index));
+	addInstruction(ir_initVal(table_get(gen.table, expression->identifier)->index));
 }
 
 static void addInstruction (Ir *instruction)

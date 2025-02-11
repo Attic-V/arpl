@@ -155,6 +155,9 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 	if (node->a->dataType != node->b->dataType) {
 		error(node->operator, "operands must have the same type");
 	}
+	if (node->a->type != AstExpression_Var) {
+		error(node->a->as.var->identifier, "expression must be modifiable");
+	}
 }
 
 static void visitExpressionBinary (AstExpressionBinary *node)

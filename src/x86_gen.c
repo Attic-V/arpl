@@ -27,6 +27,7 @@ static void transformReserve (IrReserve *instruction);
 static void transformSar (IrSar *instruction);
 static void transformShl (IrShl *instruction);
 static void transformSub (IrSub *instruction);
+static void transformVal (IrVal *instruction);
 static void transformXor (IrXor *instruction);
 
 typedef struct {
@@ -95,6 +96,7 @@ static void transform (Ir *r)
 		case Ir_Sar: transformSar(r->as.sar); break;
 		case Ir_Shl: transformShl(r->as.shl); break;
 		case Ir_Sub: transformSub(r->as.sub); break;
+		case Ir_Val: transformVal(r->as.val); break;
 		case Ir_Xor: transformXor(r->as.xor); break;
 	}
 }
@@ -244,6 +246,12 @@ static void transformSub (IrSub *instruction)
 	emit("\tpop     r8");
 	emit("\tsub     r8d, r9d");
 	emit("\tpush    r8");
+}
+
+static void transformVal (IrVal *instruction)
+{
+	emit("\tmov     r9d, dword [rbp - %d]", instruction->idx + 4);
+	emit("\tpush    r9");
 }
 
 static void transformXor (IrXor *instruction)
