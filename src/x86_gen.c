@@ -5,7 +5,11 @@
 #include "memory.h"
 #include "x86_gen.h"
 
+#define push(register) emit("\tpush    " #register)
+#define pop(register) emit("\tpop     " #register)
+
 static void emit (char *format, ...);
+
 static void transform (Ir *r);
 static void transformAdd (IrAdd *instruction);
 static void transformAnd (IrAnd *instruction);
@@ -58,16 +62,16 @@ void gen_x86 (Ir *ir)
 	emit("");
 
 	emit("main:");
-	emit("\tpush    rbp");
+	push(rbp);
 	emit("\tmov     rbp, rsp");
 
 	for (Ir *r = ir; r != NULL; r = r->next) {
 		transform(r);
 	}
 
-	emit("\tpop     rax");
+	pop(rax);
 	emit("\tmov     rsp, rbp");
-	emit("\tpop     rbp");
+	pop(rbp);
 	emit("\tret");
 
 	fclose(gen.fp);
@@ -103,35 +107,35 @@ static void transform (Ir *r)
 
 static void transformAdd (IrAdd *instruction)
 {
-	emit("\tpop     r9");
-	emit("\tpop     r8");
+	pop(r9);
+	pop(r8);
 	emit("\tadd     r8d, r9d");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformAnd (IrAnd *instruction)
 {
-	emit("\tpop     r9");
-	emit("\tpop     r8");
+	pop(r9);
+	pop(r8);
 	emit("\tand     r8d, r9d");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformAssign (IrAssign *instruction)
 {
-	emit("\tpop     r9");
-	emit("\tpop     r8");
+	pop(r9);
+	pop(r8);
 	emit("\tmov     dword [r8], r9d");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformEqu (IrEqu *instruction)
 {
-	emit("\tpop     r9");
-	emit("\tpop     r8");
+	pop(r9);
+	pop(r8);
 	emit("\tcmp     r8, r9");
 	emit("\tsete    r8b");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformJmp (IrJmp *instruction)
@@ -141,7 +145,7 @@ static void transformJmp (IrJmp *instruction)
 
 static void transformJmpFalse (IrJmpFalse *instruction)
 {
-	emit("\tpop     r8");
+	pop(r8);
 	emit("\ttest    r8d, r8d");
 	emit("\tjz      .LB%d", instruction->n);
 }
@@ -153,59 +157,59 @@ static void transformLabel (IrLabel *instruction)
 
 static void transformLess (IrLess *instruction)
 {
-	emit("\tpop     r9");
-	emit("\tpop     r8");
+	pop(r9);
+	pop(r8);
 	emit("\tcmp     r8, r9");
 	emit("\tsetl    r8b");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformLessEqu (IrLessEqu *instruction)
 {
-	emit("\tpop     r9");
-	emit("\tpop     r8");
+	pop(r9);
+	pop(r8);
 	emit("\tcmp     r8, r9");
 	emit("\tsetle   r8b");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformMul (IrMul *instruction)
 {
-	emit("\tpop     r9");
-	emit("\tpop     r8");
+	pop(r9);
+	pop(r8);
 	emit("\timul    r8d, r9d");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformNeg (IrNeg *instruction)
 {
-	emit("\tpop     r9");
+	pop(r9);
 	emit("\tneg     r9d");
-	emit("\tpush    r9");
+	push(r9);
 }
 
 static void transformNot (IrNot *instruction)
 {
-	emit("\tpop     r8");
+	pop(r8);
 	emit("\tnot     r8d");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformNotEqu (IrNotEqu *instruction)
 {
-	emit("\tpop     r9");
-	emit("\tpop     r8");
+	pop(r9);
+	pop(r8);
 	emit("\tcmp     r8, r9");
 	emit("\tsetne   r8b");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformOr (IrOr *instruction)
 {
-	emit("\tpop     r9");
-	emit("\tpop     r8");
+	pop(r9);
+	pop(r8);
 	emit("\tor      r8d, r9d");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformPush (IrPush *instruction)
@@ -216,7 +220,7 @@ static void transformPush (IrPush *instruction)
 static void transformRef (IrRef *instruction)
 {
 	emit("\tlea     r9, [rbp - %d]", instruction->idx + 4);
-	emit("\tpush    r9");
+	push(r9);
 }
 
 static void transformReserve (IrReserve *instruction)
@@ -226,40 +230,40 @@ static void transformReserve (IrReserve *instruction)
 
 static void transformSar (IrSar *instruction)
 {
-	emit("\tpop     rcx");
-	emit("\tpop     r8");
+	pop(rcx);
+	pop(r8);
 	emit("\tsar     r8d, cl");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformShl (IrShl *instruction)
 {
-	emit("\tpop     rcx");
-	emit("\tpop     r8");
+	pop(rcx);
+	pop(r8);
 	emit("\tshl     r8d, cl");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformSub (IrSub *instruction)
 {
-	emit("\tpop     r9");
-	emit("\tpop     r8");
+	pop(r9);
+	pop(r8);
 	emit("\tsub     r8d, r9d");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void transformVal (IrVal *instruction)
 {
 	emit("\tmov     r9d, dword [rbp - %d]", instruction->idx + 4);
-	emit("\tpush    r9");
+	push(r9);
 }
 
 static void transformXor (IrXor *instruction)
 {
-	emit("\tpop     r9");
-	emit("\tpop     r8");
+	pop(r9);
+	pop(r8);
 	emit("\txor     r8d, r9d");
-	emit("\tpush    r8");
+	push(r8);
 }
 
 static void emit (char *format, ...)
