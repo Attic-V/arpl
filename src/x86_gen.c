@@ -11,28 +11,28 @@
 static void emit (char *format, ...);
 
 static void transform (Ir *r);
-static void transformAdd (IrAdd *instruction);
-static void transformAnd (IrAnd *instruction);
-static void transformAssign (IrAssign *instruction);
-static void transformEqu (IrEqu *instruction);
-static void transformJmp (IrJmp *instruction);
-static void transformJmpFalse (IrJmpFalse *instruction);
-static void transformLabel (IrLabel *instruction);
-static void transformLess (IrLess *instruction);
-static void transformLessEqu (IrLessEqu *instruction);
-static void transformMul (IrMul *instruction);
-static void transformNeg (IrNeg *instruction);
-static void transformNot (IrNot *instruction);
-static void transformNotEqu (IrNotEqu *instruction);
-static void transformOr (IrOr *instruction);
-static void transformPush (IrPush *instruction);
-static void transformRef (IrRef *instruction);
-static void transformReserve (IrReserve *instruction);
-static void transformSar (IrSar *instruction);
-static void transformShl (IrShl *instruction);
-static void transformSub (IrSub *instruction);
-static void transformVal (IrVal *instruction);
-static void transformXor (IrXor *instruction);
+static void transformAdd (Ir *ir);
+static void transformAnd (Ir *ir);
+static void transformAssign (Ir *ir);
+static void transformEqu (Ir *ir);
+static void transformJmp (Ir *ir);
+static void transformJmpFalse (Ir *ir);
+static void transformLabel (Ir *ir);
+static void transformLess (Ir *ir);
+static void transformLessEqu (Ir *ir);
+static void transformMul (Ir *ir);
+static void transformNeg (Ir *ir);
+static void transformNot (Ir *ir);
+static void transformNotEqu (Ir *ir);
+static void transformOr (Ir *ir);
+static void transformPush (Ir *ir);
+static void transformRef (Ir *ir);
+static void transformReserve (Ir *ir);
+static void transformSar (Ir *ir);
+static void transformShl (Ir *ir);
+static void transformSub (Ir *ir);
+static void transformVal (Ir *ir);
+static void transformXor (Ir *ir);
 
 typedef struct {
 	FILE *fp;
@@ -79,58 +79,69 @@ void gen_x86 (Ir *ir)
 
 static void transform (Ir *r)
 {
-	switch (r->type) {
-		case Ir_Add: transformAdd(r->as.add); break;
-		case Ir_And: transformAnd(r->as.and); break;
-		case Ir_Assign: transformAssign(r->as.assign); break;
-		case Ir_Equ: transformEqu(r->as.equ); break;
-		case Ir_Jmp: transformJmp(r->as.jmp); break;
-		case Ir_JmpFalse: transformJmpFalse(r->as.jmpFalse); break;
-		case Ir_Label: transformLabel(r->as.label); break;
-		case Ir_Less: transformLess(r->as.less); break;
-		case Ir_LessEqu: transformLessEqu(r->as.lessEqu); break;
-		case Ir_Mul: transformMul(r->as.mul); break;
-		case Ir_Neg: transformNeg(r->as.neg); break;
-		case Ir_Not: transformNot(r->as.not); break;
-		case Ir_NotEqu: transformNotEqu(r->as.notEqu); break;
-		case Ir_Or: transformOr(r->as.or); break;
-		case Ir_Push: transformPush(r->as.push); break;
-		case Ir_Ref: transformRef(r->as.ref); break;
-		case Ir_Reserve: transformReserve(r->as.reserve); break;
-		case Ir_Sar: transformSar(r->as.sar); break;
-		case Ir_Shl: transformShl(r->as.shl); break;
-		case Ir_Sub: transformSub(r->as.sub); break;
-		case Ir_Val: transformVal(r->as.val); break;
-		case Ir_Xor: transformXor(r->as.xor); break;
-	}
+	#define transformer(type) [Ir_##type] = transform##type
+	static void (*transformers[])(Ir *ir) = {
+		transformer(Add),
+		transformer(And),
+		transformer(Assign),
+		transformer(Equ),
+		transformer(Jmp),
+		transformer(JmpFalse),
+		transformer(Label),
+		transformer(Less),
+		transformer(LessEqu),
+		transformer(Mul),
+		transformer(Neg),
+		transformer(Not),
+		transformer(NotEqu),
+		transformer(Or),
+		transformer(Push),
+		transformer(Ref),
+		transformer(Reserve),
+		transformer(Sar),
+		transformer(Shl),
+		transformer(Sub),
+		transformer(Val),
+		transformer(Xor),
+	};
+	transformers[r->type](r);
+	#undef transformer
 }
 
-static void transformAdd (IrAdd *instruction)
+static void transformAdd (Ir *ir)
 {
+	IrAdd *instruction = ir->as.add;
+	(void)instruction;
 	pop(r9);
 	pop(r8);
 	emit("\tadd     r8d, r9d");
 	push(r8);
 }
 
-static void transformAnd (IrAnd *instruction)
+static void transformAnd (Ir *ir)
 {
+	IrAnd *instruction = ir->as.and;
+	(void)instruction;
 	pop(r9);
 	pop(r8);
 	emit("\tand     r8d, r9d");
 	push(r8);
 }
 
-static void transformAssign (IrAssign *instruction)
+static void transformAssign (Ir *ir)
 {
+	IrAssign *instruction = ir->as.assign;
+	(void)instruction;
 	pop(r9);
 	pop(r8);
 	emit("\tmov     dword [r8], r9d");
 	push(r8);
 }
 
-static void transformEqu (IrEqu *instruction)
+static void transformEqu (Ir *ir)
 {
+	IrEqu *instruction = ir->as.equ;
+	(void)instruction;
 	pop(r9);
 	pop(r8);
 	emit("\tcmp     r8, r9");
@@ -138,25 +149,33 @@ static void transformEqu (IrEqu *instruction)
 	push(r8);
 }
 
-static void transformJmp (IrJmp *instruction)
+static void transformJmp (Ir *ir)
 {
+	IrJmp *instruction = ir->as.jmp;
+	(void)instruction;
 	emit("\tjmp     .LB%d", instruction->n);
 }
 
-static void transformJmpFalse (IrJmpFalse *instruction)
+static void transformJmpFalse (Ir *ir)
 {
+	IrJmpFalse *instruction = ir->as.jmpFalse;
+	(void)instruction;
 	pop(r8);
 	emit("\ttest    r8d, r8d");
 	emit("\tjz      .LB%d", instruction->n);
 }
 
-static void transformLabel (IrLabel *instruction)
+static void transformLabel (Ir *ir)
 {
+	IrLabel *instruction = ir->as.label;
+	(void)instruction;
 	emit(".LB%d:", instruction->n);
 }
 
-static void transformLess (IrLess *instruction)
+static void transformLess (Ir *ir)
 {
+	IrLess *instruction = ir->as.less;
+	(void)instruction;
 	pop(r9);
 	pop(r8);
 	emit("\tcmp     r8, r9");
@@ -164,8 +183,10 @@ static void transformLess (IrLess *instruction)
 	push(r8);
 }
 
-static void transformLessEqu (IrLessEqu *instruction)
+static void transformLessEqu (Ir *ir)
 {
+	IrLessEqu *instruction = ir->as.lessEqu;
+	(void)instruction;
 	pop(r9);
 	pop(r8);
 	emit("\tcmp     r8, r9");
@@ -173,30 +194,38 @@ static void transformLessEqu (IrLessEqu *instruction)
 	push(r8);
 }
 
-static void transformMul (IrMul *instruction)
+static void transformMul (Ir *ir)
 {
+	IrMul *instruction = ir->as.mul;
+	(void)instruction;
 	pop(r9);
 	pop(r8);
 	emit("\timul    r8d, r9d");
 	push(r8);
 }
 
-static void transformNeg (IrNeg *instruction)
+static void transformNeg (Ir *ir)
 {
+	IrNeg *instruction = ir->as.neg;
+	(void)instruction;
 	pop(r9);
 	emit("\tneg     r9d");
 	push(r9);
 }
 
-static void transformNot (IrNot *instruction)
+static void transformNot (Ir *ir)
 {
+	IrNot *instruction = ir->as.not;
+	(void)instruction;
 	pop(r8);
 	emit("\tnot     r8d");
 	push(r8);
 }
 
-static void transformNotEqu (IrNotEqu *instruction)
+static void transformNotEqu (Ir *ir)
 {
+	IrNotEqu *instruction = ir->as.notEqu;
+	(void)instruction;
 	pop(r9);
 	pop(r8);
 	emit("\tcmp     r8, r9");
@@ -204,62 +233,80 @@ static void transformNotEqu (IrNotEqu *instruction)
 	push(r8);
 }
 
-static void transformOr (IrOr *instruction)
+static void transformOr (Ir *ir)
 {
+	IrOr *instruction = ir->as.or;
+	(void)instruction;
 	pop(r9);
 	pop(r8);
 	emit("\tor      r8d, r9d");
 	push(r8);
 }
 
-static void transformPush (IrPush *instruction)
+static void transformPush (Ir *ir)
 {
+	IrPush *instruction = ir->as.push;
+	(void)instruction;
 	emit("\tpush    %d", instruction->value);
 }
 
-static void transformRef (IrRef *instruction)
+static void transformRef (Ir *ir)
 {
+	IrRef *instruction = ir->as.ref;
+	(void)instruction;
 	emit("\tlea     r9, [rbp - %d]", instruction->idx + 4);
 	push(r9);
 }
 
-static void transformReserve (IrReserve *instruction)
+static void transformReserve (Ir *ir)
 {
+	IrReserve *instruction = ir->as.reserve;
+	(void)instruction;
 	emit("\tsub     rsp, %d", instruction->bytes);
 }
 
-static void transformSar (IrSar *instruction)
+static void transformSar (Ir *ir)
 {
+	IrSar *instruction = ir->as.sar;
+	(void)instruction;
 	pop(rcx);
 	pop(r8);
 	emit("\tsar     r8d, cl");
 	push(r8);
 }
 
-static void transformShl (IrShl *instruction)
+static void transformShl (Ir *ir)
 {
+	IrShl *instruction = ir->as.shl;
+	(void)instruction;
 	pop(rcx);
 	pop(r8);
 	emit("\tshl     r8d, cl");
 	push(r8);
 }
 
-static void transformSub (IrSub *instruction)
+static void transformSub (Ir *ir)
 {
+	IrSub *instruction = ir->as.sub;
+	(void)instruction;
 	pop(r9);
 	pop(r8);
 	emit("\tsub     r8d, r9d");
 	push(r8);
 }
 
-static void transformVal (IrVal *instruction)
+static void transformVal (Ir *ir)
 {
+	IrVal *instruction = ir->as.val;
+	(void)instruction;
 	emit("\tmov     r9d, dword [rbp - %d]", instruction->idx + 4);
 	push(r9);
 }
 
-static void transformXor (IrXor *instruction)
+static void transformXor (Ir *ir)
 {
+	IrXor *instruction = ir->as.xor;
+	(void)instruction;
 	pop(r9);
 	pop(r8);
 	emit("\txor     r8d, r9d");
