@@ -12,7 +12,9 @@
 		if (prev != NULL) { \
 			prev->next = node; \
 		} \
-		node->previous = prev; \
+		if (node != NULL) { \
+			node->previous = prev; \
+		} \
 	} while (0)
 
 #endif
