@@ -29,6 +29,7 @@ static Analyzer analyzer;
 
 void analyze (Ast *ast)
 {
+	analyzer.table = table_init(256);
 	visitAst(ast);
 }
 
@@ -54,10 +55,9 @@ static void visitStatement (AstStatement *node)
 
 static void visitStatementBlock (AstStatementBlock *node)
 {
-	analyzer.table = node->table = table_init(256);
+	node->table = analyzer.table;
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
-		analyzer.table = node->table;
 	}
 }
 
