@@ -60,9 +60,12 @@ static AstRoot *getRoot (void)
 
 static AstStatement *getStatement (void)
 {
-	if (check(TT_If)) return getStatementIfE();
-	if (check(TT_LBrace)) return getStatementBlock();
-	if (check(TT_Var)) return getStatementVar();
+	switch (parser.tokens[parser.current].type) {
+		case TT_If: return getStatementIfE();
+		case TT_LBrace: return getStatementBlock();
+		case TT_Var: return getStatementVar();
+		default:
+	}
 	return getStatementExpr();
 }
 
