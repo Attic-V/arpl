@@ -12,7 +12,7 @@ struct Table {
 	Symbol **symbols;
 	int count;
 	int capacity;
-	int currentIdx;
+	int bytesUsed;
 };
 
 void table_grow (Table *table);
@@ -29,7 +29,7 @@ Table *table_init (int capacity)
 	for (int i = 0; i < table->capacity; i++) {
 		table->symbols[i] = NULL;
 	}
-	table->currentIdx = 0;
+	table->bytesUsed = 0;
 
 	return table;
 }
@@ -49,8 +49,8 @@ bool table_add (Table *table, Symbol *symbol)
 	for (; table->symbols[idx] != NULL; idx++, idx %= table->capacity);
 
 	symbol->n = table->count++;
-	symbol->index = table->currentIdx;
-	table->currentIdx += getDtSize(symbol->type);
+	symbol->index = table->bytesUsed;
+	table->bytesUsed += getDtSize(symbol->type);
 
 	table->symbols[idx] = symbol;
 	if (table->count * 2 >= table->capacity) {
