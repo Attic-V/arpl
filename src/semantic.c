@@ -41,6 +41,7 @@ static void visitAst (Ast *ast)
 static void visitRoot (AstRoot *node)
 {
 	visitStatement(node->statement);
+	node->table = analyzer.table;
 }
 
 static void visitStatement (AstStatement *node)
@@ -55,7 +56,6 @@ static void visitStatement (AstStatement *node)
 
 static void visitStatementBlock (AstStatementBlock *node)
 {
-	node->table = analyzer.table;
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
 	}

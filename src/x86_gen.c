@@ -254,7 +254,7 @@ static void transformRef (Ir *ir)
 {
 	IrRef *instruction = ir->as.ref;
 	(void)instruction;
-	emit("\tlea     r9, [rbp - %d]", instruction->idx + 4);
+	emit("\tlea     r9, [rbp - %d]", instruction->idx);
 	push(r9);
 }
 
@@ -299,7 +299,7 @@ static void transformVal (Ir *ir)
 {
 	IrVal *instruction = ir->as.val;
 	(void)instruction;
-	emit("\tmov     r9d, dword [rbp - %d]", instruction->idx + 4);
+	emit("\tmov     r9d, dword [rbp - %d]", instruction->idx);
 	push(r9);
 }
 

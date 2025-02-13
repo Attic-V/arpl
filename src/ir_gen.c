@@ -60,6 +60,7 @@ static void visitAst (Ast *ast)
 
 static void visitRoot (AstRoot *root)
 {
+	gen.table = root->table;
 	visitStatement(root->statement);
 }
 
@@ -80,11 +81,9 @@ static void reserveSymbol (Symbol *symbol)
 
 static void visitStatementBlock (AstStatementBlock *statement)
 {
-	gen.table = statement->table;
 	table_apply(gen.table, reserveSymbol);
 	for (AstStatement *stmt = statement->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
-		gen.table = statement->table;
 	}
 }
 

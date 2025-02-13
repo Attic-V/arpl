@@ -73,7 +73,6 @@ typedef struct AstStatement AstStatement;
 
 typedef struct {
 	AstStatement *children;
-	Table *table;
 } AstStatementBlock;
 
 typedef struct {
@@ -112,6 +111,7 @@ struct AstStatement {
 
 typedef struct {
 	AstStatement *statement;
+	Table *table;
 } AstRoot;
 
 typedef struct {
