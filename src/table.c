@@ -1,10 +1,10 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "arena.h"
 #include "data.h"
 #include "hash.h"
-#include "memory.h"
 #include "table.h"
 
 struct Table {
@@ -93,13 +93,4 @@ void table_grow (Table *table)
 	}
 	table_free(table);
 	table = new;
-}
-
-Symbol *symbol_init (Token identifier, DataType type)
-{
-	Symbol *symbol = mem_alloc(sizeof(*symbol));
-	symbol->n = ~0;
-	symbol->identifier = identifier;
-	symbol->type = type;
-	return symbol;
 }
