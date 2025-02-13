@@ -41,15 +41,16 @@ void table_free (Table *table)
 
 bool table_add (Table *table, Symbol *symbol)
 {
-	uint32_t hash = getHash(symbol->identifier.lexeme, symbol->identifier.length);
-	uint32_t idx = hash % table->capacity;
 	if (table_get(table, symbol->identifier) != NULL) {
 		return false;
 	}
+
+	uint32_t hash = getHash(symbol->identifier.lexeme, symbol->identifier.length);
+	uint32_t idx = hash % table->capacity;
 	for (; table->symbols[idx] != NULL; idx++, idx %= table->capacity);
 
 	symbol->n = table->count++;
-	symbol->index = table->bytesUsed;
+	symbol->physicalIndex = table->bytesUsed;
 	table->bytesUsed += getDtSize(symbol->type);
 
 	table->symbols[idx] = symbol;
