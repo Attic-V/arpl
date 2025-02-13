@@ -58,9 +58,15 @@ static void visitAst (Ast *ast)
 	visitRoot(ast->root);
 }
 
+static void reserveSymbol (Symbol *symbol)
+{
+	gen.reservedBytes += getDtSize(symbol->type);
+}
+
 static void visitRoot (AstRoot *root)
 {
 	gen.table = root->table;
+	table_apply(gen.table, reserveSymbol);
 	visitStatement(root->statement);
 }
 
@@ -74,14 +80,8 @@ static void visitStatement (AstStatement *statement)
 	}
 }
 
-static void reserveSymbol (Symbol *symbol)
-{
-	gen.reservedBytes += getDtSize(symbol->type);
-}
-
 static void visitStatementBlock (AstStatementBlock *statement)
 {
-	table_apply(gen.table, reserveSymbol);
 	for (AstStatement *stmt = statement->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
 	}
