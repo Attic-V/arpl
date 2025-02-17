@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "error.h"
 #include "linked_list.h"
@@ -27,6 +28,7 @@ typedef struct {
 	Scope *currentScope;
 	Scope *nextScope;
 	size_t currentPhysicalIndex;
+	bool hadError;
 } Analyzer;
 
 static Analyzer analyzer;
@@ -37,7 +39,13 @@ void analyze (Ast *ast)
 	analyzer.currentScope = NULL;
 	analyzer.nextScope = NULL;
 	analyzer.currentPhysicalIndex = 0;
+	analyzer.hadError = false;
+
 	visitAst(ast);
+
+	if (analyzer.hadError) {
+		exit(1);
+	}
 }
 
 static void visitAst (Ast *ast)
@@ -160,6 +168,11 @@ static void visitExpression (AstExpression *node)
 			break;
 		case AstExpression_Var:
 			Symbol *symbol = scope_get(analyzer.currentScope, node->as.var->identifier);
+			if (symbol == NULL) {
+				error(node->as.var->identifier, "undeclared identifier");
+				analyzer.hadError = true;
+				break;
+			}
 			switch (symbol->type) {
 				case DT_Number: node->dataType = DT_Number; break;
 				default:
