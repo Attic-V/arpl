@@ -30,7 +30,8 @@ typedef struct {
 	Ir *current;
 	int label;
 	size_t reservedBytes;
-	Table *table;
+	size_t tableSegment;
+	Scope *scope;
 } IrGenerator;
 
 static IrGenerator gen;
@@ -58,15 +59,9 @@ static void visitAst (Ast *ast)
 	visitRoot(ast->root);
 }
 
-static void reserveSymbol (Symbol *symbol)
-{
-	gen.reservedBytes += getDtSize(symbol->type);
-}
-
 static void visitRoot (AstRoot *root)
 {
-	gen.table = root->table;
-	table_apply(gen.table, reserveSymbol);
+	gen.reservedBytes = root->statement->as.block->scope->physicalSize;
 	visitStatement(root->statement);
 }
 
@@ -82,8 +77,10 @@ static void visitStatement (AstStatement *statement)
 
 static void visitStatementBlock (AstStatementBlock *statement)
 {
+	gen.scope = statement->scope;
 	for (AstStatement *stmt = statement->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
+		gen.scope = statement->scope;
 	}
 }
 
@@ -127,7 +124,7 @@ static void visitExpression (AstExpression *expression)
 
 static void visitExpressionAssign (AstExpressionAssign *expression)
 {
-	addInstruction(ir_initRef(table_get(gen.table, expression->a->as.var->identifier)->physicalIndex));
+	addInstruction(ir_initRef(table_get(gen.scope->table, expression->a->as.var->identifier)->physicalIndex));
 	visitExpression(expression->b);
 	addInstruction(ir_initAssign());
 }
@@ -197,7 +194,7 @@ static void visitExpressionUnary (AstExpressionUnary *expression)
 
 static void visitExpressionVar (AstExpressionVar *expression)
 {
-	addInstruction(ir_initVal(table_get(gen.table, expression->identifier)->physicalIndex));
+	addInstruction(ir_initVal(table_get(gen.scope->table, expression->identifier)->physicalIndex));
 }
 
 static void addInstruction (Ir *instruction)

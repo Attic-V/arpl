@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "data_type.h"
+#include "scope.h"
 #include "table.h"
 #include "token.h"
 
@@ -73,6 +74,7 @@ typedef struct AstStatement AstStatement;
 
 typedef struct {
 	AstStatement *children;
+	Scope *scope;
 } AstStatementBlock;
 
 typedef struct {
@@ -111,7 +113,6 @@ struct AstStatement {
 
 typedef struct {
 	AstStatement *statement;
-	Table *table;
 } AstRoot;
 
 typedef struct {

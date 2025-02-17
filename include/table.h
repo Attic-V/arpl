@@ -11,6 +11,5 @@ Table *table_init (int capacity);
 void table_free (Table *table);
 bool table_add (Table *table, Symbol *symbol);
 Symbol *table_get (Table *table, Token identifier);
-void table_apply (Table *table, void (*callback)(Symbol *symbol));
 
 #endif

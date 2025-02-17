@@ -76,14 +76,6 @@ Symbol *table_get (Table *table, Token identifier)
 	return NULL;
 }
 
-void table_apply (Table *table, void (*callback)(Symbol *symbol))
-{
-	for (int i = 0; i < table->capacity; i++) {
-		if (table->symbols[i] == NULL) continue;
-		callback(table->symbols[i]);
-	}
-}
-
 void table_grow (Table *table)
 {
 	Table *new = table_init(table->capacity * 2);

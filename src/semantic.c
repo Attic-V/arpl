@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "error.h"
+#include "linked_list.h"
 #include "semantic.h"
 
 static void visitAst (Ast *ast);
@@ -22,14 +23,20 @@ static void visitExpressionUnary (AstExpressionUnary *node);
 static void visitExpressionVar (AstExpressionVar *node);
 
 typedef struct {
-	Table *table;
+	Scope *previousScope;
+	Scope *currentScope;
+	Scope *nextScope;
+	size_t currentPhysicalIndex;
 } Analyzer;
 
 static Analyzer analyzer;
 
 void analyze (Ast *ast)
 {
-	analyzer.table = table_init(256);
+	analyzer.previousScope = NULL;
+	analyzer.currentScope = NULL;
+	analyzer.nextScope = NULL;
+	analyzer.currentPhysicalIndex = 0;
 	visitAst(ast);
 }
 
@@ -41,7 +48,6 @@ static void visitAst (Ast *ast)
 static void visitRoot (AstRoot *node)
 {
 	visitStatement(node->statement);
-	node->table = analyzer.table;
 }
 
 static void visitStatement (AstStatement *node)
@@ -56,8 +62,19 @@ static void visitStatement (AstStatement *node)
 
 static void visitStatementBlock (AstStatementBlock *node)
 {
+	analyzer.currentScope = node->scope = scope_init();
+	node->scope->parent = analyzer.previousScope;
+	dll_insert(analyzer.nextScope, node->scope);
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
+		analyzer.previousScope = node->scope;
 		visitStatement(stmt);
+		analyzer.currentScope = node->scope;
+	}
+	for (Scope *s = analyzer.nextScope; s != NULL && s->previous != NULL; s = s->previous);
+	node->scope->children = analyzer.nextScope;
+	analyzer.nextScope = node->scope;
+	if (node->scope->parent != NULL) {
+		node->scope->parent->physicalSize += node->scope->physicalSize;
 	}
 }
 
@@ -77,7 +94,11 @@ static void visitStatementIfE (AstStatementIfE *node)
 
 static void visitStatementVar (AstStatementVar *node)
 {
-	if (!table_add(analyzer.table, symbol_init(node->identifier, getTypeFromKey(node->type)))) {
+	Symbol *symbol = symbol_init(node->identifier, getTypeFromKey(node->type));
+	if (scope_add(analyzer.currentScope, symbol)) {
+		symbol->physicalIndex = analyzer.currentPhysicalIndex;
+		analyzer.currentPhysicalIndex += getDtSize(symbol->type);
+	} else {
 		error(node->identifier, "variable has already been declared in scope");
 	}
 }
@@ -138,7 +159,7 @@ static void visitExpression (AstExpression *node)
 			visitExpressionUnary(node->as.unary);
 			break;
 		case AstExpression_Var:
-			Symbol *symbol = table_get(analyzer.table, node->as.var->identifier);
+			Symbol *symbol = scope_get(analyzer.currentScope, node->as.var->identifier);
 			switch (symbol->type) {
 				case DT_Number: node->dataType = DT_Number; break;
 				default:
