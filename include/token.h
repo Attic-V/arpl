@@ -38,6 +38,7 @@ typedef enum {
 	TT_Tilde,
 	TT_True,
 	TT_Var,
+	TT_While,
 } TokenType;
 
 typedef struct {

@@ -15,6 +15,7 @@ static AstStatement *getStatementBlock (void);
 static AstStatement *getStatementExpr (void);
 static AstStatement *getStatementIfE (void);
 static AstStatement *getStatementVar (void);
+static AstStatement *getStatementWhileC (void);
 
 static AstExpression *getExpression (void);
 static AstExpression *getExpressionAndBitwise (void);
@@ -64,6 +65,7 @@ static AstStatement *getStatement (void)
 		case TT_If: return getStatementIfE();
 		case TT_LBrace: return getStatementBlock();
 		case TT_Var: return getStatementVar();
+		case TT_While: return getStatementWhileC();
 		default:
 	}
 	return getStatementExpr();
@@ -124,6 +126,16 @@ static AstStatement *getStatementVar (void)
 		consume(TT_Semicolon, "expected ';'");
 		return ast_initStatementVar(identifier, type);
 	}
+}
+
+static AstStatement *getStatementWhileC (void)
+{
+	consume(TT_While, "expected 'while'");
+	consume(TT_LParen, "expected '('");
+	AstExpression *condition = getExpression();
+	consume(TT_RParen, "expected ')'");
+	AstStatement *statement = getStatement();
+	return ast_initStatementWhileC(condition, statement);
 }
 
 static AstExpression *getExpression (void)

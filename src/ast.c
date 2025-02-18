@@ -7,6 +7,7 @@ static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
 static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b);
 static AstStatementInit *astStatement_initInit (Token identifier, Token type, AstExpression *expression, Token operator);
 static AstStatementVar *astStatement_initVar (Token identifier, Token type);
+static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a);
 
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
@@ -72,6 +73,14 @@ AstStatement *ast_initStatementVar (Token identifier, Token type)
 	statement->type = AstStatement_Var;
 	statement->as.var = astStatement_initVar(identifier, type);
 	dll_init(statement);
+	return statement;
+}
+
+AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement *a)
+{
+	AstStatement *statement = mem_alloc(sizeof(*statement));
+	statement->type = AstStatement_WhileC;
+	statement->as.whileC = astStatement_initWhileC(condition, a);
 	return statement;
 }
 
@@ -170,6 +179,14 @@ static AstStatementVar *astStatement_initVar (Token identifier, Token type)
 	var->identifier = identifier;
 	var->type = type;
 	return var;
+}
+
+static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a)
+{
+	AstStatementWhileC *whileC = mem_alloc(sizeof(*whileC));
+	whileC->condition = condition;
+	whileC->a = a;
+	return whileC;
 }
 
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator)

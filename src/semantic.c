@@ -14,6 +14,7 @@ static void visitStatementExpr (AstStatementExpr *node);
 static void visitStatementIfE (AstStatementIfE *node);
 static void visitStatementInit (AstStatementInit *node);
 static void visitStatementVar (AstStatementVar *node);
+static void visitStatementWhileC (AstStatementWhileC *node);
 
 static void visitExpression (AstExpression *node);
 static void visitExpressionAssign (AstExpressionAssign *node);
@@ -65,6 +66,7 @@ static void visitStatement (AstStatement *node)
 		case AstStatement_IfE: visitStatementIfE(node->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(node->as.init); break;
 		case AstStatement_Var: visitStatementVar(node->as.var); break;
+		case AstStatement_WhileC: visitStatementWhileC(node->as.whileC); break;
 	}
 }
 
@@ -111,6 +113,12 @@ static void visitStatementVar (AstStatementVar *node)
 	} else {
 		error(node->identifier, "variable has already been declared in scope");
 	}
+}
+
+static void visitStatementWhileC (AstStatementWhileC *node)
+{
+	visitExpression(node->condition);
+	visitStatement(node->a);
 }
 
 static void visitExpression (AstExpression *node)
