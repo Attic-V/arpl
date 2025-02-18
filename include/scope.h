@@ -9,8 +9,6 @@ struct Scope {
 	Table *table;
 	Scope *parent;
 	Scope *children;
-	Scope *next;
-	Scope *previous;
 	size_t physicalSize;
 };
 

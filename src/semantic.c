@@ -26,7 +26,6 @@ static void visitExpressionVar (AstExpressionVar *node);
 typedef struct {
 	Scope *previousScope;
 	Scope *currentScope;
-	Scope *nextScope;
 	size_t currentPhysicalIndex;
 	bool hadError;
 } Analyzer;
@@ -37,7 +36,6 @@ void analyze (Ast *ast)
 {
 	analyzer.previousScope = NULL;
 	analyzer.currentScope = NULL;
-	analyzer.nextScope = NULL;
 	analyzer.currentPhysicalIndex = 0;
 	analyzer.hadError = false;
 
@@ -72,15 +70,11 @@ static void visitStatementBlock (AstStatementBlock *node)
 {
 	analyzer.currentScope = node->scope = scope_init();
 	node->scope->parent = analyzer.previousScope;
-	dll_insert(analyzer.nextScope, node->scope);
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
 		analyzer.previousScope = node->scope;
 		visitStatement(stmt);
 		analyzer.currentScope = node->scope;
 	}
-	for (Scope *s = analyzer.nextScope; s != NULL && s->previous != NULL; s = s->previous);
-	node->scope->children = analyzer.nextScope;
-	analyzer.nextScope = node->scope;
 	if (node->scope->parent != NULL) {
 		node->scope->parent->physicalSize += node->scope->physicalSize;
 	}
