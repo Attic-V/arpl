@@ -11,6 +11,7 @@ static void visitRoot (AstRoot *root);
 
 static void visitStatement (AstStatement *statement);
 static void visitStatementBlock (AstStatementBlock *statement);
+static void visitStatementDoWhile (AstStatementDoWhile *statement);
 static void visitStatementExpr (AstStatementExpr *statement);
 static void visitStatementIfE (AstStatementIfE *statement);
 static void visitStatementInit (AstStatementInit *statement);
@@ -71,6 +72,7 @@ static void visitStatement (AstStatement *statement)
 {
 	switch (statement->type) {
 		case AstStatement_Block: visitStatementBlock(statement->as.block); break;
+		case AstStatement_DoWhile: visitStatementDoWhile(statement->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(statement->as.expr); break;
 		case AstStatement_IfE: visitStatementIfE(statement->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(statement->as.init); break;
@@ -86,6 +88,15 @@ static void visitStatementBlock (AstStatementBlock *statement)
 		visitStatement(stmt);
 		gen.scope = statement->scope;
 	}
+}
+
+static void visitStatementDoWhile (AstStatementDoWhile *statement)
+{
+	int l0 = gen.label++;
+	addInstruction(ir_initLabel(l0));
+	visitStatement(statement->a);
+	visitExpression(statement->condition);
+	addInstruction(ir_initJmpTrue(l0));
 }
 
 static void visitStatementExpr (AstStatementExpr *statement)

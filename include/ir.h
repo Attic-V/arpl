@@ -27,6 +27,10 @@ typedef struct {
 
 typedef struct {
 	int n;
+} IrJmpTrue;
+
+typedef struct {
+	int n;
 } IrLabel;
 
 typedef struct {
@@ -85,6 +89,7 @@ typedef enum {
 	Ir_Equ,
 	Ir_Jmp,
 	Ir_JmpFalse,
+	Ir_JmpTrue,
 	Ir_Label,
 	Ir_Less,
 	Ir_LessEqu,
@@ -114,6 +119,7 @@ struct Ir {
 		IrEqu *equ;
 		IrJmp *jmp;
 		IrJmpFalse *jmpFalse;
+		IrJmpTrue *jmpTrue;
 		IrLabel *label;
 		IrLess *less;
 		IrLessEqu *lessEqu;
@@ -141,6 +147,7 @@ Ir *ir_initAssign (void);
 Ir *ir_initEqu (void);
 Ir *ir_initJmp (int n);
 Ir *ir_initJmpFalse (int n);
+Ir *ir_initJmpTrue (int n);
 Ir *ir_initLabel (int n);
 Ir *ir_initLess (void);
 Ir *ir_initLessEqu (void);

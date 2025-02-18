@@ -8,6 +8,7 @@ static IrAssign *irAssign_init (void);
 static IrEqu *irEqu_init (void);
 static IrJmp *irJmp_init (int n);
 static IrJmpFalse *irJmpFalse_init (int n);
+static IrJmpTrue *irJmpTrue_init (int n);
 static IrLabel *irLabel_init (int n);
 static IrLess *irLess_init (void);
 static IrLessEqu *irLessEqu_init (void);
@@ -75,6 +76,15 @@ Ir *ir_initJmpFalse (int n)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_JmpFalse;
 	ir->as.jmpFalse = irJmpFalse_init(n);
+	dll_init(ir);
+	return ir;
+}
+
+Ir *ir_initJmpTrue (int n)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_JmpTrue;
+	ir->as.jmpTrue = irJmpTrue_init(n);
 	dll_init(ir);
 	return ir;
 }
@@ -259,6 +269,13 @@ static IrJmpFalse *irJmpFalse_init (int n)
 	IrJmpFalse *jmpFalse = mem_alloc(sizeof(*jmpFalse));
 	jmpFalse->n = n;
 	return jmpFalse;
+}
+
+static IrJmpTrue *irJmpTrue_init (int n)
+{
+	IrJmpTrue *jmpTrue = mem_alloc(sizeof(*jmpTrue));
+	jmpTrue->n = n;
+	return jmpTrue;
 }
 
 static IrLabel *irLabel_init (int n)

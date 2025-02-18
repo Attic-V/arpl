@@ -3,6 +3,7 @@
 #include "memory.h"
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
+static AstStatementDoWhile *astStatement_initDoWhile (AstStatement *a, AstExpression *condition, Token operator);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
 static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword);
 static AstStatementInit *astStatement_initInit (Token identifier, Token type, AstExpression *expression, Token operator);
@@ -36,6 +37,15 @@ AstStatement *ast_initStatementBlock (AstStatement *children)
 	AstStatement *statement = mem_alloc(sizeof(*statement));
 	statement->type = AstStatement_Block;
 	statement->as.block = astStatement_initBlock(children);
+	dll_init(statement);
+	return statement;
+}
+
+AstStatement *ast_initStatementDoWhile (AstStatement *a, AstExpression *condition, Token keyword)
+{
+	AstStatement *statement = mem_alloc(sizeof(*statement));
+	statement->type = AstStatement_DoWhile;
+	statement->as.doWhile = astStatement_initDoWhile(a, condition, keyword);
 	dll_init(statement);
 	return statement;
 }
@@ -145,6 +155,15 @@ static AstStatementBlock *astStatement_initBlock (AstStatement *children)
 	AstStatementBlock *block = mem_alloc(sizeof(*block));
 	block->children = children;
 	return block;
+}
+
+static AstStatementDoWhile *astStatement_initDoWhile (AstStatement *a, AstExpression *condition, Token keyword)
+{
+	AstStatementDoWhile *doWhile = mem_alloc(sizeof(*doWhile));
+	doWhile->a = a;
+	doWhile->condition = condition;
+	doWhile->keyword = keyword;
+	return doWhile;
 }
 
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression)

@@ -17,6 +17,7 @@ static void transformAssign (Ir *ir);
 static void transformEqu (Ir *ir);
 static void transformJmp (Ir *ir);
 static void transformJmpFalse (Ir *ir);
+static void transformJmpTrue (Ir *ir);
 static void transformLabel (Ir *ir);
 static void transformLess (Ir *ir);
 static void transformLessEqu (Ir *ir);
@@ -87,6 +88,7 @@ static void transform (Ir *r)
 		transformer(Equ),
 		transformer(Jmp),
 		transformer(JmpFalse),
+		transformer(JmpTrue),
 		transformer(Label),
 		transformer(Less),
 		transformer(LessEqu),
@@ -164,6 +166,15 @@ static void transformJmpFalse (Ir *ir)
 	pop(r8);
 	emit("\ttest    r8d, r8d");
 	emit("\tjz      .LB%d", instruction->n);
+}
+
+static void transformJmpTrue (Ir *ir)
+{
+	IrJmpTrue *instruction = ir->as.jmpTrue;
+	(void)instruction;
+	pop(r8);
+	emit("\ttest    r8d, r8d");
+	emit("\tjnz     .LB%d", instruction->n);
 }
 
 static void transformLabel (Ir *ir)

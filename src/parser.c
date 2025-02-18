@@ -12,6 +12,7 @@ static AstRoot *getRoot (void);
 
 static AstStatement *getStatement(void);
 static AstStatement *getStatementBlock (void);
+static AstStatement *getStatementDoWhile (void);
 static AstStatement *getStatementExpr (void);
 static AstStatement *getStatementIfE (void);
 static AstStatement *getStatementVar (void);
@@ -62,6 +63,7 @@ static AstRoot *getRoot (void)
 static AstStatement *getStatement (void)
 {
 	switch (parser.tokens[parser.current].type) {
+		case TT_Do: return getStatementDoWhile();
 		case TT_If: return getStatementIfE();
 		case TT_LBrace: return getStatementBlock();
 		case TT_Var: return getStatementVar();
@@ -83,6 +85,18 @@ static AstStatement *getStatementBlock (void)
 	consume(TT_RBrace, "expected '}'");
 	for (; statements != NULL && statements->previous != NULL; statements = statements->previous);
 	return ast_initStatementBlock(statements);
+}
+
+static AstStatement *getStatementDoWhile (void)
+{
+	consume(TT_Do, "expected 'do'");
+	AstStatement *statement = getStatement();
+	Token keyword = consume(TT_While, "expected 'while'");
+	consume(TT_LParen, "expected '('");
+	AstExpression *condition = getExpression();
+	consume(TT_RParen, "expected ')'");
+	consume(TT_Semicolon, "expected ';'");
+	return ast_initStatementDoWhile(statement, condition, keyword);
 }
 
 static AstStatement *getStatementExpr (void)

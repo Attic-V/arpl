@@ -10,6 +10,7 @@ static void visitRoot (AstRoot *node);
 
 static void visitStatement (AstStatement *node);
 static void visitStatementBlock (AstStatementBlock *node);
+static void visitStatementDoWhile (AstStatementDoWhile *node);
 static void visitStatementExpr (AstStatementExpr *node);
 static void visitStatementIfE (AstStatementIfE *node);
 static void visitStatementInit (AstStatementInit *node);
@@ -62,6 +63,7 @@ static void visitStatement (AstStatement *node)
 {
 	switch (node->type) {
 		case AstStatement_Block: visitStatementBlock(node->as.block); break;
+		case AstStatement_DoWhile: visitStatementDoWhile(node->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
 		case AstStatement_IfE: visitStatementIfE(node->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(node->as.init); break;
@@ -81,6 +83,15 @@ static void visitStatementBlock (AstStatementBlock *node)
 	}
 	if (node->scope->parent != NULL) {
 		node->scope->parent->physicalSize += node->scope->physicalSize;
+	}
+}
+
+static void visitStatementDoWhile (AstStatementDoWhile *node)
+{
+	visitStatement(node->a);
+	visitExpression(node->condition);
+	if (node->condition->dataType != DT_Boolean) {
+		error(node->keyword, "condition must be a boolean");
 	}
 }
 
