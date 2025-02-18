@@ -167,7 +167,7 @@ static void visitExpression (AstExpression *node)
 			visitExpressionUnary(node->as.unary);
 			break;
 		case AstExpression_Var:
-			Symbol *symbol = scope_get(analyzer.currentScope, node->as.var->identifier);
+			Symbol *symbol = telescope_get(analyzer.currentScope, node->as.var->identifier);
 			if (symbol == NULL) {
 				error(node->as.var->identifier, "undeclared identifier");
 				analyzer.hadError = true;

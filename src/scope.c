@@ -30,3 +30,15 @@ size_t scope_physicalSize (Scope *scope)
 {
 	return scope->physicalSize;
 }
+
+Symbol *telescope_get (Scope *scope, Token identifier)
+{
+	for (Scope *s = scope; s != NULL; s = s->parent) {
+		Symbol *symbol = scope_get(s, identifier);
+		if (symbol == NULL) {
+			continue;
+		}
+		return symbol;
+	}
+	return NULL;
+}

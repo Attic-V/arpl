@@ -124,7 +124,7 @@ static void visitExpression (AstExpression *expression)
 
 static void visitExpressionAssign (AstExpressionAssign *expression)
 {
-	addInstruction(ir_initRef(table_get(gen.scope->table, expression->a->as.var->identifier)->physicalIndex));
+	addInstruction(ir_initRef(telescope_get(gen.scope, expression->a->as.var->identifier)->physicalIndex));
 	visitExpression(expression->b);
 	addInstruction(ir_initAssign());
 }
@@ -194,7 +194,7 @@ static void visitExpressionUnary (AstExpressionUnary *expression)
 
 static void visitExpressionVar (AstExpressionVar *expression)
 {
-	addInstruction(ir_initVal(table_get(gen.scope->table, expression->identifier)->physicalIndex));
+	addInstruction(ir_initVal(telescope_get(gen.scope, expression->identifier)->physicalIndex));
 }
 
 static void addInstruction (Ir *instruction)
