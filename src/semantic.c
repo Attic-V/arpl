@@ -92,6 +92,9 @@ static void visitStatementExpr (AstStatementExpr *node)
 static void visitStatementIfE (AstStatementIfE *node)
 {
 	visitExpression(node->condition);
+	if (node->condition->dataType != DT_Boolean) {
+		error(node->keyword, "condition must be a boolean");
+	}
 	visitStatement(node->a);
 	if (node->b != NULL) {
 		visitStatement(node->b);
@@ -118,6 +121,9 @@ static void visitStatementVar (AstStatementVar *node)
 static void visitStatementWhileC (AstStatementWhileC *node)
 {
 	visitExpression(node->condition);
+	if (node->condition->dataType != DT_Boolean) {
+		error(node->keyword, "condition must be a boolean");
+	}
 	visitStatement(node->a);
 }
 

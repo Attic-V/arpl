@@ -4,10 +4,10 @@
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
-static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b);
+static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword);
 static AstStatementInit *astStatement_initInit (Token identifier, Token type, AstExpression *expression, Token operator);
 static AstStatementVar *astStatement_initVar (Token identifier, Token type);
-static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a);
+static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a, Token keyword);
 
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
@@ -49,11 +49,11 @@ AstStatement *ast_initStatementExpr (AstExpression *expression)
 	return statement;
 }
 
-AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, AstStatement *b)
+AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword)
 {
 	AstStatement *statement = mem_alloc(sizeof(*statement));
 	statement->type = AstStatement_IfE;
-	statement->as.ifE = astStatement_initIfE(condition, a, b);
+	statement->as.ifE = astStatement_initIfE(condition, a, b, keyword);
 	dll_init(statement);
 	return statement;
 }
@@ -76,11 +76,11 @@ AstStatement *ast_initStatementVar (Token identifier, Token type)
 	return statement;
 }
 
-AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement *a)
+AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement *a, Token keyword)
 {
 	AstStatement *statement = mem_alloc(sizeof(*statement));
 	statement->type = AstStatement_WhileC;
-	statement->as.whileC = astStatement_initWhileC(condition, a);
+	statement->as.whileC = astStatement_initWhileC(condition, a, keyword);
 	return statement;
 }
 
@@ -154,12 +154,13 @@ static AstStatementExpr *astStatement_initExpr (AstExpression *expression)
 	return expr;
 }
 
-static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b)
+static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword)
 {
 	AstStatementIfE *ifE = mem_alloc(sizeof(*ifE));
 	ifE->condition = condition;
 	ifE->a = a;
 	ifE->b = b;
+	ifE->keyword = keyword;
 	return ifE;
 }
 
@@ -181,11 +182,12 @@ static AstStatementVar *astStatement_initVar (Token identifier, Token type)
 	return var;
 }
 
-static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a)
+static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a, Token keyword)
 {
 	AstStatementWhileC *whileC = mem_alloc(sizeof(*whileC));
 	whileC->condition = condition;
 	whileC->a = a;
+	whileC->keyword = keyword;
 	return whileC;
 }
 

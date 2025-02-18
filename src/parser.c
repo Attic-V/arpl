@@ -94,7 +94,7 @@ static AstStatement *getStatementExpr (void)
 
 static AstStatement *getStatementIfE (void)
 {
-	consume(TT_If, "expected 'if'");
+	Token keyword = consume(TT_If, "expected 'if'");
 	consume(TT_LParen, "expected '('");
 	AstExpression *condition = getExpression();
 	consume(TT_RParen, "expected ')'");
@@ -104,7 +104,7 @@ static AstStatement *getStatementIfE (void)
 		parser.current++;
 		b = getStatement();
 	}
-	return ast_initStatementIfE(condition, a, b);
+	return ast_initStatementIfE(condition, a, b, keyword);
 }
 
 static AstStatement *getStatementVar (void)
@@ -130,12 +130,12 @@ static AstStatement *getStatementVar (void)
 
 static AstStatement *getStatementWhileC (void)
 {
-	consume(TT_While, "expected 'while'");
+	Token keyword = consume(TT_While, "expected 'while'");
 	consume(TT_LParen, "expected '('");
 	AstExpression *condition = getExpression();
 	consume(TT_RParen, "expected ')'");
 	AstStatement *statement = getStatement();
-	return ast_initStatementWhileC(condition, statement);
+	return ast_initStatementWhileC(condition, statement, keyword);
 }
 
 static AstExpression *getExpression (void)
