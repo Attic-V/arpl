@@ -135,6 +135,7 @@ static void transformAssign (Ir *ir)
 	pop(r9);
 	pop(r8);
 	emit("\tmov     dword [r8], r9d");
+	emit("\tmov     r8d, dword [r8]");
 	push(r8);
 }
 
