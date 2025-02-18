@@ -115,8 +115,15 @@ static AstStatement *getStatementVar (void)
 	} else {
 		error(parser.tokens[parser.current++], "expected 'int' or 'bool'");
 	}
-	consume(TT_Semicolon, "expected ';'");
-	return ast_initStatementVar(identifier, type);
+	if (check(TT_Equal)) {
+		Token operator = parser.tokens[parser.current++];
+		AstExpression *expression = getExpression();
+		consume(TT_Semicolon, "expected ';'");
+		return ast_initStatementInit(identifier, type, expression, operator);
+	} else {
+		consume(TT_Semicolon, "expected ';'");
+		return ast_initStatementVar(identifier, type);
+	}
 }
 
 static AstExpression *getExpression (void)

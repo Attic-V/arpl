@@ -12,6 +12,7 @@ static void visitStatement (AstStatement *node);
 static void visitStatementBlock (AstStatementBlock *node);
 static void visitStatementExpr (AstStatementExpr *node);
 static void visitStatementIfE (AstStatementIfE *node);
+static void visitStatementInit (AstStatementInit *node);
 static void visitStatementVar (AstStatementVar *node);
 
 static void visitExpression (AstExpression *node);
@@ -62,6 +63,7 @@ static void visitStatement (AstStatement *node)
 		case AstStatement_Block: visitStatementBlock(node->as.block); break;
 		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
 		case AstStatement_IfE: visitStatementIfE(node->as.ifE); break;
+		case AstStatement_Init: visitStatementInit(node->as.init); break;
 		case AstStatement_Var: visitStatementVar(node->as.var); break;
 	}
 }
@@ -92,6 +94,12 @@ static void visitStatementIfE (AstStatementIfE *node)
 	if (node->b != NULL) {
 		visitStatement(node->b);
 	}
+}
+
+static void visitStatementInit (AstStatementInit *node)
+{
+	visitStatement(ast_initStatementVar(node->identifier, node->type));
+	visitExpression(ast_initExpressionAssign(ast_initExpressionVar(node->identifier), node->expression, node->operator));
 }
 
 static void visitStatementVar (AstStatementVar *node)

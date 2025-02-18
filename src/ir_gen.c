@@ -13,6 +13,7 @@ static void visitStatement (AstStatement *statement);
 static void visitStatementBlock (AstStatementBlock *statement);
 static void visitStatementExpr (AstStatementExpr *statement);
 static void visitStatementIfE (AstStatementIfE *statement);
+static void visitStatementInit (AstStatementInit *statement);
 static void visitStatementVar (AstStatementVar *statement);
 
 static void visitExpression (AstExpression *expression);
@@ -71,6 +72,7 @@ static void visitStatement (AstStatement *statement)
 		case AstStatement_Block: visitStatementBlock(statement->as.block); break;
 		case AstStatement_Expr: visitStatementExpr(statement->as.expr); break;
 		case AstStatement_IfE: visitStatementIfE(statement->as.ifE); break;
+		case AstStatement_Init: visitStatementInit(statement->as.init); break;
 		case AstStatement_Var: visitStatementVar(statement->as.var); break;
 	}
 }
@@ -104,6 +106,12 @@ static void visitStatementIfE (AstStatementIfE *statement)
 		visitStatement(statement->b);
 		addInstruction(ir_initLabel(l1));
 	}
+}
+
+static void visitStatementInit (AstStatementInit *statement)
+{
+	visitStatement(ast_initStatementVar(statement->identifier, statement->type));
+	visitExpression(ast_initExpressionAssign(ast_initExpressionVar(statement->identifier), statement->expression, statement->operator));
 }
 
 static void visitStatementVar (AstStatementVar *statement)

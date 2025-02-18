@@ -90,12 +90,20 @@ typedef struct {
 typedef struct {
 	Token identifier;
 	Token type;
+	AstExpression *expression;
+	Token operator;
+} AstStatementInit;
+
+typedef struct {
+	Token identifier;
+	Token type;
 } AstStatementVar;
 
 typedef enum {
 	AstStatement_Block,
 	AstStatement_Expr,
 	AstStatement_IfE,
+	AstStatement_Init,
 	AstStatement_Var,
 } AstStatementType;
 
@@ -105,6 +113,7 @@ struct AstStatement {
 		AstStatementBlock *block;
 		AstStatementExpr *expr;
 		AstStatementIfE *ifE;
+		AstStatementInit *init;
 		AstStatementVar *var;
 	} as;
 	AstStatement* next;
@@ -125,6 +134,7 @@ AstRoot *ast_initRoot (AstStatement *statement);
 AstStatement *ast_initStatementBlock (AstStatement *children);
 AstStatement *ast_initStatementExpr (AstExpression *expression);
 AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, AstStatement *b);
+AstStatement *ast_initStatementInit (Token identifier, Token type, AstExpression *expression, Token operator);
 AstStatement *ast_initStatementVar (Token identifier, Token type);
 
 AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator);
