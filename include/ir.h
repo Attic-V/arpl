@@ -18,6 +18,9 @@ typedef struct {
 } IrEqu;
 
 typedef struct {
+} IrInc;
+
+typedef struct {
 	int n;
 } IrJmp;
 
@@ -55,6 +58,9 @@ typedef struct {
 } IrOr;
 
 typedef struct {
+} IrPop;
+
+typedef struct {
 	int32_t value;
 } IrPush;
 
@@ -87,6 +93,7 @@ typedef enum {
 	Ir_And,
 	Ir_Assign,
 	Ir_Equ,
+	Ir_Inc,
 	Ir_Jmp,
 	Ir_JmpFalse,
 	Ir_JmpTrue,
@@ -98,6 +105,7 @@ typedef enum {
 	Ir_Not,
 	Ir_NotEqu,
 	Ir_Or,
+	Ir_Pop,
 	Ir_Push,
 	Ir_Ref,
 	Ir_Reserve,
@@ -117,6 +125,7 @@ struct Ir {
 		IrAnd *and;
 		IrAssign *assign;
 		IrEqu *equ;
+		IrInc *inc;
 		IrJmp *jmp;
 		IrJmpFalse *jmpFalse;
 		IrJmpTrue *jmpTrue;
@@ -128,6 +137,7 @@ struct Ir {
 		IrNot *not;
 		IrNotEqu *notEqu;
 		IrOr *or;
+		IrPop *pop;
 		IrPush *push;
 		IrRef *ref;
 		IrReserve *reserve;
@@ -145,6 +155,7 @@ Ir *ir_initAdd (void);
 Ir *ir_initAnd (void);
 Ir *ir_initAssign (void);
 Ir *ir_initEqu (void);
+Ir *ir_initInc (void);
 Ir *ir_initJmp (int n);
 Ir *ir_initJmpFalse (int n);
 Ir *ir_initJmpTrue (int n);
@@ -156,6 +167,7 @@ Ir *ir_initNeg (void);
 Ir *ir_initNot (void);
 Ir *ir_initNotEqu (void);
 Ir *ir_initOr (void);
+Ir *ir_initPop (void);
 Ir *ir_initPush (int32_t value);
 Ir *ir_initRef (size_t idx);
 Ir *ir_initReserve (size_t bytes);

@@ -186,6 +186,7 @@ static void visitExpression (AstExpression *node)
 					node->dataType = DT_Boolean;
 					break;
 				case TT_Minus:
+				case TT_Plus_Plus:
 				case TT_Tilde:
 					node->dataType = DT_Number;
 					break;
@@ -217,7 +218,7 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 		error(node->operator, "operands must have the same type");
 	}
 	if (node->a->type != AstExpression_Var) {
-		error(node->a->as.var->identifier, "expression must be modifiable");
+		error(node->operator, "assignee must be modifiable");
 		analyzer.hadError = true;
 	}
 }
@@ -277,17 +278,27 @@ static void visitExpressionTernary (AstExpressionTernary *node)
 
 static void visitExpressionUnary (AstExpressionUnary *node)
 {
-	visitExpression(node->right);
+	AstExpression *expression = node->left == NULL ? node->right : node->left;
+	visitExpression(expression);
 	switch (node->operator.type) {
 		case TT_Bang:
-			if (node->right->dataType != DT_Boolean) {
+			if (expression->dataType != DT_Boolean) {
 				error(node->operator, "operand must be a boolean");
 			}
 			break;
 		case TT_Minus:
 		case TT_Tilde:
-			if (node->right->dataType != DT_Number) {
+			if (expression->dataType != DT_Number) {
 				error(node->operator, "operand must be a number");
+			}
+			break;
+		case TT_Plus_Plus:
+			if (expression->dataType != DT_Number) {
+				error(node->operator, "operand must be a number");
+			}
+			if (expression->type != AstExpression_Var) {
+				error(expression->as.var->identifier, "expression must be modifiable");
+				analyzer.hadError = true;
 			}
 			break;
 		default:

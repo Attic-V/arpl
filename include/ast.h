@@ -38,6 +38,7 @@ typedef struct {
 } AstExpressionTernary;
 
 typedef struct {
+	AstExpression *left;
 	Token operator;
 	AstExpression *right;
 } AstExpressionUnary;
@@ -161,7 +162,7 @@ AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Tok
 AstExpression *ast_initExpressionBoolean (bool value);
 AstExpression *ast_initExpressionNumber (Token value);
 AstExpression *ast_initExpressionTernary (AstExpression *condition, AstExpression *a, AstExpression *b, Token operator);
-AstExpression *ast_initExpressionUnary (Token operator, AstExpression *right);
+AstExpression *ast_initExpressionUnary (AstExpression *left, Token operator, AstExpression *right);
 AstExpression *ast_initExpressionVar (Token identifier);
 
 #endif

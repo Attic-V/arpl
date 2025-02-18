@@ -15,6 +15,7 @@ static void transformAdd (Ir *ir);
 static void transformAnd (Ir *ir);
 static void transformAssign (Ir *ir);
 static void transformEqu (Ir *ir);
+static void transformInc (Ir *ir);
 static void transformJmp (Ir *ir);
 static void transformJmpFalse (Ir *ir);
 static void transformJmpTrue (Ir *ir);
@@ -26,6 +27,7 @@ static void transformNeg (Ir *ir);
 static void transformNot (Ir *ir);
 static void transformNotEqu (Ir *ir);
 static void transformOr (Ir *ir);
+static void transformPop (Ir *ir);
 static void transformPush (Ir *ir);
 static void transformRef (Ir *ir);
 static void transformReserve (Ir *ir);
@@ -86,6 +88,7 @@ static void transform (Ir *r)
 		transformer(And),
 		transformer(Assign),
 		transformer(Equ),
+		transformer(Inc),
 		transformer(Jmp),
 		transformer(JmpFalse),
 		transformer(JmpTrue),
@@ -97,6 +100,7 @@ static void transform (Ir *r)
 		transformer(Not),
 		transformer(NotEqu),
 		transformer(Or),
+		transformer(Pop),
 		transformer(Push),
 		transformer(Ref),
 		transformer(Reserve),
@@ -149,6 +153,16 @@ static void transformEqu (Ir *ir)
 	pop(r8);
 	emit("\tcmp     r8, r9");
 	emit("\tsete    r8b");
+	push(r8);
+}
+
+static void transformInc (Ir *ir)
+{
+	IrInc *instruction = ir->as.inc;
+	(void)instruction;
+	pop(r8);
+	emit("\tinc     dword [r8]");
+	emit("\tmov     r8d, dword [r8]");
 	push(r8);
 }
 
@@ -253,6 +267,13 @@ static void transformOr (Ir *ir)
 	pop(r8);
 	emit("\tor      r8d, r9d");
 	push(r8);
+}
+
+static void transformPop (Ir *ir)
+{
+	IrPop *instruction = ir->as.pop;
+	(void)instruction;
+	emit("\tadd     rsp, 8");
 }
 
 static void transformPush (Ir *ir)

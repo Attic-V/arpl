@@ -31,7 +31,8 @@ static AstExpression *getExpressionRelational (void);
 static AstExpression *getExpressionShift (void);
 static AstExpression *getExpressionSum (void);
 static AstExpression *getExpressionTernary (void);
-static AstExpression *getExpressionUnary (void);
+static AstExpression *getExpressionUnaryPostfix (void);
+static AstExpression *getExpressionUnaryPrefix (void);
 static AstExpression *getExpressionXor (void);
 
 static bool check (TokenType type);
@@ -282,23 +283,33 @@ static AstExpression *getExpressionSum (void)
 
 static AstExpression *getExpressionProduct (void)
 {
-	AstExpression *expression = getExpressionUnary();
+	AstExpression *expression = getExpressionUnaryPrefix();
 	while (check(TT_Star)) {
 		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionUnary();
+		AstExpression *right = getExpressionUnaryPrefix();
 		expression = ast_initExpressionBinary(expression, right, operator);
 	}
 	return expression;
 }
 
-static AstExpression *getExpressionUnary (void)
+static AstExpression *getExpressionUnaryPrefix (void)
 {
 	if (check(TT_Minus) || check(TT_Bang) || check(TT_Tilde)) {
 		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionUnary();
-		return ast_initExpressionUnary(operator, right);
+		AstExpression *right = getExpressionUnaryPrefix();
+		return ast_initExpressionUnary(NULL, operator, right);
 	}
-	return getExpressionPrimary();
+	return getExpressionUnaryPostfix();
+}
+
+static AstExpression *getExpressionUnaryPostfix (void)
+{
+	AstExpression *left = getExpressionPrimary();
+	while (check(TT_Plus_Plus)) {
+		Token operator = parser.tokens[parser.current++];
+		return ast_initExpressionUnary(left, operator, NULL);
+	}
+	return left;
 }
 
 static AstExpression *getExpressionPrimary (void)

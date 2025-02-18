@@ -222,16 +222,26 @@ static void visitExpressionTernary (AstExpressionTernary *expression)
 
 static void visitExpressionUnary (AstExpressionUnary *expression)
 {
-	visitExpression(expression->right);
-	switch (expression->operator.type) {
-		case TT_Bang:
-			addInstruction(ir_initNot());
-			addInstruction(ir_initPush(1));
-			addInstruction(ir_initAnd());
-			break;
-		case TT_Minus: addInstruction(ir_initNeg()); break;
-		case TT_Tilde: addInstruction(ir_initNot()); break;
-		default:
+	if (expression->left == NULL) {
+		visitExpression(expression->right);
+		switch (expression->operator.type) {
+			case TT_Bang:
+				addInstruction(ir_initNot());
+				addInstruction(ir_initPush(1));
+				addInstruction(ir_initAnd());
+				break;
+			case TT_Minus: addInstruction(ir_initNeg()); break;
+			case TT_Tilde: addInstruction(ir_initNot()); break;
+			default:
+		}
+	} else {
+		visitExpression(expression->left);
+		addInstruction(ir_initRef(telescope_get(gen.scope, expression->left->as.var->identifier)->physicalIndex));
+		switch (expression->operator.type) {
+			case TT_Plus_Plus: addInstruction(ir_initInc()); break;
+			default:
+		}
+		addInstruction(ir_initPop());
 	}
 }
 
