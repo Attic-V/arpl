@@ -30,6 +30,7 @@ typedef enum {
 	TT_Pipe,
 	TT_Pipe_Pipe,
 	TT_Plus,
+	TT_Plus_Equal,
 	TT_Question,
 	TT_RBrace,
 	TT_RParen,

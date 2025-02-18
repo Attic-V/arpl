@@ -147,7 +147,17 @@ static void visitExpression (AstExpression *expression)
 static void visitExpressionAssign (AstExpressionAssign *expression)
 {
 	addInstruction(ir_initRef(telescope_get(gen.scope, expression->a->as.var->identifier)->physicalIndex));
-	visitExpression(expression->b);
+	switch (expression->operator.type) {
+		case TT_Equal:
+			visitExpression(expression->b);
+			break;
+		case TT_Plus_Equal:
+			visitExpression(expression->a);
+			visitExpression(expression->b);
+			addInstruction(ir_initAdd());
+			break;
+		default:
+	}
 	addInstruction(ir_initAssign());
 }
 
