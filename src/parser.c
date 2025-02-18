@@ -297,7 +297,7 @@ static AstExpression *getExpressionUnaryPrefix (void)
 	if (check(TT_Minus) || check(TT_Bang) || check(TT_Tilde)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpressionUnaryPrefix();
-		return ast_initExpressionUnary(NULL, operator, right);
+		return ast_initExpressionPrefix(operator, right);
 	}
 	return getExpressionUnaryPostfix();
 }
@@ -307,7 +307,7 @@ static AstExpression *getExpressionUnaryPostfix (void)
 	AstExpression *left = getExpressionPrimary();
 	while (check(TT_Plus_Plus)) {
 		Token operator = parser.tokens[parser.current++];
-		return ast_initExpressionUnary(left, operator, NULL);
+		return ast_initExpressionPostfix(operator, left);
 	}
 	return left;
 }

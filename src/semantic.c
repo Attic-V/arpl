@@ -22,8 +22,9 @@ static void visitExpressionAssign (AstExpressionAssign *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
 static void visitExpressionBoolean (AstExpressionBoolean *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
+static void visitExpressionPostfix (AstExpressionPostfix *node);
+static void visitExpressionPrefix (AstExpressionPrefix *node);
 static void visitExpressionTernary (AstExpressionTernary *node);
-static void visitExpressionUnary (AstExpressionUnary *node);
 static void visitExpressionVar (AstExpressionVar *node);
 
 typedef struct {
@@ -176,23 +177,31 @@ static void visitExpression (AstExpression *node)
 			node->dataType = DT_Number;
 			visitExpressionNumber(node->as.number);
 			break;
-		case AstExpression_Ternary:
-			visitExpressionTernary(node->as.ternary);
-			node->dataType = node->as.ternary->a->dataType;
+		case AstExpression_Postfix:
+			switch (node->as.postfix->operator.type) {
+				case TT_Plus_Plus:
+					node->dataType = DT_Number;
+					break;
+				default:
+			}
+			visitExpressionPostfix(node->as.postfix);
 			break;
-		case AstExpression_Unary:
-			switch (node->as.unary->operator.type) {
+		case AstExpression_Prefix:
+			switch (node->as.prefix->operator.type) {
 				case TT_Bang:
 					node->dataType = DT_Boolean;
 					break;
 				case TT_Minus:
-				case TT_Plus_Plus:
 				case TT_Tilde:
 					node->dataType = DT_Number;
 					break;
 				default:
 			}
-			visitExpressionUnary(node->as.unary);
+			visitExpressionPrefix(node->as.prefix);
+			break;
+		case AstExpression_Ternary:
+			visitExpressionTernary(node->as.ternary);
+			node->dataType = node->as.ternary->a->dataType;
 			break;
 		case AstExpression_Var:
 			Symbol *symbol = telescope_get(analyzer.currentScope, node->as.var->identifier);
@@ -263,6 +272,42 @@ static void visitExpressionBoolean (AstExpressionBoolean *node)
 static void visitExpressionNumber (AstExpressionNumber *node)
 { }
 
+static void visitExpressionPostfix (AstExpressionPostfix *node)
+{
+	visitExpression(node->e);
+	switch (node->operator.type) {
+		case TT_Plus_Plus:
+			if (node->e->dataType != DT_Number) {
+				error(node->operator, "operand must be a number");
+			}
+			if (node->e->type != AstExpression_Var) {
+				error(node->e->as.var->identifier, "expression must be modifiable");
+				analyzer.hadError = true;
+			}
+			break;
+		default:
+	}
+}
+
+static void visitExpressionPrefix (AstExpressionPrefix *node)
+{
+	visitExpression(node->e);
+	switch (node->operator.type) {
+		case TT_Bang:
+			if (node->e->dataType != DT_Boolean) {
+				error(node->operator, "operand must be a boolean");
+			}
+			break;
+		case TT_Minus:
+		case TT_Tilde:
+			if (node->e->dataType != DT_Number) {
+				error(node->operator, "operand must be a number");
+			}
+			break;
+		default:
+	}
+}
+
 static void visitExpressionTernary (AstExpressionTernary *node)
 {
 	visitExpression(node->condition);
@@ -273,35 +318,6 @@ static void visitExpressionTernary (AstExpressionTernary *node)
 	}
 	if (node->a->dataType != node->b->dataType) {
 		error(node->operator, "operands must have the same type");
-	}
-}
-
-static void visitExpressionUnary (AstExpressionUnary *node)
-{
-	AstExpression *expression = node->left == NULL ? node->right : node->left;
-	visitExpression(expression);
-	switch (node->operator.type) {
-		case TT_Bang:
-			if (expression->dataType != DT_Boolean) {
-				error(node->operator, "operand must be a boolean");
-			}
-			break;
-		case TT_Minus:
-		case TT_Tilde:
-			if (expression->dataType != DT_Number) {
-				error(node->operator, "operand must be a number");
-			}
-			break;
-		case TT_Plus_Plus:
-			if (expression->dataType != DT_Number) {
-				error(node->operator, "operand must be a number");
-			}
-			if (expression->type != AstExpression_Var) {
-				error(expression->as.var->identifier, "expression must be modifiable");
-				analyzer.hadError = true;
-			}
-			break;
-		default:
 	}
 }
 

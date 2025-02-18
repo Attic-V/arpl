@@ -14,8 +14,9 @@ static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpre
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBoolean *astExpression_initBoolean (bool value);
 static AstExpressionNumber *astExpression_initNumber (Token value);
+static AstExpressionPostfix *astExpression_initPostfix (Token operator, AstExpression *e);
+static AstExpressionPrefix *astExpression_initPrefix (Token operator, AstExpression *e);
 static AstExpressionTernary *astExpression_initTernary (AstExpression *condition, AstExpression *a, AstExpression *b, Token operator);
-static AstExpressionUnary *astExpression_initUnary (AstExpression *left, Token operator, AstExpression *right);
 static AstExpressionVar *astExpression_initVar (Token identifier);
 
 Ast *ast_init (AstRoot *root)
@@ -126,19 +127,27 @@ AstExpression *ast_initExpressionNumber (Token value)
 	return expression;
 }
 
+AstExpression *ast_initExpressionPostfix (Token operator, AstExpression *e)
+{
+	AstExpression *expression = mem_alloc(sizeof(*expression));
+	expression->type = AstExpression_Postfix;
+	expression->as.postfix = astExpression_initPostfix(operator, e);
+	return expression;
+}
+
+AstExpression *ast_initExpressionPrefix (Token operator, AstExpression *e)
+{
+	AstExpression *expression = mem_alloc(sizeof(*expression));
+	expression->type = AstExpression_Prefix;
+	expression->as.prefix = astExpression_initPrefix(operator, e);
+	return expression;
+}
+
 AstExpression *ast_initExpressionTernary (AstExpression *condition, AstExpression *a, AstExpression *b, Token operator)
 {
 	AstExpression *expression = mem_alloc(sizeof(*expression));
 	expression->type = AstExpression_Ternary;
 	expression->as.ternary = astExpression_initTernary(condition, a, b, operator);
-	return expression;
-}
-
-AstExpression *ast_initExpressionUnary (AstExpression *left, Token operator, AstExpression *right)
-{
-	AstExpression *expression = mem_alloc(sizeof(*expression));
-	expression->type = AstExpression_Unary;
-	expression->as.unary = astExpression_initUnary(left, operator, right);
 	return expression;
 }
 
@@ -242,6 +251,22 @@ static AstExpressionNumber *astExpression_initNumber (Token value)
 	return number;
 }
 
+static AstExpressionPostfix *astExpression_initPostfix (Token operator, AstExpression *e)
+{
+	AstExpressionPostfix *postfix = mem_alloc(sizeof(*postfix));
+	postfix->operator = operator;
+	postfix->e = e;
+	return postfix;
+}
+
+static AstExpressionPrefix *astExpression_initPrefix (Token operator, AstExpression *e)
+{
+	AstExpressionPrefix *prefix = mem_alloc(sizeof(*prefix));
+	prefix->operator = operator;
+	prefix->e = e;
+	return prefix;
+}
+
 static AstExpressionTernary *astExpression_initTernary (AstExpression *condition, AstExpression *a, AstExpression *b, Token operator)
 {
 	AstExpressionTernary *ternary = mem_alloc(sizeof(*ternary));
@@ -250,15 +275,6 @@ static AstExpressionTernary *astExpression_initTernary (AstExpression *condition
 	ternary->b = b;
 	ternary->operator = operator;
 	return ternary;
-}
-
-static AstExpressionUnary *astExpression_initUnary (AstExpression *left, Token operator, AstExpression *right)
-{
-	AstExpressionUnary *unary = mem_alloc(sizeof(*unary));
-	unary->left = left;
-	unary->operator = operator;
-	unary->right = right;
-	return unary;
 }
 
 static AstExpressionVar *astExpression_initVar (Token identifier)
