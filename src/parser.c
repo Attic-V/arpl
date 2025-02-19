@@ -149,7 +149,12 @@ static AstStatement *getStatementWhileC (void)
 	consume(TT_LParen, "expected '('");
 	AstExpression *condition = getExpression();
 	consume(TT_RParen, "expected ')'");
-	AstStatement *statement = getStatement();
+	AstStatement *statement = NULL;
+	if (check(TT_Semicolon)) {
+		parser.current++;
+	} else {
+		statement = getStatement();
+	}
 	return ast_initStatementWhileC(condition, statement, keyword);
 }
 

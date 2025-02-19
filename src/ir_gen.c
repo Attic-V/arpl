@@ -141,7 +141,9 @@ static void visitStatementWhileC (AstStatementWhileC *statement)
 	addInstruction(ir_initLabel(l0));
 	visitExpression(statement->condition);
 	addInstruction(ir_initJmpFalse(l1));
-	visitStatement(statement->a);
+	if (statement->a != NULL) {
+		visitStatement(statement->a);
+	}
 	addInstruction(ir_initJmp(l0));
 	addInstruction(ir_initLabel(l1));
 }

@@ -137,7 +137,9 @@ static void visitStatementWhileC (AstStatementWhileC *node)
 	if (node->condition->dataType != DT_Boolean) {
 		error(node->keyword, "condition must be a boolean");
 	}
-	visitStatement(node->a);
+	if (node->a != NULL) {
+		visitStatement(node->a);
+	}
 }
 
 static void visitExpression (AstExpression *node)
