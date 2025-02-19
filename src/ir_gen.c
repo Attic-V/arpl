@@ -172,8 +172,15 @@ static void visitExpressionAssign (AstExpression *expression)
 			break;
 		case TT_Plus_Equal:
 			visitExpression(e->a);
+			addInstruction(ir_initDeref());
 			visitExpression(e->b);
 			addInstruction(ir_initAdd());
+			break;
+		case TT_Minus_Equal:
+			visitExpression(e->a);
+			addInstruction(ir_initDeref());
+			visitExpression(e->b);
+			addInstruction(ir_initSub());
 			break;
 		default:
 	}

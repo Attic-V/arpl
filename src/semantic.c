@@ -236,6 +236,7 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 		error(node->operator, "assignee must be modifiable");
 		analyzer.hadError = true;
 	}
+	node->b->modifiable = false;
 }
 
 static void visitExpressionBinary (AstExpressionBinary *node)
