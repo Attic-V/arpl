@@ -15,6 +15,9 @@ typedef struct {
 } IrAssign;
 
 typedef struct {
+} IrDeref;
+
+typedef struct {
 } IrEqu;
 
 typedef struct {
@@ -92,6 +95,7 @@ typedef enum {
 	Ir_Add,
 	Ir_And,
 	Ir_Assign,
+	Ir_Deref,
 	Ir_Equ,
 	Ir_Inc,
 	Ir_Jmp,
@@ -124,6 +128,7 @@ struct Ir {
 		IrAdd *add;
 		IrAnd *and;
 		IrAssign *assign;
+		IrDeref *deref;
 		IrEqu *equ;
 		IrInc *inc;
 		IrJmp *jmp;
@@ -154,6 +159,7 @@ struct Ir {
 Ir *ir_initAdd (void);
 Ir *ir_initAnd (void);
 Ir *ir_initAssign (void);
+Ir *ir_initDeref (void);
 Ir *ir_initEqu (void);
 Ir *ir_initInc (void);
 Ir *ir_initJmp (int n);

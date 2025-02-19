@@ -99,6 +99,7 @@ static void visitStatementDoWhile (AstStatementDoWhile *node)
 static void visitStatementExpr (AstStatementExpr *node)
 {
 	visitExpression(node->expression);
+	node->expression->modifiable = false;
 }
 
 static void visitStatementIfE (AstStatementIfE *node)
@@ -141,6 +142,7 @@ static void visitStatementWhileC (AstStatementWhileC *node)
 
 static void visitExpression (AstExpression *node)
 {
+	node->modifiable = false;
 	switch (node->type) {
 		case AstExpression_Assign:
 			visitExpressionAssign(node->as.assign);
@@ -192,6 +194,7 @@ static void visitExpression (AstExpression *node)
 					node->dataType = DT_Boolean;
 					break;
 				case TT_Minus:
+				case TT_Plus_Plus:
 				case TT_Tilde:
 					node->dataType = DT_Number;
 					break;
@@ -215,6 +218,7 @@ static void visitExpression (AstExpression *node)
 				default:
 			}
 			visitExpressionVar(node->as.var);
+			node->modifiable = true;
 			break;
 	}
 }
@@ -226,7 +230,7 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 	if (node->a->dataType != node->b->dataType) {
 		error(node->operator, "operands must have the same type");
 	}
-	if (node->a->type != AstExpression_Var) {
+	if (!node->a->modifiable) {
 		error(node->operator, "assignee must be modifiable");
 		analyzer.hadError = true;
 	}
@@ -264,6 +268,8 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 	if (node->a->dataType != node->b->dataType) {
 		error(node->operator, "operands must have the same type");
 	}
+	node->a->modifiable = false;
+	node->b->modifiable = false;
 }
 
 static void visitExpressionBoolean (AstExpressionBoolean *node)
@@ -280,7 +286,7 @@ static void visitExpressionPostfix (AstExpressionPostfix *node)
 			if (node->e->dataType != DT_Number) {
 				error(node->operator, "operand must be a number");
 			}
-			if (node->e->type != AstExpression_Var) {
+			if (!node->e->modifiable) {
 				error(node->e->as.var->identifier, "expression must be modifiable");
 				analyzer.hadError = true;
 			}
@@ -304,6 +310,15 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 				error(node->operator, "operand must be a number");
 			}
 			break;
+		case TT_Plus_Plus:
+			if (node->e->dataType != DT_Number) {
+				error(node->operator, "operand must be a number");
+			}
+			if (!node->e->modifiable) {
+				error(node->e->as.var->identifier, "expression must be modifiable");
+				analyzer.hadError = true;
+			}
+			break;
 		default:
 	}
 }
@@ -319,6 +334,9 @@ static void visitExpressionTernary (AstExpressionTernary *node)
 	if (node->a->dataType != node->b->dataType) {
 		error(node->operator, "operands must have the same type");
 	}
+	node->condition->modifiable = false;
+	node->a->modifiable = false;
+	node->b->modifiable = false;
 }
 
 static void visitExpressionVar (AstExpressionVar *node)

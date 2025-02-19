@@ -19,14 +19,14 @@ static void visitStatementVar (AstStatementVar *statement);
 static void visitStatementWhileC (AstStatementWhileC *statement);
 
 static void visitExpression (AstExpression *expression);
-static void visitExpressionAssign (AstExpressionAssign *expression);
-static void visitExpressionBinary (AstExpressionBinary *expression);
-static void visitExpressionBoolean (AstExpressionBoolean *expression);
-static void visitExpressionNumber (AstExpressionNumber *expression);
-static void visitExpressionPostfix (AstExpressionPostfix *expression);
-static void visitExpressionPrefix (AstExpressionPrefix *expression);
-static void visitExpressionTernary (AstExpressionTernary *expression);
-static void visitExpressionVar (AstExpressionVar *expression);
+static void visitExpressionAssign (AstExpression *expression);
+static void visitExpressionBinary (AstExpression *expression);
+static void visitExpressionBoolean (AstExpression *expression);
+static void visitExpressionNumber (AstExpression *expression);
+static void visitExpressionPostfix (AstExpression *expression);
+static void visitExpressionPrefix (AstExpression *expression);
+static void visitExpressionTernary (AstExpression *expression);
+static void visitExpressionVar (AstExpression *expression);
 
 static void addInstruction (Ir *instruction);
 
@@ -124,8 +124,11 @@ static void visitStatementIfE (AstStatementIfE *statement)
 
 static void visitStatementInit (AstStatementInit *statement)
 {
-	visitStatement(ast_initStatementVar(statement->identifier, statement->type));
-	visitExpression(ast_initExpressionAssign(ast_initExpressionVar(statement->identifier), statement->expression, statement->operator));
+	AstStatement *stmt = ast_initStatementVar(statement->identifier, statement->type);
+	AstExpression *expr = ast_initExpressionVar(statement->identifier);
+	expr->modifiable = true;
+	visitStatement(stmt);
+	visitExpression(ast_initExpressionAssign(expr, statement->expression, statement->operator));
 }
 
 static void visitStatementVar (AstStatementVar *statement)
@@ -146,39 +149,42 @@ static void visitStatementWhileC (AstStatementWhileC *statement)
 static void visitExpression (AstExpression *expression)
 {
 	switch (expression->type) {
-		case AstExpression_Assign: visitExpressionAssign(expression->as.assign); break;
-		case AstExpression_Binary: visitExpressionBinary(expression->as.binary); break;
-		case AstExpression_Boolean: visitExpressionBoolean(expression->as.boolean); break;
-		case AstExpression_Number: visitExpressionNumber(expression->as.number); break;
-		case AstExpression_Postfix: visitExpressionPostfix(expression->as.postfix); break;
-		case AstExpression_Prefix: visitExpressionPrefix(expression->as.prefix); break;
-		case AstExpression_Ternary: visitExpressionTernary(expression->as.ternary); break;
-		case AstExpression_Var: visitExpressionVar(expression->as.var); break;
+		case AstExpression_Assign: visitExpressionAssign(expression); break;
+		case AstExpression_Binary: visitExpressionBinary(expression); break;
+		case AstExpression_Boolean: visitExpressionBoolean(expression); break;
+		case AstExpression_Number: visitExpressionNumber(expression); break;
+		case AstExpression_Postfix: visitExpressionPostfix(expression); break;
+		case AstExpression_Prefix: visitExpressionPrefix(expression); break;
+		case AstExpression_Ternary: visitExpressionTernary(expression); break;
+		case AstExpression_Var: visitExpressionVar(expression); break;
 	}
 }
 
-static void visitExpressionAssign (AstExpressionAssign *expression)
+static void visitExpressionAssign (AstExpression *expression)
 {
-	addInstruction(ir_initRef(telescope_get(gen.scope, expression->a->as.var->identifier)->physicalIndex));
-	switch (expression->operator.type) {
+	AstExpressionAssign *e = expression->as.assign;
+	visitExpression(e->a);
+	switch (e->operator.type) {
 		case TT_Equal:
-			visitExpression(expression->b);
+			visitExpression(e->b);
 			break;
 		case TT_Plus_Equal:
-			visitExpression(expression->a);
-			visitExpression(expression->b);
+			visitExpression(e->a);
+			visitExpression(e->b);
 			addInstruction(ir_initAdd());
 			break;
 		default:
 	}
 	addInstruction(ir_initAssign());
+	addInstruction(ir_initDeref());
 }
 
-static void visitExpressionBinary (AstExpressionBinary *expression)
+static void visitExpressionBinary (AstExpression *expression)
 {
-	visitExpression(expression->a);
-	visitExpression(expression->b);
-	switch (expression->operator.type) {
+	AstExpressionBinary *e = expression->as.binary;
+	visitExpression(e->a);
+	visitExpression(e->b);
+	switch (e->operator.type) {
 		case TT_And: addInstruction(ir_initAnd()); break;
 		case TT_And_And: addInstruction(ir_initAnd()); break;
 		case TT_Bang_Equal: addInstruction(ir_initNotEqu()); break;
@@ -197,60 +203,77 @@ static void visitExpressionBinary (AstExpressionBinary *expression)
 	}
 }
 
-static void visitExpressionBoolean (AstExpressionBoolean *expression)
+static void visitExpressionBoolean (AstExpression *expression)
 {
-	addInstruction(ir_initPush(expression->value));
+	AstExpressionBoolean *e = expression->as.boolean;
+	addInstruction(ir_initPush(e->value));
 }
 
-static void visitExpressionNumber (AstExpressionNumber *expression)
+static void visitExpressionNumber (AstExpression *expression)
 {
-	char *buffer = mem_alloc(expression->value.length + 1);
-	sprintf(buffer, "%.*s", expression->value.length, expression->value.lexeme);
+	AstExpressionNumber *e = expression->as.number;
+	char *buffer = mem_alloc(e->value.length + 1);
+	sprintf(buffer, "%.*s", e->value.length, e->value.lexeme);
 	addInstruction(ir_initPush(atoi(buffer)));
 }
 
-static void visitExpressionPostfix (AstExpressionPostfix *expression)
+static void visitExpressionPostfix (AstExpression *expression)
 {
-	visitExpression(expression->e);
-	addInstruction(ir_initRef(telescope_get(gen.scope, expression->e->as.var->identifier)->physicalIndex));
-	switch (expression->operator.type) {
-		case TT_Plus_Plus: addInstruction(ir_initInc()); break;
+	AstExpressionPostfix *e = expression->as.postfix;
+	visitExpression(e->e);
+	addInstruction(ir_initDeref());
+	visitExpression(e->e);
+	switch (e->operator.type) {
+		case TT_Plus_Plus:
+			addInstruction(ir_initInc());
+			break;
 		default:
 	}
 	addInstruction(ir_initPop());
 }
 
-static void visitExpressionPrefix (AstExpressionPrefix *expression)
+static void visitExpressionPrefix (AstExpression *expression)
 {
-	visitExpression(expression->e);
-	switch (expression->operator.type) {
+	AstExpressionPrefix *e = expression->as.prefix;
+	visitExpression(e->e);
+	switch (e->operator.type) {
 		case TT_Bang:
 			addInstruction(ir_initNot());
 			addInstruction(ir_initPush(1));
 			addInstruction(ir_initAnd());
 			break;
 		case TT_Minus: addInstruction(ir_initNeg()); break;
+		case TT_Plus_Plus:
+			addInstruction(ir_initInc());
+			addInstruction(ir_initDeref());
+			break;
 		case TT_Tilde: addInstruction(ir_initNot()); break;
 		default:
 	}
 }
 
-static void visitExpressionTernary (AstExpressionTernary *expression)
+static void visitExpressionTernary (AstExpression *expression)
 {
+	AstExpressionTernary *e = expression->as.ternary;
 	int l0 = gen.label++;
 	int l1 = gen.label++;
-	visitExpression(expression->condition);
+	visitExpression(e->condition);
 	addInstruction(ir_initJmpFalse(l0));
-	visitExpression(expression->a);
+	visitExpression(e->a);
 	addInstruction(ir_initJmp(l1));
 	addInstruction(ir_initLabel(l0));
-	visitExpression(expression->b);
+	visitExpression(e->b);
 	addInstruction(ir_initLabel(l1));
 }
 
-static void visitExpressionVar (AstExpressionVar *expression)
+static void visitExpressionVar (AstExpression *expression)
 {
-	addInstruction(ir_initVal(telescope_get(gen.scope, expression->identifier)->physicalIndex));
+	AstExpressionVar *e = expression->as.var;
+	if (expression->modifiable) {
+		addInstruction(ir_initRef(telescope_get(gen.scope, e->identifier)->physicalIndex));
+	} else {
+		addInstruction(ir_initVal(telescope_get(gen.scope, e->identifier)->physicalIndex));
+	}
 }
 
 static void addInstruction (Ir *instruction)

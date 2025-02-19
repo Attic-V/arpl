@@ -75,6 +75,7 @@ struct AstExpression {
 		AstExpressionVar *var;
 	} as;
 	DataType dataType;
+	bool modifiable;
 };
 
 typedef struct AstStatement AstStatement;

@@ -14,6 +14,7 @@ static void transform (Ir *r);
 static void transformAdd (Ir *ir);
 static void transformAnd (Ir *ir);
 static void transformAssign (Ir *ir);
+static void transformDeref (Ir *ir);
 static void transformEqu (Ir *ir);
 static void transformInc (Ir *ir);
 static void transformJmp (Ir *ir);
@@ -87,6 +88,7 @@ static void transform (Ir *r)
 		transformer(Add),
 		transformer(And),
 		transformer(Assign),
+		transformer(Deref),
 		transformer(Equ),
 		transformer(Inc),
 		transformer(Jmp),
@@ -141,6 +143,14 @@ static void transformAssign (Ir *ir)
 	pop(r9);
 	pop(r8);
 	emit("\tmov     dword [r8], r9d");
+	push(r8);
+}
+
+static void transformDeref (Ir *ir)
+{
+	IrDeref *instruction = ir->as.deref;
+	(void)instruction;
+	pop(r8);
 	emit("\tmov     r8d, dword [r8]");
 	push(r8);
 }
@@ -162,7 +172,6 @@ static void transformInc (Ir *ir)
 	(void)instruction;
 	pop(r8);
 	emit("\tinc     dword [r8]");
-	emit("\tmov     r8d, dword [r8]");
 	push(r8);
 }
 
