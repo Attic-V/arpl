@@ -39,6 +39,7 @@ typedef enum {
 	TT_RParen,
 	TT_Semicolon,
 	TT_Star,
+	TT_Star_Equal,
 	TT_Tilde,
 	TT_True,
 	TT_Var,

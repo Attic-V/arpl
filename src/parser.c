@@ -166,7 +166,7 @@ static AstExpression *getExpression (void)
 static AstExpression *getExpressionAssign (void)
 {
 	AstExpression *expression = getExpressionTernary();
-	while (check(TT_Equal) || check(TT_Plus_Equal) || check(TT_Minus_Equal)) {
+	while (check(TT_Equal) || check(TT_Plus_Equal) || check(TT_Minus_Equal) || check(TT_Star_Equal)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpression();
 		expression = ast_initExpressionAssign(expression, right, operator);
