@@ -285,6 +285,7 @@ static void visitExpressionPostfix (AstExpressionPostfix *node)
 {
 	visitExpression(node->e);
 	switch (node->operator.type) {
+		case TT_Minus_Minus:
 		case TT_Plus_Plus:
 			if (node->e->dataType != DT_Number) {
 				error(node->operator, "operand must be a number");
@@ -313,6 +314,7 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 				error(node->operator, "operand must be a number");
 			}
 			break;
+		case TT_Minus_Minus:
 		case TT_Plus_Plus:
 			if (node->e->dataType != DT_Number) {
 				error(node->operator, "operand must be a number");

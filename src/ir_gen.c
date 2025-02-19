@@ -239,9 +239,8 @@ static void visitExpressionPostfix (AstExpression *expression)
 	addInstruction(ir_initDeref());
 	visitExpression(e->e);
 	switch (e->operator.type) {
-		case TT_Plus_Plus:
-			addInstruction(ir_initInc());
-			break;
+		case TT_Plus_Plus: addInstruction(ir_initInc()); break;
+		case TT_Minus_Minus: addInstruction(ir_initDec()); break;
 		default:
 	}
 	addInstruction(ir_initPop());
@@ -258,6 +257,10 @@ static void visitExpressionPrefix (AstExpression *expression)
 			addInstruction(ir_initAnd());
 			break;
 		case TT_Minus: addInstruction(ir_initNeg()); break;
+		case TT_Minus_Minus:
+			addInstruction(ir_initDec());
+			addInstruction(ir_initDeref());
+			break;
 		case TT_Plus_Plus:
 			addInstruction(ir_initInc());
 			addInstruction(ir_initDeref());
