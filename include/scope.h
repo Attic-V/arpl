@@ -18,7 +18,7 @@ bool scope_add (Scope *scope, Symbol *symbol);
 Symbol *scope_get (Scope *scope, Token identifier);
 size_t scope_physicalSize (Scope *scope);
 /**
- * `scope_get` for that searches parent scopes
+ * `scope_get` that also searches parent scopes
  */
 Symbol *telescope_get (Scope *scope, Token identifier);
 
