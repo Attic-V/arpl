@@ -91,6 +91,7 @@ Token *scan (char *source)
 			if (!strcmp(buffer, "for")) { token->type = TT_For; continue; }
 			if (!strcmp(buffer, "if")) { token->type = TT_If; continue; }
 			if (!strcmp(buffer, "int")) { token->type = TT_Int; continue; }
+			if (!strcmp(buffer, "return")) { token->type = TT_Return; continue; }
 			if (!strcmp(buffer, "true")) { token->type = TT_True; continue; }
 			if (!strcmp(buffer, "var")) { token->type = TT_Var; continue; }
 			if (!strcmp(buffer, "while")) { token->type = TT_While; continue; }

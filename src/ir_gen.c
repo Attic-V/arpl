@@ -16,6 +16,7 @@ static void visitStatementExpr (AstStatementExpr *statement);
 static void visitStatementForI (AstStatementForI *statement);
 static void visitStatementIfE (AstStatementIfE *statement);
 static void visitStatementInit (AstStatementInit *statement);
+static void visitStatementReturnE (AstStatementReturnE *statement);
 static void visitStatementVar (AstStatementVar *statement);
 static void visitStatementWhileC (AstStatementWhileC *statement);
 
@@ -79,6 +80,7 @@ static void visitStatement (AstStatement *statement)
 		case AstStatement_ForI: visitStatementForI(statement->as.forI); break;
 		case AstStatement_IfE: visitStatementIfE(statement->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(statement->as.init); break;
+		case AstStatement_ReturnE: visitStatementReturnE(statement->as.returnE); break;
 		case AstStatement_Var: visitStatementVar(statement->as.var); break;
 		case AstStatement_WhileC: visitStatementWhileC(statement->as.whileC); break;
 	}
@@ -105,6 +107,7 @@ static void visitStatementDoWhile (AstStatementDoWhile *statement)
 static void visitStatementExpr (AstStatementExpr *statement)
 {
 	visitExpression(statement->expression);
+	addInstruction(ir_initPop());
 }
 
 static void visitStatementForI (AstStatementForI *statement)
@@ -154,6 +157,15 @@ static void visitStatementInit (AstStatementInit *statement)
 	expr->modifiable = true;
 	visitStatement(stmt);
 	visitExpression(ast_initExpressionAssign(expr, statement->expression, statement->operator));
+	addInstruction(ir_initPop());
+}
+
+static void visitStatementReturnE (AstStatementReturnE *statement)
+{
+	if (statement->expression != NULL) {
+		visitExpression(statement->expression);
+	}
+	addInstruction(ir_initRet());
 }
 
 static void visitStatementVar (AstStatementVar *statement)

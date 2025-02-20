@@ -33,6 +33,7 @@ static void transformPop (Ir *ir);
 static void transformPush (Ir *ir);
 static void transformRef (Ir *ir);
 static void transformReserve (Ir *ir);
+static void transformRet (Ir *ir);
 static void transformSar (Ir *ir);
 static void transformShl (Ir *ir);
 static void transformSub (Ir *ir);
@@ -74,7 +75,6 @@ void gen_x86 (Ir *ir)
 		transform(r);
 	}
 
-	pop(rax);
 	emit("\tmov     rsp, rbp");
 	pop(rbp);
 	emit("\tret");
@@ -108,6 +108,7 @@ static void transform (Ir *r)
 		transformer(Push),
 		transformer(Ref),
 		transformer(Reserve),
+		transformer(Ret),
 		transformer(Sar),
 		transformer(Shl),
 		transformer(Sub),
@@ -316,6 +317,16 @@ static void transformReserve (Ir *ir)
 	IrReserve *instruction = ir->as.reserve;
 	(void)instruction;
 	emit("\tsub     rsp, %d", instruction->bytes);
+}
+
+static void transformRet (Ir *ir)
+{
+	IrRet *instruction = ir->as.ret;
+	(void)instruction;
+	emit("\tmov     rax, [rsp]");
+	emit("\tmov     rsp, rbp");
+	pop(rbp);
+	emit("\tret");
 }
 
 static void transformSar (Ir *ir)

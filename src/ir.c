@@ -24,6 +24,7 @@ static IrPop *irPop_init (void);
 static IrPush *irPush_init (int32_t value);
 static IrRef *irRef_init (size_t idx);
 static IrReserve *irReserve_init (size_t bytes);
+static IrRet *irRet_init (void);
 static IrSar *irSar_init (void);
 static IrShl *irShl_init (void);
 static IrSub *irSub_init (void);
@@ -228,6 +229,15 @@ Ir *ir_initReserve (size_t bytes)
 	return ir;
 }
 
+Ir *ir_initRet (void)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_Ret;
+	ir->as.ret = irRet_init();
+	dll_init(ir);
+	return ir;
+}
+
 Ir *ir_initSar (void)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
@@ -410,6 +420,12 @@ static IrReserve *irReserve_init (size_t bytes)
 	IrReserve *reserve = mem_alloc(sizeof(*reserve));
 	reserve->bytes = bytes;
 	return reserve;
+}
+
+static IrRet *irRet_init (void)
+{
+	IrRet *ret = mem_alloc(sizeof(*ret));
+	return ret;
 }
 
 static IrSar *irSar_init (void)

@@ -79,6 +79,9 @@ typedef struct {
 } IrReserve;
 
 typedef struct {
+} IrRet;
+
+typedef struct {
 } IrSar;
 
 typedef struct {
@@ -117,6 +120,7 @@ typedef enum {
 	Ir_Push,
 	Ir_Ref,
 	Ir_Reserve,
+	Ir_Ret,
 	Ir_Sar,
 	Ir_Shl,
 	Ir_Sub,
@@ -151,6 +155,7 @@ struct Ir {
 		IrPush *push;
 		IrRef *ref;
 		IrReserve *reserve;
+		IrRet *ret;
 		IrSar *sar;
 		IrShl *shl;
 		IrSub *sub;
@@ -183,6 +188,7 @@ Ir *ir_initPop (void);
 Ir *ir_initPush (int32_t value);
 Ir *ir_initRef (size_t idx);
 Ir *ir_initReserve (size_t bytes);
+Ir *ir_initRet (void);
 Ir *ir_initSar (void);
 Ir *ir_initShl (void);
 Ir *ir_initSub (void);

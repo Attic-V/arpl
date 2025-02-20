@@ -15,6 +15,7 @@ static void visitStatementExpr (AstStatementExpr *node);
 static void visitStatementForI (AstStatementForI *node);
 static void visitStatementIfE (AstStatementIfE *node);
 static void visitStatementInit (AstStatementInit *node);
+static void visitStatementReturnE (AstStatementReturnE *node);
 static void visitStatementVar (AstStatementVar *node);
 static void visitStatementWhileC (AstStatementWhileC *node);
 
@@ -70,6 +71,7 @@ static void visitStatement (AstStatement *node)
 		case AstStatement_ForI: visitStatementForI(node->as.forI); break;
 		case AstStatement_IfE: visitStatementIfE(node->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(node->as.init); break;
+		case AstStatement_ReturnE: visitStatementReturnE(node->as.returnE); break;
 		case AstStatement_Var: visitStatementVar(node->as.var); break;
 		case AstStatement_WhileC: visitStatementWhileC(node->as.whileC); break;
 	}
@@ -139,6 +141,14 @@ static void visitStatementInit (AstStatementInit *node)
 {
 	visitStatement(ast_initStatementVar(node->identifier, node->type));
 	visitExpression(ast_initExpressionAssign(ast_initExpressionVar(node->identifier), node->expression, node->operator));
+}
+
+static void visitStatementReturnE (AstStatementReturnE *node)
+{
+	if (node->expression != NULL) {
+		visitExpression(node->expression);
+		node->expression->modifiable = false;
+	}
 }
 
 static void visitStatementVar (AstStatementVar *node)

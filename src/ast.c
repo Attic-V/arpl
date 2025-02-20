@@ -8,6 +8,7 @@ static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
 static AstStatementForI *astStatement_initForI (AstStatement *init, AstExpression *condition, AstExpression *update, AstStatement *body, Token keyword);
 static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword);
 static AstStatementInit *astStatement_initInit (Token identifier, Token type, AstExpression *expression, Token operator);
+static AstStatementReturnE *astStatement_initReturnE (AstExpression *expression);
 static AstStatementVar *astStatement_initVar (Token identifier, Token type);
 static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a, Token keyword);
 
@@ -84,6 +85,15 @@ AstStatement *ast_initStatementInit (Token identifier, Token type, AstExpression
 	AstStatement *statement = mem_alloc(sizeof(*statement));
 	statement->type = AstStatement_Init;
 	statement->as.init = astStatement_initInit(identifier, type, expression, operator);
+	dll_init(statement);
+	return statement;
+}
+
+AstStatement *ast_initStatementReturnE (AstExpression *expression)
+{
+	AstStatement *statement = mem_alloc(sizeof(*statement));
+	statement->type = AstStatement_ReturnE;
+	statement->as.returnE = astStatement_initReturnE(expression);
 	dll_init(statement);
 	return statement;
 }
@@ -221,6 +231,13 @@ static AstStatementInit *astStatement_initInit (Token identifier, Token type, As
 	init->expression = expression;
 	init->operator = operator;
 	return init;
+}
+
+static AstStatementReturnE *astStatement_initReturnE (AstExpression *expression)
+{
+	AstStatementReturnE *returnE = mem_alloc(sizeof(*returnE));
+	returnE->expression = expression;
+	return returnE;
 }
 
 static AstStatementVar *astStatement_initVar (Token identifier, Token type)

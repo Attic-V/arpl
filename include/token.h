@@ -38,6 +38,7 @@ typedef enum {
 	TT_Plus_Plus,
 	TT_Question,
 	TT_RBrace,
+	TT_Return,
 	TT_RParen,
 	TT_Semicolon,
 	TT_Star,

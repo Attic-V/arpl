@@ -16,6 +16,7 @@ static AstStatement *getStatementDoWhile (void);
 static AstStatement *getStatementExpr (void);
 static AstStatement *getStatementForI (void);
 static AstStatement *getStatementIfE (void);
+static AstStatement *getStatementReturnE (void);
 static AstStatement *getStatementVar (void);
 static AstStatement *getStatementWhileC (void);
 
@@ -69,6 +70,7 @@ static AstStatement *getStatement (void)
 		case TT_For: return getStatementForI();
 		case TT_If: return getStatementIfE();
 		case TT_LBrace: return getStatementBlock();
+		case TT_Return: return getStatementReturnE();
 		case TT_Var: return getStatementVar();
 		case TT_While: return getStatementWhileC();
 		default:
@@ -151,6 +153,17 @@ static AstStatement *getStatementIfE (void)
 		b = getStatement();
 	}
 	return ast_initStatementIfE(condition, a, b, keyword);
+}
+
+static AstStatement *getStatementReturnE (void)
+{
+	consume(TT_Return, "expected 'return'");
+	AstExpression *expression = NULL;
+	if (!check(TT_Semicolon)) {
+		expression = getExpression();
+	}
+	consume(TT_Semicolon, "expected ';'");
+	return ast_initStatementReturnE(expression);
 }
 
 static AstStatement *getStatementVar (void)

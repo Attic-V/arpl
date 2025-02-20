@@ -118,6 +118,10 @@ typedef struct {
 } AstStatementInit;
 
 typedef struct {
+	AstExpression *expression;
+} AstStatementReturnE;
+
+typedef struct {
 	Token identifier;
 	Token type;
 } AstStatementVar;
@@ -135,6 +139,7 @@ typedef enum {
 	AstStatement_ForI,
 	AstStatement_IfE,
 	AstStatement_Init,
+	AstStatement_ReturnE,
 	AstStatement_Var,
 	AstStatement_WhileC,
 } AstStatementType;
@@ -148,6 +153,7 @@ struct AstStatement {
 		AstStatementForI *forI;
 		AstStatementIfE *ifE;
 		AstStatementInit *init;
+		AstStatementReturnE *returnE;
 		AstStatementVar *var;
 		AstStatementWhileC *whileC;
 	} as;
@@ -172,6 +178,7 @@ AstStatement *ast_initStatementExpr (AstExpression *expression);
 AstStatement *ast_initStatementForI (AstStatement *init, AstExpression* condition, AstExpression *update, AstStatement *body, Token keyword);
 AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyord);
 AstStatement *ast_initStatementInit (Token identifier, Token type, AstExpression *expression, Token operator);
+AstStatement *ast_initStatementReturnE (AstExpression *expression);
 AstStatement *ast_initStatementVar (Token identifier, Token type);
 AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement* a, Token keyword);
 
