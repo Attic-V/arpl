@@ -127,7 +127,6 @@ static void visitStatementForI (AstStatementForI *statement)
 	}
 	if (statement->update != NULL) {
 		visitStatement(ast_initStatementExpr(statement->update));
-		addInstruction(ir_initPop());
 	}
 	addInstruction(ir_initJmp(l0));
 	addInstruction(ir_initLabel(l1));
