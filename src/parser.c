@@ -96,9 +96,9 @@ static AstStatement *getStatementBlock (void)
 
 static AstStatement *getStatementContinueL (void)
 {
-	consume(TT_Continue, "expected 'continue'");
+	Token keyword = consume(TT_Continue, "expected 'continue'");
 	consume(TT_Semicolon, "expected ';'");
-	return ast_initStatementContinueL();
+	return ast_initStatementContinueL(keyword);
 }
 
 static AstStatement *getStatementDoWhile (void)

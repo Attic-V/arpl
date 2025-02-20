@@ -3,7 +3,7 @@
 #include "memory.h"
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
-static AstStatementContinueL *astStatement_initContinueL (void);
+static AstStatementContinueL *astStatement_initContinueL (Token keyword);
 static AstStatementDoWhile *astStatement_initDoWhile (AstStatement *a, AstExpression *condition, Token operator);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
 static AstStatementForI *astStatement_initForI (AstStatement *init, AstExpression *condition, AstExpression *update, AstStatement *body, Token keyword);
@@ -45,11 +45,11 @@ AstStatement *ast_initStatementBlock (AstStatement *children)
 	return statement;
 }
 
-AstStatement *ast_initStatementContinueL (void)
+AstStatement *ast_initStatementContinueL (Token keyword)
 {
 	AstStatement *statement = mem_alloc(sizeof(*statement));
 	statement->type = AstStatement_ContinueL;
-	statement->as.continueL = astStatement_initContinueL();
+	statement->as.continueL = astStatement_initContinueL(keyword);
 	dll_init(statement);
 	return statement;
 }
@@ -196,9 +196,10 @@ static AstStatementBlock *astStatement_initBlock (AstStatement *children)
 	return block;
 }
 
-static AstStatementContinueL *astStatement_initContinueL (void)
+static AstStatementContinueL *astStatement_initContinueL (Token keyword)
 {
 	AstStatementContinueL *continueL = mem_alloc(sizeof(*continueL));
+	continueL->keyword = keyword;
 	return continueL;
 }
 

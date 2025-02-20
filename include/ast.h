@@ -86,6 +86,7 @@ typedef struct {
 } AstStatementBlock;
 
 typedef struct {
+	Token keyword;
 } AstStatementContinueL;
 
 typedef struct {
@@ -178,7 +179,7 @@ Ast *ast_init (AstRoot *root);
 AstRoot *ast_initRoot (AstStatement *statement);
 
 AstStatement *ast_initStatementBlock (AstStatement *children);
-AstStatement *ast_initStatementContinueL (void);
+AstStatement *ast_initStatementContinueL (Token keyword);
 AstStatement *ast_initStatementDoWhile (AstStatement *a, AstExpression *condition, Token keyword);
 AstStatement *ast_initStatementExpr (AstExpression *expression);
 AstStatement *ast_initStatementForI (AstStatement *init, AstExpression* condition, AstExpression *update, AstStatement *body, Token keyword);
