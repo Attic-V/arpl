@@ -11,6 +11,7 @@ typedef enum {
 	TT_Bool,
 	TT_Caret,
 	TT_Colon,
+	TT_Continue,
 	TT_Do,
 	TT_Else,
 	TT_EOF,

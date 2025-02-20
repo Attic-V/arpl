@@ -3,6 +3,7 @@
 #include "memory.h"
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
+static AstStatementContinueL *astStatement_initContinueL (void);
 static AstStatementDoWhile *astStatement_initDoWhile (AstStatement *a, AstExpression *condition, Token operator);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
 static AstStatementForI *astStatement_initForI (AstStatement *init, AstExpression *condition, AstExpression *update, AstStatement *body, Token keyword);
@@ -40,6 +41,15 @@ AstStatement *ast_initStatementBlock (AstStatement *children)
 	AstStatement *statement = mem_alloc(sizeof(*statement));
 	statement->type = AstStatement_Block;
 	statement->as.block = astStatement_initBlock(children);
+	dll_init(statement);
+	return statement;
+}
+
+AstStatement *ast_initStatementContinueL (void)
+{
+	AstStatement *statement = mem_alloc(sizeof(*statement));
+	statement->type = AstStatement_ContinueL;
+	statement->as.continueL = astStatement_initContinueL();
 	dll_init(statement);
 	return statement;
 }
@@ -184,6 +194,12 @@ static AstStatementBlock *astStatement_initBlock (AstStatement *children)
 	AstStatementBlock *block = mem_alloc(sizeof(*block));
 	block->children = children;
 	return block;
+}
+
+static AstStatementContinueL *astStatement_initContinueL (void)
+{
+	AstStatementContinueL *continueL = mem_alloc(sizeof(*continueL));
+	return continueL;
 }
 
 static AstStatementDoWhile *astStatement_initDoWhile (AstStatement *a, AstExpression *condition, Token keyword)

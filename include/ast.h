@@ -86,6 +86,9 @@ typedef struct {
 } AstStatementBlock;
 
 typedef struct {
+} AstStatementContinueL;
+
+typedef struct {
 	AstStatement *a;
 	AstExpression *condition;
 	Token keyword;
@@ -134,6 +137,7 @@ typedef struct {
 
 typedef enum {
 	AstStatement_Block,
+	AstStatement_ContinueL,
 	AstStatement_DoWhile,
 	AstStatement_Expr,
 	AstStatement_ForI,
@@ -148,6 +152,7 @@ struct AstStatement {
 	AstStatementType type;
 	union {
 		AstStatementBlock *block;
+		AstStatementContinueL *continueL;
 		AstStatementDoWhile *doWhile;
 		AstStatementExpr *expr;
 		AstStatementForI *forI;
@@ -173,6 +178,7 @@ Ast *ast_init (AstRoot *root);
 AstRoot *ast_initRoot (AstStatement *statement);
 
 AstStatement *ast_initStatementBlock (AstStatement *children);
+AstStatement *ast_initStatementContinueL (void);
 AstStatement *ast_initStatementDoWhile (AstStatement *a, AstExpression *condition, Token keyword);
 AstStatement *ast_initStatementExpr (AstExpression *expression);
 AstStatement *ast_initStatementForI (AstStatement *init, AstExpression* condition, AstExpression *update, AstStatement *body, Token keyword);

@@ -11,6 +11,7 @@ static void visitRoot (AstRoot *root);
 
 static void visitStatement (AstStatement *statement);
 static void visitStatementBlock (AstStatementBlock *statement);
+static void visitStatementContinueL (AstStatementContinueL *statement);
 static void visitStatementDoWhile (AstStatementDoWhile *statement);
 static void visitStatementExpr (AstStatementExpr *statement);
 static void visitStatementForI (AstStatementForI *statement);
@@ -38,6 +39,7 @@ typedef struct {
 	size_t reservedBytes;
 	size_t tableSegment;
 	Scope *scope;
+	int continueLabel;
 } IrGenerator;
 
 static IrGenerator gen;
@@ -75,6 +77,7 @@ static void visitStatement (AstStatement *statement)
 {
 	switch (statement->type) {
 		case AstStatement_Block: visitStatementBlock(statement->as.block); break;
+		case AstStatement_ContinueL: visitStatementContinueL(statement->as.continueL); break;
 		case AstStatement_DoWhile: visitStatementDoWhile(statement->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(statement->as.expr); break;
 		case AstStatement_ForI: visitStatementForI(statement->as.forI); break;
@@ -88,18 +91,28 @@ static void visitStatement (AstStatement *statement)
 
 static void visitStatementBlock (AstStatementBlock *statement)
 {
+	int currentContinue = gen.continueLabel;
 	gen.scope = statement->scope;
 	for (AstStatement *stmt = statement->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
 		gen.scope = statement->scope;
+		gen.continueLabel = currentContinue;
 	}
+}
+
+static void visitStatementContinueL (AstStatementContinueL *statement)
+{
+	addInstruction(ir_initJmp(gen.continueLabel));
 }
 
 static void visitStatementDoWhile (AstStatementDoWhile *statement)
 {
 	int l0 = gen.label++;
+	int l1 = gen.label++;
+	gen.continueLabel = l1;
 	addInstruction(ir_initLabel(l0));
 	visitStatement(statement->a);
+	addInstruction(ir_initLabel(l1));
 	visitExpression(statement->condition);
 	addInstruction(ir_initJmpTrue(l0));
 }
@@ -114,6 +127,8 @@ static void visitStatementForI (AstStatementForI *statement)
 {
 	int l0 = gen.label++;
 	int l1 = gen.label++;
+	int l2 = gen.label++;
+	gen.continueLabel = l2;
 	if (statement->init != NULL) {
 		visitStatement(statement->init);
 	}
@@ -125,6 +140,7 @@ static void visitStatementForI (AstStatementForI *statement)
 	if (statement->body != NULL) {
 		visitStatement(statement->body);
 	}
+	addInstruction(ir_initLabel(l2));
 	if (statement->update != NULL) {
 		visitStatement(ast_initStatementExpr(statement->update));
 	}
@@ -174,6 +190,7 @@ static void visitStatementWhileC (AstStatementWhileC *statement)
 {
 	int l0 = gen.label++;
 	int l1 = gen.label++;
+	gen.continueLabel = l0;
 	addInstruction(ir_initLabel(l0));
 	visitExpression(statement->condition);
 	addInstruction(ir_initJmpFalse(l1));

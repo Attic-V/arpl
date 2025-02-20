@@ -10,6 +10,7 @@ static void visitRoot (AstRoot *node);
 
 static void visitStatement (AstStatement *node);
 static void visitStatementBlock (AstStatementBlock *node);
+static void visitStatementContinueL (AstStatementContinueL *node);
 static void visitStatementDoWhile (AstStatementDoWhile *node);
 static void visitStatementExpr (AstStatementExpr *node);
 static void visitStatementForI (AstStatementForI *node);
@@ -66,6 +67,7 @@ static void visitStatement (AstStatement *node)
 {
 	switch (node->type) {
 		case AstStatement_Block: visitStatementBlock(node->as.block); break;
+		case AstStatement_ContinueL: visitStatementContinueL(node->as.continueL); break;
 		case AstStatement_DoWhile: visitStatementDoWhile(node->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
 		case AstStatement_ForI: visitStatementForI(node->as.forI); break;
@@ -90,6 +92,9 @@ static void visitStatementBlock (AstStatementBlock *node)
 		node->scope->parent->physicalSize += node->scope->physicalSize;
 	}
 }
+
+static void visitStatementContinueL (AstStatementContinueL *node)
+{ }
 
 static void visitStatementDoWhile (AstStatementDoWhile *node)
 {
