@@ -12,6 +12,7 @@ static void visitStatement (AstStatement *node);
 static void visitStatementBlock (AstStatementBlock *node);
 static void visitStatementDoWhile (AstStatementDoWhile *node);
 static void visitStatementExpr (AstStatementExpr *node);
+static void visitStatementForI (AstStatementForI *node);
 static void visitStatementIfE (AstStatementIfE *node);
 static void visitStatementInit (AstStatementInit *node);
 static void visitStatementVar (AstStatementVar *node);
@@ -66,6 +67,7 @@ static void visitStatement (AstStatement *node)
 		case AstStatement_Block: visitStatementBlock(node->as.block); break;
 		case AstStatement_DoWhile: visitStatementDoWhile(node->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
+		case AstStatement_ForI: visitStatementForI(node->as.forI); break;
 		case AstStatement_IfE: visitStatementIfE(node->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(node->as.init); break;
 		case AstStatement_Var: visitStatementVar(node->as.var); break;
@@ -100,6 +102,25 @@ static void visitStatementExpr (AstStatementExpr *node)
 {
 	visitExpression(node->expression);
 	node->expression->modifiable = false;
+}
+
+static void visitStatementForI (AstStatementForI *node)
+{
+	if (node->init != NULL) {
+		visitStatement(node->init);
+	}
+	if (node->condition != NULL) {
+		visitExpression(node->condition);
+		if (node->condition->dataType != DT_Boolean) {
+			error(node->keyword, "condition must be a boolean");
+		}
+	}
+	if (node->update != NULL) {
+		visitExpression(node->update);
+	}
+	if (node->body != NULL) {
+		visitStatement(node->body);
+	}
 }
 
 static void visitStatementIfE (AstStatementIfE *node)

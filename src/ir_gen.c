@@ -13,6 +13,7 @@ static void visitStatement (AstStatement *statement);
 static void visitStatementBlock (AstStatementBlock *statement);
 static void visitStatementDoWhile (AstStatementDoWhile *statement);
 static void visitStatementExpr (AstStatementExpr *statement);
+static void visitStatementForI (AstStatementForI *statement);
 static void visitStatementIfE (AstStatementIfE *statement);
 static void visitStatementInit (AstStatementInit *statement);
 static void visitStatementVar (AstStatementVar *statement);
@@ -75,6 +76,7 @@ static void visitStatement (AstStatement *statement)
 		case AstStatement_Block: visitStatementBlock(statement->as.block); break;
 		case AstStatement_DoWhile: visitStatementDoWhile(statement->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(statement->as.expr); break;
+		case AstStatement_ForI: visitStatementForI(statement->as.forI); break;
 		case AstStatement_IfE: visitStatementIfE(statement->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(statement->as.init); break;
 		case AstStatement_Var: visitStatementVar(statement->as.var); break;
@@ -103,6 +105,29 @@ static void visitStatementDoWhile (AstStatementDoWhile *statement)
 static void visitStatementExpr (AstStatementExpr *statement)
 {
 	visitExpression(statement->expression);
+}
+
+static void visitStatementForI (AstStatementForI *statement)
+{
+	int l0 = gen.label++;
+	int l1 = gen.label++;
+	if (statement->init != NULL) {
+		visitStatement(statement->init);
+	}
+	addInstruction(ir_initLabel(l0));
+	if (statement->condition != NULL) {
+		visitExpression(statement->condition);
+		addInstruction(ir_initJmpFalse(l1));
+	}
+	if (statement->body != NULL) {
+		visitStatement(statement->body);
+	}
+	if (statement->update != NULL) {
+		visitStatement(ast_initStatementExpr(statement->update));
+		addInstruction(ir_initPop());
+	}
+	addInstruction(ir_initJmp(l0));
+	addInstruction(ir_initLabel(l1));
 }
 
 static void visitStatementIfE (AstStatementIfE *statement)

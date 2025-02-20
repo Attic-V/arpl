@@ -14,6 +14,7 @@ static AstStatement *getStatement(void);
 static AstStatement *getStatementBlock (void);
 static AstStatement *getStatementDoWhile (void);
 static AstStatement *getStatementExpr (void);
+static AstStatement *getStatementForI (void);
 static AstStatement *getStatementIfE (void);
 static AstStatement *getStatementVar (void);
 static AstStatement *getStatementWhileC (void);
@@ -65,6 +66,7 @@ static AstStatement *getStatement (void)
 {
 	switch (parser.tokens[parser.current].type) {
 		case TT_Do: return getStatementDoWhile();
+		case TT_For: return getStatementForI();
 		case TT_If: return getStatementIfE();
 		case TT_LBrace: return getStatementBlock();
 		case TT_Var: return getStatementVar();
@@ -105,6 +107,35 @@ static AstStatement *getStatementExpr (void)
 	AstStatement *statement = ast_initStatementExpr(getExpression());
 	consume(TT_Semicolon, "expected ';'");
 	return statement;
+}
+
+static AstStatement *getStatementForI (void)
+{
+	Token keyword = consume(TT_For, "expected 'for'");
+	consume(TT_LParen, "expected '('");
+	AstStatement *init = NULL;
+	if (check(TT_Semicolon)) {
+		parser.current++;
+	} else {
+		init = getStatement();
+	}
+	AstExpression *condition = NULL;
+	if (!check(TT_Semicolon)) {
+		condition = getExpression();
+	}
+	consume(TT_Semicolon, "expected ';'");
+	AstExpression *update = NULL;
+	if (!check(TT_RParen)) {
+		update = getExpression();
+	}
+	consume(TT_RParen, "expected ')'");
+	AstStatement *body = NULL;
+	if (check(TT_Semicolon)) {
+		parser.current++;
+	} else {
+		body = getStatement();
+	}
+	return ast_initStatementBlock(ast_initStatementForI(init, condition, update, body, keyword));
 }
 
 static AstStatement *getStatementIfE (void)

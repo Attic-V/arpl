@@ -5,6 +5,7 @@
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementDoWhile *astStatement_initDoWhile (AstStatement *a, AstExpression *condition, Token operator);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
+static AstStatementForI *astStatement_initForI (AstStatement *init, AstExpression *condition, AstExpression *update, AstStatement *body, Token keyword);
 static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword);
 static AstStatementInit *astStatement_initInit (Token identifier, Token type, AstExpression *expression, Token operator);
 static AstStatementVar *astStatement_initVar (Token identifier, Token type);
@@ -56,6 +57,15 @@ AstStatement *ast_initStatementExpr (AstExpression *expression)
 	AstStatement *statement = mem_alloc(sizeof(*statement));
 	statement->type = AstStatement_Expr;
 	statement->as.expr = astStatement_initExpr(expression);
+	dll_init(statement);
+	return statement;
+}
+
+AstStatement *ast_initStatementForI (AstStatement *init, AstExpression *condition, AstExpression *update, AstStatement *body, Token keyword)
+{
+	AstStatement *statement = mem_alloc(sizeof(*statement));
+	statement->type = AstStatement_ForI;
+	statement->as.forI = astStatement_initForI(init, condition, update, body, keyword);
 	dll_init(statement);
 	return statement;
 }
@@ -180,6 +190,17 @@ static AstStatementExpr *astStatement_initExpr (AstExpression *expression)
 	AstStatementExpr *expr = mem_alloc(sizeof(*expr));
 	expr->expression = expression;
 	return expr;
+}
+
+static AstStatementForI *astStatement_initForI (AstStatement *init, AstExpression *condition, AstExpression *update, AstStatement *body, Token keyword)
+{
+	AstStatementForI *forI = mem_alloc(sizeof(*forI));
+	forI->init = init;
+	forI->condition = condition;
+	forI->update = update;
+	forI->body = body;
+	forI->keyword = keyword;
+	return forI;
 }
 
 static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword)
