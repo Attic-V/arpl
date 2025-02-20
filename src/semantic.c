@@ -35,7 +35,7 @@ typedef struct {
 	Scope *currentScope;
 	size_t currentPhysicalIndex;
 	bool hadError;
-	bool inLoop;
+	bool canContinue;
 } Analyzer;
 
 static Analyzer analyzer;
@@ -46,7 +46,7 @@ void analyze (Ast *ast)
 	analyzer.currentScope = NULL;
 	analyzer.currentPhysicalIndex = 0;
 	analyzer.hadError = false;
-	analyzer.inLoop = false;
+	analyzer.canContinue = false;
 
 	visitAst(ast);
 
@@ -85,12 +85,12 @@ static void visitStatementBlock (AstStatementBlock *node)
 {
 	analyzer.currentScope = node->scope = scope_init();
 	node->scope->parent = analyzer.previousScope;
-	bool inLoop = analyzer.inLoop;
+	bool canContinue = analyzer.canContinue;
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
 		analyzer.previousScope = node->scope;
 		visitStatement(stmt);
 		analyzer.currentScope = node->scope;
-		analyzer.inLoop = inLoop;
+		analyzer.canContinue = canContinue;
 	}
 	if (node->scope->parent != NULL) {
 		node->scope->parent->physicalSize += node->scope->physicalSize;
@@ -99,7 +99,7 @@ static void visitStatementBlock (AstStatementBlock *node)
 
 static void visitStatementContinueL (AstStatementContinueL *node)
 {
-	if (!analyzer.inLoop) {
+	if (!analyzer.canContinue) {
 		analyzer.hadError = true;
 		error(node->keyword, "continue must be used within a loop");
 	}
@@ -107,7 +107,7 @@ static void visitStatementContinueL (AstStatementContinueL *node)
 
 static void visitStatementDoWhile (AstStatementDoWhile *node)
 {
-	analyzer.inLoop = true;
+	analyzer.canContinue = true;
 	visitStatement(node->a);
 	visitExpression(node->condition);
 	if (node->condition->dataType != DT_Boolean) {
@@ -126,7 +126,7 @@ static void visitStatementForI (AstStatementForI *node)
 	if (node->init != NULL) {
 		visitStatement(node->init);
 	}
-	analyzer.inLoop = true;
+	analyzer.canContinue = true;
 	if (node->condition != NULL) {
 		visitExpression(node->condition);
 		if (node->condition->dataType != DT_Boolean) {
@@ -180,7 +180,7 @@ static void visitStatementVar (AstStatementVar *node)
 
 static void visitStatementWhileC (AstStatementWhileC *node)
 {
-	analyzer.inLoop = true;
+	analyzer.canContinue = true;
 	visitExpression(node->condition);
 	if (node->condition->dataType != DT_Boolean) {
 		error(node->keyword, "condition must be a boolean");
