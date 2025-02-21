@@ -10,6 +10,7 @@ static void visitRoot (AstRoot *node);
 
 static void visitStatement (AstStatement *node);
 static void visitStatementBlock (AstStatementBlock *node);
+static void visitStatementBreakL (AstStatementBreakL *node);
 static void visitStatementContinueL (AstStatementContinueL *node);
 static void visitStatementDoWhile (AstStatementDoWhile *node);
 static void visitStatementExpr (AstStatementExpr *node);
@@ -36,6 +37,7 @@ typedef struct {
 	size_t currentPhysicalIndex;
 	bool hadError;
 	bool canContinue;
+	bool canBreak;
 } Analyzer;
 
 static Analyzer analyzer;
@@ -47,6 +49,7 @@ void analyze (Ast *ast)
 	analyzer.currentPhysicalIndex = 0;
 	analyzer.hadError = false;
 	analyzer.canContinue = false;
+	analyzer.canBreak = false;
 
 	visitAst(ast);
 
@@ -69,6 +72,7 @@ static void visitStatement (AstStatement *node)
 {
 	switch (node->type) {
 		case AstStatement_Block: visitStatementBlock(node->as.block); break;
+		case AstStatement_BreakL: visitStatementBreakL(node->as.breakL); break;
 		case AstStatement_ContinueL: visitStatementContinueL(node->as.continueL); break;
 		case AstStatement_DoWhile: visitStatementDoWhile(node->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
@@ -86,14 +90,24 @@ static void visitStatementBlock (AstStatementBlock *node)
 	analyzer.currentScope = node->scope = scope_init();
 	node->scope->parent = analyzer.previousScope;
 	bool canContinue = analyzer.canContinue;
+	bool canBreak = analyzer.canBreak;
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
 		analyzer.previousScope = node->scope;
 		visitStatement(stmt);
 		analyzer.currentScope = node->scope;
 		analyzer.canContinue = canContinue;
+		analyzer.canBreak = canBreak;
 	}
 	if (node->scope->parent != NULL) {
 		node->scope->parent->physicalSize += node->scope->physicalSize;
+	}
+}
+
+static void visitStatementBreakL (AstStatementBreakL *node)
+{
+	if (!analyzer.canBreak) {
+		analyzer.hadError = true;
+		error(node->keyword, "cannot be used here");
 	}
 }
 
@@ -101,13 +115,14 @@ static void visitStatementContinueL (AstStatementContinueL *node)
 {
 	if (!analyzer.canContinue) {
 		analyzer.hadError = true;
-		error(node->keyword, "continue must be used within a loop");
+		error(node->keyword, "cannot be used here");
 	}
 }
 
 static void visitStatementDoWhile (AstStatementDoWhile *node)
 {
 	analyzer.canContinue = true;
+	analyzer.canBreak = true;
 	visitStatement(node->a);
 	visitExpression(node->condition);
 	if (node->condition->dataType != DT_Boolean) {
@@ -127,6 +142,7 @@ static void visitStatementForI (AstStatementForI *node)
 		visitStatement(node->init);
 	}
 	analyzer.canContinue = true;
+	analyzer.canBreak = true;
 	if (node->condition != NULL) {
 		visitExpression(node->condition);
 		if (node->condition->dataType != DT_Boolean) {
@@ -181,6 +197,7 @@ static void visitStatementVar (AstStatementVar *node)
 static void visitStatementWhileC (AstStatementWhileC *node)
 {
 	analyzer.canContinue = true;
+	analyzer.canBreak = true;
 	visitExpression(node->condition);
 	if (node->condition->dataType != DT_Boolean) {
 		error(node->keyword, "condition must be a boolean");

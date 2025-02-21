@@ -3,6 +3,7 @@
 #include "memory.h"
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
+static AstStatementBreakL *astStatement_initBreakL (Token keyword);
 static AstStatementContinueL *astStatement_initContinueL (Token keyword);
 static AstStatementDoWhile *astStatement_initDoWhile (AstStatement *a, AstExpression *condition, Token operator);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
@@ -41,6 +42,15 @@ AstStatement *ast_initStatementBlock (AstStatement *children)
 	AstStatement *statement = mem_alloc(sizeof(*statement));
 	statement->type = AstStatement_Block;
 	statement->as.block = astStatement_initBlock(children);
+	dll_init(statement);
+	return statement;
+}
+
+AstStatement *ast_initStatementBreakL (Token keyword)
+{
+	AstStatement *statement = mem_alloc(sizeof(*statement));
+	statement->type = AstStatement_BreakL;
+	statement->as.breakL = astStatement_initBreakL(keyword);
 	dll_init(statement);
 	return statement;
 }
@@ -194,6 +204,13 @@ static AstStatementBlock *astStatement_initBlock (AstStatement *children)
 	AstStatementBlock *block = mem_alloc(sizeof(*block));
 	block->children = children;
 	return block;
+}
+
+static AstStatementBreakL *astStatement_initBreakL (Token keyword)
+{
+	AstStatementBreakL *breakL = mem_alloc(sizeof(*breakL));
+	breakL->keyword = keyword;
+	return breakL;
 }
 
 static AstStatementContinueL *astStatement_initContinueL (Token keyword)
