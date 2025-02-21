@@ -13,12 +13,14 @@ static AstRoot *getRoot (void);
 static AstStatement *getStatement(void);
 static AstStatement *getStatementBlock (void);
 static AstStatement *getStatementBreakL (void);
+static AstStatement *getStatementCaseL (void);
 static AstStatement *getStatementContinueL (void);
 static AstStatement *getStatementDoWhile (void);
 static AstStatement *getStatementExpr (void);
 static AstStatement *getStatementForI (void);
 static AstStatement *getStatementIfE (void);
 static AstStatement *getStatementReturnE (void);
+static AstStatement *getStatementSwitchC (void);
 static AstStatement *getStatementVar (void);
 static AstStatement *getStatementWhileC (void);
 
@@ -75,6 +77,7 @@ static AstStatement *getStatement (void)
 		case TT_If: return getStatementIfE();
 		case TT_LBrace: return getStatementBlock();
 		case TT_Return: return getStatementReturnE();
+		case TT_Switch: return getStatementSwitchC();
 		case TT_Var: return getStatementVar();
 		case TT_While: return getStatementWhileC();
 		default:
@@ -101,6 +104,27 @@ static AstStatement *getStatementBreakL (void)
 	Token keyword = consume(TT_Break, "expected 'break'");
 	consume(TT_Semicolon, "expected ';'");
 	return ast_initStatementBreakL(keyword);
+}
+
+static AstStatement *getStatementCaseL (void)
+{
+	Token keyword;
+	AstExpression *expression = NULL;
+	if (check(TT_Case)) {
+		keyword = consume(TT_Case, "expected 'case'");
+		expression = getExpression();
+	} else {
+		keyword = consume(TT_Default, "expected 'default'");
+	}
+	consume(TT_Colon, "expected ':'");
+	AstStatement *statements = NULL;
+	while (!(check(TT_Case) || check(TT_Default) || check(TT_RBrace))) {
+		AstStatement *statement = getStatement();
+		dll_insert(statements, statement);
+		statements = statement;
+	}
+	for (; statements != NULL && statements->previous != NULL; statements = statements->previous);
+	return ast_initStatementCaseL(expression, statements, keyword);
 }
 
 static AstStatement *getStatementContinueL (void)
@@ -182,6 +206,25 @@ static AstStatement *getStatementReturnE (void)
 	}
 	consume(TT_Semicolon, "expected ';'");
 	return ast_initStatementReturnE(expression);
+}
+
+static AstStatement *getStatementSwitchC (void)
+{
+	consume(TT_Switch, "expected 'switch'");
+	consume(TT_LParen, "expected '('");
+	AstExpression *expression = getExpression();
+	consume(TT_RParen, "expected ')'");
+	consume(TT_LBrace, "expected '{'");
+	AstStatement *statements = NULL;
+	while (!check(TT_RBrace)) {
+		AstStatement *statement = getStatementCaseL();
+		dll_insert(statements, statement);
+		statements = statement;
+	}
+	for (; statements != NULL && statements->previous != NULL; statements = statements->previous);
+	consume(TT_RBrace, "expected '}'");
+	AstStatement *body = ast_initStatementBlock(statements);
+	return ast_initStatementSwitchC(expression, body);
 }
 
 static AstStatement *getStatementVar (void)

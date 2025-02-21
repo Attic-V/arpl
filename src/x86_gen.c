@@ -14,6 +14,7 @@ static void transform (Ir *r);
 static void transformAdd (Ir *ir);
 static void transformAnd (Ir *ir);
 static void transformAssign (Ir *ir);
+static void transformCopy (Ir *ir);
 static void transformDec (Ir *ir);
 static void transformDeref (Ir *ir);
 static void transformEqu (Ir *ir);
@@ -89,6 +90,7 @@ static void transform (Ir *r)
 		transformer(Add),
 		transformer(And),
 		transformer(Assign),
+		transformer(Copy),
 		transformer(Dec),
 		transformer(Deref),
 		transformer(Equ),
@@ -146,6 +148,15 @@ static void transformAssign (Ir *ir)
 	pop(r9);
 	pop(r8);
 	emit("\tmov     dword [r8], r9d");
+	push(r8);
+}
+
+static void transformCopy (Ir *ir)
+{
+	IrCopy *instruction = ir->as.copy;
+	(void)instruction;
+	pop(r8);
+	push(r8);
 	push(r8);
 }
 

@@ -5,6 +5,7 @@
 static IrAdd *irAdd_init (void);
 static IrAnd *irAnd_init (void);
 static IrAssign *irAssign_init (void);
+static IrCopy *irCopy_init (void);
 static IrDec *irDec_init (void);
 static IrDeref *irDeref_init (void);
 static IrEqu *irEqu_init (void);
@@ -54,6 +55,15 @@ Ir *ir_initAssign (void)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Assign;
 	ir->as.assign = irAssign_init();
+	dll_init(ir);
+	return ir;
+}
+
+Ir *ir_initCopy (void)
+{
+	Ir *ir = mem_alloc(sizeof(*ir));
+	ir->type = Ir_Copy;
+	ir->as.copy = irCopy_init();
 	dll_init(ir);
 	return ir;
 }
@@ -299,6 +309,12 @@ static IrAssign *irAssign_init (void)
 {
 	IrAssign *assign = mem_alloc(sizeof(*assign));
 	return assign;
+}
+
+static IrCopy *irCopy_init (void)
+{
+	IrCopy *copy = mem_alloc(sizeof(*copy));
+	return copy;
 }
 
 static IrDec *irDec_init (void)

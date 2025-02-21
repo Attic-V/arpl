@@ -86,7 +86,9 @@ Token *scan (char *source)
 			sprintf(buffer, "%.*s", token->length, token->lexeme);
 			if (!strcmp(buffer, "bool")) { token->type = TT_Bool; continue; }
 			if (!strcmp(buffer, "break")) { token->type = TT_Break; continue; }
+			if (!strcmp(buffer, "case")) { token->type = TT_Case; continue; }
 			if (!strcmp(buffer, "continue")) { token->type = TT_Continue; continue; }
+			if (!strcmp(buffer, "default")) { token->type = TT_Default; continue; }
 			if (!strcmp(buffer, "do")) { token->type = TT_Do; continue; }
 			if (!strcmp(buffer, "else")) { token->type = TT_Else; continue; }
 			if (!strcmp(buffer, "false")) { token->type = TT_False; continue; }
@@ -94,6 +96,7 @@ Token *scan (char *source)
 			if (!strcmp(buffer, "if")) { token->type = TT_If; continue; }
 			if (!strcmp(buffer, "int")) { token->type = TT_Int; continue; }
 			if (!strcmp(buffer, "return")) { token->type = TT_Return; continue; }
+			if (!strcmp(buffer, "switch")) { token->type = TT_Switch; continue; }
 			if (!strcmp(buffer, "true")) { token->type = TT_True; continue; }
 			if (!strcmp(buffer, "var")) { token->type = TT_Var; continue; }
 			if (!strcmp(buffer, "while")) { token->type = TT_While; continue; }
