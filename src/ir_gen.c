@@ -54,7 +54,6 @@ Ir *gen_ir (Ast *ast)
 	gen.current = NULL;
 	gen.label = 0;
 	gen.reservedBytes = 0;
-	gen.nextCaseBodyLabel = gen.label++;
 
 	visitAst(ast);
 
@@ -223,13 +222,16 @@ static void visitStatementReturnE (AstStatementReturnE *statement)
 
 static void visitStatementSwitchC (AstStatementSwitchC *statement)
 {
+	int currentBreakLabel = gen.breakLabel;
 	int l0 = gen.label++;
 	gen.breakLabel = l0;
+	gen.nextCaseBodyLabel = gen.label++;
 	visitExpression(statement->e);
 	visitStatement(statement->body);
-	addInstruction(ir_initLabel(gen.nextCaseBodyLabel++));
+	addInstruction(ir_initLabel(gen.nextCaseBodyLabel));
 	addInstruction(ir_initLabel(l0));
 	addInstruction(ir_initPop());
+	gen.breakLabel = currentBreakLabel;
 }
 
 static void visitStatementVar (AstStatementVar *statement)
