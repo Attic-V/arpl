@@ -6,6 +6,14 @@
 #include "memory.h"
 #include "table.h"
 
+#define pushLabels \
+	int currentContinue = gen.continueLabel; \
+	int currentBreak = gen.breakLabel;
+
+#define popLabels \
+	gen.continueLabel = currentContinue; \
+	gen.breakLabel = currentBreak;
+
 static void visitAst (Ast *ast);
 static void visitRoot (AstRoot *root);
 
@@ -99,14 +107,12 @@ static void visitStatement (AstStatement *statement)
 
 static void visitStatementBlock (AstStatementBlock *statement)
 {
-	int currentContinue = gen.continueLabel;
-	int currentBreak = gen.breakLabel;
+	pushLabels
 	gen.scope = statement->scope;
 	for (AstStatement *stmt = statement->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
 		gen.scope = statement->scope;
-		gen.continueLabel = currentContinue;
-		gen.breakLabel = currentBreak;
+		popLabels
 	}
 }
 
@@ -125,8 +131,10 @@ static void visitStatementCaseL (AstStatementCaseL *statement)
 		addInstruction(ir_initJmpFalse(l0));
 	}
 	addInstruction(ir_initLabel(gen.nextCaseBodyLabel));
+	pushLabels
 	for (AstStatement *s = statement->body; s != NULL; s = s->next) {
 		visitStatement(s);
+		popLabels
 	}
 	gen.nextCaseBodyLabel = gen.label++;
 	addInstruction(ir_initJmp(gen.nextCaseBodyLabel));
@@ -222,7 +230,6 @@ static void visitStatementReturnE (AstStatementReturnE *statement)
 
 static void visitStatementSwitchC (AstStatementSwitchC *statement)
 {
-	int currentBreakLabel = gen.breakLabel;
 	int l0 = gen.label++;
 	gen.breakLabel = l0;
 	gen.nextCaseBodyLabel = gen.label++;
@@ -231,7 +238,6 @@ static void visitStatementSwitchC (AstStatementSwitchC *statement)
 	addInstruction(ir_initLabel(gen.nextCaseBodyLabel));
 	addInstruction(ir_initLabel(l0));
 	addInstruction(ir_initPop());
-	gen.breakLabel = currentBreakLabel;
 }
 
 static void visitStatementVar (AstStatementVar *statement)
