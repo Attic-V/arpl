@@ -9,6 +9,9 @@ typedef enum {
 } DataType;
 
 DataType getTypeFromKey (Token keyword);
+/**
+ * bytes
+ */
 size_t getDtSize (DataType type);
 
 #endif
