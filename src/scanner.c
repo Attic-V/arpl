@@ -84,22 +84,25 @@ Token *scan (char *source)
 			Token *token = &scanner.tokens[scanner.count - 1];
 			char *buffer = mem_alloc(token->length + 1);
 			sprintf(buffer, "%.*s", token->length, token->lexeme);
-			if (!strcmp(buffer, "bool")) { token->type = TT_Bool; continue; }
-			if (!strcmp(buffer, "break")) { token->type = TT_Break; continue; }
-			if (!strcmp(buffer, "case")) { token->type = TT_Case; continue; }
-			if (!strcmp(buffer, "continue")) { token->type = TT_Continue; continue; }
-			if (!strcmp(buffer, "default")) { token->type = TT_Default; continue; }
-			if (!strcmp(buffer, "do")) { token->type = TT_Do; continue; }
-			if (!strcmp(buffer, "else")) { token->type = TT_Else; continue; }
-			if (!strcmp(buffer, "false")) { token->type = TT_False; continue; }
-			if (!strcmp(buffer, "for")) { token->type = TT_For; continue; }
-			if (!strcmp(buffer, "if")) { token->type = TT_If; continue; }
-			if (!strcmp(buffer, "int")) { token->type = TT_Int; continue; }
-			if (!strcmp(buffer, "return")) { token->type = TT_Return; continue; }
-			if (!strcmp(buffer, "switch")) { token->type = TT_Switch; continue; }
-			if (!strcmp(buffer, "true")) { token->type = TT_True; continue; }
-			if (!strcmp(buffer, "var")) { token->type = TT_Var; continue; }
-			if (!strcmp(buffer, "while")) { token->type = TT_While; continue; }
+
+			#define keyword(lexeme, tokentype) if (!strcmp(buffer, #lexeme)) { token->type = TT_##tokentype; continue; }
+			keyword(bool, Bool)
+			keyword(break, Break)
+			keyword(case, Case)
+			keyword(continue, Continue)
+			keyword(default, Default)
+			keyword(do, Do)
+			keyword(else, Else)
+			keyword(false, False)
+			keyword(for, For)
+			keyword(if, If)
+			keyword(int, Int)
+			keyword(return, Return)
+			keyword(switch, Switch)
+			keyword(true, True)
+			keyword(var, Var)
+			keyword(while, While)
+			#undef keyword
 			continue;
 		}
 
