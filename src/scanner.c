@@ -66,6 +66,13 @@ Token *scan (char *source)
 			case ';': addToken(TT_Semicolon); continue;
 			case '*': addToken(match('=') ? TT_Star_Equal : TT_Star); continue;
 			case '~': addToken(TT_Tilde); continue;
+			case '/':
+				if (match('/')) {
+					while (!match('\n')) {
+						scanner.current++;
+					}
+				}
+				continue;
 		}
 
 		if (isdigit(ch)) {
