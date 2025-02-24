@@ -71,8 +71,8 @@ Token *scan (char *source)
 					while (!match('\n')) {
 						scanner.current++;
 					}
+					continue;
 				}
-				continue;
 		}
 
 		if (isdigit(ch)) {
