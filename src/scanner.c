@@ -73,6 +73,15 @@ Token *scan (char *source)
 					}
 					continue;
 				}
+				if (match('*')) {
+					while (!check('\0') && !(match('*') && match('/'))) {
+						scanner.current++;
+					}
+					if (check('\0')) {
+						fprintf(stderr, "%d: error at EOF: unclosed comment\n", scanner.line);
+					}
+					continue;
+				}
 		}
 
 		if (isdigit(ch)) {
