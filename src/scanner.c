@@ -68,7 +68,7 @@ Token *scan (char *source)
 			case '~': addToken(TT_Tilde); continue;
 			case '/':
 				if (match('/')) {
-					while (!match('\n')) {
+					while (!check('\0') && !match('\n')) {
 						scanner.current++;
 					}
 					continue;
