@@ -17,7 +17,7 @@ void scope_free (Scope *scope)
 
 bool scope_add (Scope *scope, Symbol *symbol)
 {
-	scope->physicalSize += getDtSize(symbol->type);
+	scope->physicalSize += dataType_getSize(symbol->type);
 	return table_add(scope->table, symbol);
 }
 

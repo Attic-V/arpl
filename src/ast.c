@@ -10,12 +10,13 @@ static AstStatementDoWhile *astStatement_initDoWhile (AstStatement *a, AstExpres
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
 static AstStatementForI *astStatement_initForI (AstStatement *init, AstExpression *condition, AstExpression *update, AstStatement *body, Token keyword);
 static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword);
-static AstStatementInit *astStatement_initInit (Token identifier, Token type, AstExpression *expression, Token operator);
+static AstStatementInit *astStatement_initInit (Token identifier, DataType *type, AstExpression *expression, Token operator);
 static AstStatementReturnE *astStatement_initReturnE (AstExpression *expression);
 static AstStatementSwitchC *astStatement_initSwitchC (AstExpression *e, AstStatement *body);
-static AstStatementVar *astStatement_initVar (Token identifier, Token type);
+static AstStatementVar *astStatement_initVar (Token identifier, DataType *type);
 static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a, Token keyword);
 
+static AstExpressionAccessElement *astExpression_initAccessElement (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBoolean *astExpression_initBoolean (bool value);
@@ -111,7 +112,7 @@ AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, A
 	return statement;
 }
 
-AstStatement *ast_initStatementInit (Token identifier, Token type, AstExpression *expression, Token operator)
+AstStatement *ast_initStatementInit (Token identifier, DataType *type, AstExpression *expression, Token operator)
 {
 	AstStatement *statement = mem_alloc(sizeof(*statement));
 	statement->type = AstStatement_Init;
@@ -138,7 +139,7 @@ AstStatement *ast_initStatementSwitchC (AstExpression *e, AstStatement *body)
 	return statement;
 }
 
-AstStatement *ast_initStatementVar (Token identifier, Token type)
+AstStatement *ast_initStatementVar (Token identifier, DataType *type)
 {
 	AstStatement *statement = mem_alloc(sizeof(*statement));
 	statement->type = AstStatement_Var;
@@ -155,11 +156,21 @@ AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement *a
 	return statement;
 }
 
+AstExpression *ast_initExpressionAccessElement (AstExpression *a, AstExpression *b, Token operator)
+{
+	AstExpression *expression = mem_alloc(sizeof(*expression));
+	expression->type = AstExpression_AccessElement;
+	expression->as.accessElement = astExpression_initAccessElement(a, b, operator);
+	expression->dataType = mem_alloc(sizeof(*expression->dataType));
+	return expression;
+}
+
 AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator)
 {
 	AstExpression *expression = mem_alloc(sizeof(*expression));
 	expression->type = AstExpression_Assign;
 	expression->as.assign = astExpression_initAssign(a, b, operator);
+	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
@@ -168,6 +179,7 @@ AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Tok
 	AstExpression *expression = mem_alloc(sizeof(*expression));
 	expression->type = AstExpression_Binary;
 	expression->as.binary = astExpression_initBinary(a, b, operator);
+	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
@@ -176,6 +188,7 @@ AstExpression *ast_initExpressionBoolean (bool value)
 	AstExpression *expression = mem_alloc(sizeof(*expression));
 	expression->type = AstExpression_Boolean;
 	expression->as.boolean = astExpression_initBoolean(value);
+	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
@@ -184,6 +197,7 @@ AstExpression *ast_initExpressionNumber (Token value)
 	AstExpression *expression = mem_alloc(sizeof(*expression));
 	expression->type = AstExpression_Number;
 	expression->as.number = astExpression_initNumber(value);
+	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
@@ -192,6 +206,7 @@ AstExpression *ast_initExpressionPostfix (Token operator, AstExpression *e)
 	AstExpression *expression = mem_alloc(sizeof(*expression));
 	expression->type = AstExpression_Postfix;
 	expression->as.postfix = astExpression_initPostfix(operator, e);
+	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
@@ -200,6 +215,7 @@ AstExpression *ast_initExpressionPrefix (Token operator, AstExpression *e)
 	AstExpression *expression = mem_alloc(sizeof(*expression));
 	expression->type = AstExpression_Prefix;
 	expression->as.prefix = astExpression_initPrefix(operator, e);
+	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
@@ -208,6 +224,7 @@ AstExpression *ast_initExpressionTernary (AstExpression *condition, AstExpressio
 	AstExpression *expression = mem_alloc(sizeof(*expression));
 	expression->type = AstExpression_Ternary;
 	expression->as.ternary = astExpression_initTernary(condition, a, b, operator);
+	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
@@ -216,6 +233,7 @@ AstExpression *ast_initExpressionVar (Token identifier)
 	AstExpression *expression = mem_alloc(sizeof(*expression));
 	expression->type = AstExpression_Var;
 	expression->as.var = astExpression_initVar(identifier);
+	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
@@ -286,7 +304,7 @@ static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstState
 	return ifE;
 }
 
-static AstStatementInit *astStatement_initInit (Token identifier, Token type, AstExpression *expression, Token operator)
+static AstStatementInit *astStatement_initInit (Token identifier, DataType *type, AstExpression *expression, Token operator)
 {
 	AstStatementInit *init = mem_alloc(sizeof(*init));
 	init->identifier = identifier;
@@ -311,7 +329,7 @@ static AstStatementSwitchC *astStatement_initSwitchC (AstExpression *e, AstState
 	return switchC;
 }
 
-static AstStatementVar *astStatement_initVar (Token identifier, Token type)
+static AstStatementVar *astStatement_initVar (Token identifier, DataType *type)
 {
 	AstStatementVar *var = mem_alloc(sizeof(*var));
 	var->identifier = identifier;
@@ -326,6 +344,15 @@ static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, As
 	whileC->a = a;
 	whileC->keyword = keyword;
 	return whileC;
+}
+
+static AstExpressionAccessElement *astExpression_initAccessElement (AstExpression *a, AstExpression *b, Token operator)
+{
+	AstExpressionAccessElement *accessElement = mem_alloc(sizeof(*accessElement));
+	accessElement->a = a;
+	accessElement->b = b;
+	accessElement->operator = operator;
+	return accessElement;
 }
 
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator)

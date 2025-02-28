@@ -51,7 +51,7 @@ bool table_add (Table *table, Symbol *symbol)
 
 	symbol->n = table->count++;
 	symbol->physicalIndex = table->bytesUsed;
-	table->bytesUsed += getDtSize(symbol->type);
+	table->bytesUsed += dataType_getSize(symbol->type);
 
 	table->symbols[idx] = symbol;
 	if (table->count * 2 >= table->capacity) {

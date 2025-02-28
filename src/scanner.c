@@ -55,6 +55,7 @@ Token *scan (char *source)
 				}
 				break;
 			case '{': addToken(TT_LBrace); continue;
+			case '[': addToken(TT_LBracket); continue;
 			case '<': addToken(match('<') ? TT_Less_Less : match('=') ? TT_Less_Equal : TT_Less); continue;
 			case '(': addToken(TT_LParen); continue;
 			case '-': addToken(match('-') ? TT_Minus_Minus : match('=') ? TT_Minus_Equal : TT_Minus); continue;
@@ -62,6 +63,7 @@ Token *scan (char *source)
 			case '+': addToken(match('=') ? TT_Plus_Equal : match('+') ? TT_Plus_Plus : TT_Plus); continue;
 			case '?': addToken(TT_Question); continue;
 			case '}': addToken(TT_RBrace); continue;
+			case ']': addToken(TT_RBracket); continue;
 			case ')': addToken(TT_RParen); continue;
 			case ';': addToken(TT_Semicolon); continue;
 			case '*': addToken(match('=') ? TT_Star_Equal : TT_Star); continue;

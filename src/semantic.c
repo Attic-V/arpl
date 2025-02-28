@@ -24,6 +24,7 @@ static void visitStatementVar (AstStatementVar *node);
 static void visitStatementWhileC (AstStatementWhileC *node);
 
 static void visitExpression (AstExpression *node);
+static void visitExpressionAccessElement (AstExpressionAccessElement *node);
 static void visitExpressionAssign (AstExpressionAssign *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
 static void visitExpressionBoolean (AstExpressionBoolean *node);
@@ -40,7 +41,7 @@ typedef struct {
 	bool hadError;
 	bool canContinue;
 	bool canBreak;
-	DataType caseExpressionType;
+	DataType *caseExpressionType;
 } Analyzer;
 
 static Analyzer analyzer;
@@ -96,7 +97,7 @@ static void visitStatementBlock (AstStatementBlock *node)
 	node->scope->parent = analyzer.previousScope;
 	bool canContinue = analyzer.canContinue;
 	bool canBreak = analyzer.canBreak;
-	DataType caseExpressionType = analyzer.caseExpressionType;
+	DataType *caseExpressionType = analyzer.caseExpressionType;
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
 		analyzer.previousScope = node->scope;
 		visitStatement(stmt);
@@ -122,7 +123,7 @@ static void visitStatementCaseL (AstStatementCaseL *node)
 {
 	if (node->e != NULL) {
 		visitExpression(node->e);
-		if (node->e->dataType != analyzer.caseExpressionType) {
+		if (!dataType_equal(node->e->dataType, analyzer.caseExpressionType)) {
 			error(node->keyword, "case expression type must match type of expression in switch");
 		}
 		node->e->modifiable = false;
@@ -146,7 +147,7 @@ static void visitStatementDoWhile (AstStatementDoWhile *node)
 	analyzer.canBreak = true;
 	visitStatement(node->a);
 	visitExpression(node->condition);
-	if (node->condition->dataType != DT_Boolean) {
+	if (!dataType_isBoolean(node->condition->dataType)) {
 		error(node->keyword, "condition must be a boolean");
 	}
 }
@@ -166,7 +167,7 @@ static void visitStatementForI (AstStatementForI *node)
 	analyzer.canBreak = true;
 	if (node->condition != NULL) {
 		visitExpression(node->condition);
-		if (node->condition->dataType != DT_Boolean) {
+		if (!dataType_isBoolean(node->condition->dataType)) {
 			error(node->keyword, "condition must be a boolean");
 		}
 	}
@@ -181,7 +182,7 @@ static void visitStatementForI (AstStatementForI *node)
 static void visitStatementIfE (AstStatementIfE *node)
 {
 	visitExpression(node->condition);
-	if (node->condition->dataType != DT_Boolean) {
+	if (!dataType_isBoolean(node->condition->dataType)) {
 		error(node->keyword, "condition must be a boolean");
 	}
 	visitStatement(node->a);
@@ -215,10 +216,10 @@ static void visitStatementSwitchC (AstStatementSwitchC *node)
 
 static void visitStatementVar (AstStatementVar *node)
 {
-	Symbol *symbol = symbol_init(node->identifier, getTypeFromKey(node->type));
+	Symbol *symbol = symbol_init(node->identifier, node->type);
 	if (scope_add(analyzer.currentScope, symbol)) {
 		symbol->physicalIndex = analyzer.currentPhysicalIndex;
-		analyzer.currentPhysicalIndex += getDtSize(symbol->type);
+		analyzer.currentPhysicalIndex += dataType_getSize(symbol->type);
 	} else {
 		error(node->identifier, "variable has already been declared in scope");
 	}
@@ -229,7 +230,7 @@ static void visitStatementWhileC (AstStatementWhileC *node)
 	analyzer.canContinue = true;
 	analyzer.canBreak = true;
 	visitExpression(node->condition);
-	if (node->condition->dataType != DT_Boolean) {
+	if (!dataType_isBoolean(node->condition->dataType)) {
 		error(node->keyword, "condition must be a boolean");
 	}
 	if (node->a != NULL) {
@@ -241,6 +242,11 @@ static void visitExpression (AstExpression *node)
 {
 	node->modifiable = false;
 	switch (node->type) {
+		case AstExpression_AccessElement:
+			visitExpressionAccessElement(node->as.accessElement);
+			node->dataType = node->as.accessElement->a->dataType->as.array->type;
+			node->modifiable = true;
+			break;
 		case AstExpression_Assign:
 			visitExpressionAssign(node->as.assign);
 			node->dataType = node->as.assign->b->dataType;
@@ -255,31 +261,31 @@ static void visitExpression (AstExpression *node)
 				case TT_Plus:
 				case TT_Minus:
 				case TT_Star:
-					node->dataType = DT_Number;
+					node->dataType = dataType_initNumber();
 					break;
 				case TT_And_And:
 				case TT_Bang_Equal:
 				case TT_Equal_Equal:
 				case TT_Less:
 				case TT_Pipe_Pipe:
-					node->dataType = DT_Boolean;
+					node->dataType = dataType_initBoolean();
 					break;
 				default:
 			}
 			visitExpressionBinary(node->as.binary);
 			break;
 		case AstExpression_Boolean:
-			node->dataType = DT_Boolean;
+			node->dataType = dataType_initBoolean();
 			visitExpressionBoolean(node->as.boolean);
 			break;
 		case AstExpression_Number:
-			node->dataType = DT_Number;
+			node->dataType = dataType_initNumber();
 			visitExpressionNumber(node->as.number);
 			break;
 		case AstExpression_Postfix:
 			switch (node->as.postfix->operator.type) {
 				case TT_Plus_Plus:
-					node->dataType = DT_Number;
+					node->dataType = dataType_initNumber();
 					break;
 				default:
 			}
@@ -288,12 +294,12 @@ static void visitExpression (AstExpression *node)
 		case AstExpression_Prefix:
 			switch (node->as.prefix->operator.type) {
 				case TT_Bang:
-					node->dataType = DT_Boolean;
+					node->dataType = dataType_initBoolean();
 					break;
 				case TT_Minus:
 				case TT_Plus_Plus:
 				case TT_Tilde:
-					node->dataType = DT_Number;
+					node->dataType = dataType_initNumber();
 					break;
 				default:
 			}
@@ -310,21 +316,35 @@ static void visitExpression (AstExpression *node)
 				analyzer.hadError = true;
 				break;
 			}
-			switch (symbol->type) {
-				case DT_Number: node->dataType = DT_Number; break;
-				default:
-			}
+			node->dataType = symbol->type;
 			visitExpressionVar(node->as.var);
 			node->modifiable = true;
 			break;
 	}
 }
 
+static void visitExpressionAccessElement (AstExpressionAccessElement *node)
+{
+	visitExpression(node->a);
+	visitExpression(node->b);
+	if (!dataType_isArray(node->a->dataType)) {
+		error(node->operator, "reference must be an array");
+	}
+	if (!dataType_isNumber(node->b->dataType)) {
+		error(node->operator, "index must be a number");
+	}
+	if (!node->a->modifiable) {
+		error(node->operator, "reference must be modifiable");
+		analyzer.hadError = true;
+	}
+	node->b->modifiable = false;
+}
+
 static void visitExpressionAssign (AstExpressionAssign *node)
 {
 	visitExpression(node->a);
 	visitExpression(node->b);
-	if (node->a->dataType != node->b->dataType) {
+	if (!dataType_equal(node->a->dataType, node->b->dataType)) {
 		error(node->operator, "operands must have the same type");
 	}
 	if (!node->a->modifiable) {
@@ -348,14 +368,14 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 		case TT_Plus:
 		case TT_Minus:
 		case TT_Star:
-			if (node->a->dataType != DT_Number || node->b->dataType != DT_Number) {
-				error(node->operator, "operand must be a number");
+			if (!dataType_isNumber(node->a->dataType) || !dataType_isNumber(node->b->dataType)) {
+				error(node->operator, "operands must be numbers");
 			}
 			break;
 		case TT_And_And:
 		case TT_Pipe_Pipe:
-			if (node->a->dataType != DT_Boolean || node->b->dataType != DT_Boolean) {
-				error(node->operator, "operand must be a boolean");
+			if (!dataType_isBoolean(node->a->dataType) || !dataType_isBoolean(node->b->dataType)) {
+				error(node->operator, "operands must be booleans");
 			}
 			break;
 		case TT_Bang_Equal:
@@ -363,7 +383,7 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 			break;
 		default:
 	}
-	if (node->a->dataType != node->b->dataType) {
+	if (!dataType_equal(node->a->dataType, node->b->dataType)) {
 		error(node->operator, "operands must have the same type");
 	}
 	node->a->modifiable = false;
@@ -382,7 +402,7 @@ static void visitExpressionPostfix (AstExpressionPostfix *node)
 	switch (node->operator.type) {
 		case TT_Minus_Minus:
 		case TT_Plus_Plus:
-			if (node->e->dataType != DT_Number) {
+			if (!dataType_isNumber(node->e->dataType)) {
 				error(node->operator, "operand must be a number");
 			}
 			if (!node->e->modifiable) {
@@ -399,19 +419,19 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 	visitExpression(node->e);
 	switch (node->operator.type) {
 		case TT_Bang:
-			if (node->e->dataType != DT_Boolean) {
+			if (!dataType_isBoolean(node->e->dataType)) {
 				error(node->operator, "operand must be a boolean");
 			}
 			break;
 		case TT_Minus:
 		case TT_Tilde:
-			if (node->e->dataType != DT_Number) {
+			if (!dataType_isNumber(node->e->dataType)) {
 				error(node->operator, "operand must be a number");
 			}
 			break;
 		case TT_Minus_Minus:
 		case TT_Plus_Plus:
-			if (node->e->dataType != DT_Number) {
+			if (!dataType_isNumber(node->e->dataType)) {
 				error(node->operator, "operand must be a number");
 			}
 			if (!node->e->modifiable) {
@@ -425,18 +445,21 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 
 static void visitExpressionTernary (AstExpressionTernary *node)
 {
-	visitExpression(node->condition);
-	visitExpression(node->a);
-	visitExpression(node->b);
-	if (node->condition->dataType != DT_Boolean) {
+	AstExpression *c = node->condition;
+	AstExpression *a = node->a;
+	AstExpression *b = node->b;
+	visitExpression(c);
+	visitExpression(a);
+	visitExpression(b);
+	if (!dataType_isBoolean(c->dataType)) {
 		error(node->operator, "condition must be a boolean");
 	}
-	if (node->a->dataType != node->b->dataType) {
+	if (!dataType_equal(a->dataType, b->dataType)) {
 		error(node->operator, "operands must have the same type");
 	}
-	node->condition->modifiable = false;
-	node->a->modifiable = false;
-	node->b->modifiable = false;
+	c->modifiable = false;
+	a->modifiable = false;
+	b->modifiable = false;
 }
 
 static void visitExpressionVar (AstExpressionVar *node)

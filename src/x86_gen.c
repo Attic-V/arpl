@@ -366,7 +366,7 @@ static void transformSub (Ir *ir)
 	(void)instruction;
 	pop(r9);
 	pop(r8);
-	emit("\tsub     r8d, r9d");
+	emit("\tsub     r8, r9");
 	push(r8);
 }
 

@@ -25,6 +25,7 @@ static AstStatement *getStatementVar (void);
 static AstStatement *getStatementWhileC (void);
 
 static AstExpression *getExpression (void);
+static AstExpression *getExpressionAccessElement (void);
 static AstExpression *getExpressionAndBitwise (void);
 static AstExpression *getExpressionAndLogical (void);
 static AstExpression *getExpressionAssign (void);
@@ -41,7 +42,10 @@ static AstExpression *getExpressionUnaryPostfix (void);
 static AstExpression *getExpressionUnaryPrefix (void);
 static AstExpression *getExpressionXor (void);
 
+static DataType *getType (void);
+
 static bool check (TokenType type);
+static bool match (TokenType type);
 static Token consume (TokenType type, char *format, ...);
 
 typedef struct {
@@ -231,12 +235,7 @@ static AstStatement *getStatementVar (void)
 {
 	consume(TT_Var, "expected 'var'");
 	Token identifier = consume(TT_Identifier, "expected identifier");
-	Token type;
-	if (check(TT_Int) || check(TT_Bool)) {
-		type = parser.tokens[parser.current++];
-	} else {
-		error(parser.tokens[parser.current++], "expected 'int' or 'bool'");
-	}
+	DataType *type = getType();
 	if (check(TT_Equal)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *expression = getExpression();
@@ -414,10 +413,22 @@ static AstExpression *getExpressionUnaryPrefix (void)
 
 static AstExpression *getExpressionUnaryPostfix (void)
 {
-	AstExpression *left = getExpressionPrimary();
+	AstExpression *left = getExpressionAccessElement();
 	while (check(TT_Plus_Plus) || check(TT_Minus_Minus)) {
 		Token operator = parser.tokens[parser.current++];
 		left = ast_initExpressionPostfix(operator, left);
+	}
+	return left;
+}
+
+static AstExpression *getExpressionAccessElement (void)
+{
+	AstExpression *left = getExpressionPrimary();
+	while (check(TT_LBracket)) {
+		Token operator = parser.tokens[parser.current++];
+		AstExpression *i = getExpression();
+		consume(TT_RBracket, "expected ']'");
+		left = ast_initExpressionAccessElement(left, i, operator);
 	}
 	return left;
 }
@@ -444,9 +455,41 @@ static AstExpression *getExpressionPrimary (void)
 	exit(1);
 }
 
+static DataType *getType (void)
+{
+	if (match(TT_Int)) {
+		return dataType_initNumber();
+	}
+	if (match(TT_Bool)) {
+		return dataType_initBoolean();
+	}
+	if (match(TT_LBracket)) {
+		Token lengthToken = consume(TT_Number, "expected an integer");
+		consume(TT_RBracket, "expected ']'");
+		char *buffer = mem_alloc(lengthToken.length + 1);
+		sprintf(buffer, "%.*s", lengthToken.length, lengthToken.lexeme);
+		size_t length = atoi(buffer);
+		if (length < 1) {
+			error(lengthToken, "array length cannot be less than 1");
+		}
+		return dataType_initArray(length, getType());
+	}
+	error(parser.tokens[parser.current], "expected type");
+	exit(1);
+}
+
 static bool check (TokenType type)
 {
 	return parser.tokens[parser.current].type == type;
+}
+
+static bool match (TokenType type)
+{
+	if (check(type)) {
+		parser.current++;
+		return true;
+	}
+	return false;
 }
 
 static Token consume (TokenType type, char *format, ...)
