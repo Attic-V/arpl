@@ -345,6 +345,7 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 	visitExpression(node->a);
 	visitExpression(node->b);
 	if (!dataType_equal(node->a->dataType, node->b->dataType)) {
+		analyzer.hadError = true;
 		error(node->operator, "operands must have the same type");
 	}
 	if (!node->a->modifiable) {
