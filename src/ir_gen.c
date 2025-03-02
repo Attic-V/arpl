@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "data.h"
 #include "ir_gen.h"
 #include "linked_list.h"
 #include "memory.h"
@@ -128,7 +129,7 @@ static void visitStatementCaseL (AstStatementCaseL *statement)
 	if (statement->e != NULL) {
 		addInstruction(ir_initCopy());
 		visitExpression(statement->e);
-		addInstruction(ir_initEqu());
+		addInstruction(ir_initEqu(dataType_getSize(statement->e->dataType)));
 		addInstruction(ir_initJmpFalse(l0));
 	}
 	addInstruction(ir_initLabel(gen.nextCaseBodyLabel));
@@ -213,11 +214,13 @@ static void visitStatementIfE (AstStatementIfE *statement)
 
 static void visitStatementInit (AstStatementInit *statement)
 {
-	AstStatement *stmt = ast_initStatementVar(statement->identifier, statement->type);
-	AstExpression *expr = ast_initExpressionVar(statement->identifier);
-	expr->modifiable = true;
-	visitStatement(stmt);
-	visitExpression(ast_initExpressionAssign(expr, statement->expression, statement->operator));
+	AstStatement *svar = ast_initStatementVar(statement->identifier, statement->type);
+	AstExpression *evar = ast_initExpressionVar(statement->identifier);
+	evar->modifiable = true;
+	evar->dataType = statement->type;
+	visitStatement(svar);
+	AstExpression *eassign = ast_initExpressionAssign(evar, statement->expression, statement->operator);
+	visitExpression(eassign);
 	addInstruction(ir_initPop());
 }
 
@@ -281,10 +284,10 @@ static void visitExpressionAccessElement (AstExpression *expression)
 	visitExpression(e->a);
 	visitExpression(e->b);
 	addInstruction(ir_initPush(dataType_getSize(e->a->dataType->as.array->type)));
-	addInstruction(ir_initMul());
-	addInstruction(ir_initSub());
+	addInstruction(ir_initMul(QWORD));
+	addInstruction(ir_initSub(QWORD));
 	if (!expression->modifiable) {
-		addInstruction(ir_initDeref());
+		addInstruction(ir_initDeref(dataType_getSize(e->a->dataType->as.array->type)));
 	}
 }
 
@@ -292,32 +295,33 @@ static void visitExpressionAssign (AstExpression *expression)
 {
 	AstExpressionAssign *e = expression->as.assign;
 	visitExpression(e->a);
+	size_t size = dataType_getSize(e->a->dataType);
 	switch (e->operator.type) {
 		case TT_Equal:
 			visitExpression(e->b);
 			break;
 		case TT_Plus_Equal:
 			visitExpression(e->a);
-			addInstruction(ir_initDeref());
+			addInstruction(ir_initDeref(size));
 			visitExpression(e->b);
-			addInstruction(ir_initAdd());
+			addInstruction(ir_initAdd(size));
 			break;
 		case TT_Minus_Equal:
 			visitExpression(e->a);
-			addInstruction(ir_initDeref());
+			addInstruction(ir_initDeref(size));
 			visitExpression(e->b);
-			addInstruction(ir_initSub());
+			addInstruction(ir_initSub(size));
 			break;
 		case TT_Star_Equal:
 			visitExpression(e->a);
-			addInstruction(ir_initDeref());
+			addInstruction(ir_initDeref(size));
 			visitExpression(e->b);
-			addInstruction(ir_initMul());
+			addInstruction(ir_initMul(size));
 			break;
 		default:
 	}
-	addInstruction(ir_initAssign());
-	addInstruction(ir_initDeref());
+	addInstruction(ir_initAssign(size));
+	addInstruction(ir_initDeref(size));
 }
 
 static void visitExpressionBinary (AstExpression *expression)
@@ -325,21 +329,22 @@ static void visitExpressionBinary (AstExpression *expression)
 	AstExpressionBinary *e = expression->as.binary;
 	visitExpression(e->a);
 	visitExpression(e->b);
+	size_t size = dataType_getSize(e->a->dataType);
 	switch (e->operator.type) {
-		case TT_And: addInstruction(ir_initAnd()); break;
-		case TT_And_And: addInstruction(ir_initAnd()); break;
-		case TT_Bang_Equal: addInstruction(ir_initNotEqu()); break;
-		case TT_Caret: addInstruction(ir_initXor()); break;
-		case TT_Equal_Equal: addInstruction(ir_initEqu()); break;
-		case TT_Greater_Greater: addInstruction(ir_initSar()); break;
-		case TT_Less: addInstruction(ir_initLess()); break;
-		case TT_Less_Equal: addInstruction(ir_initLessEqu()); break;
-		case TT_Less_Less: addInstruction(ir_initShl()); break;
-		case TT_Pipe: addInstruction(ir_initOr()); break;
-		case TT_Pipe_Pipe: addInstruction(ir_initOr()); break;
-		case TT_Plus: addInstruction(ir_initAdd()); break;
-		case TT_Minus: addInstruction(ir_initSub()); break;
-		case TT_Star: addInstruction(ir_initMul()); break;
+		case TT_And: addInstruction(ir_initAnd(size)); break;
+		case TT_And_And: addInstruction(ir_initAnd(size)); break;
+		case TT_Bang_Equal: addInstruction(ir_initNotEqu(size)); break;
+		case TT_Caret: addInstruction(ir_initXor(size)); break;
+		case TT_Equal_Equal: addInstruction(ir_initEqu(size)); break;
+		case TT_Greater_Greater: addInstruction(ir_initSar(size)); break;
+		case TT_Less: addInstruction(ir_initLess(size)); break;
+		case TT_Less_Equal: addInstruction(ir_initLessEqu(size)); break;
+		case TT_Less_Less: addInstruction(ir_initShl(size)); break;
+		case TT_Pipe: addInstruction(ir_initOr(size)); break;
+		case TT_Pipe_Pipe: addInstruction(ir_initOr(size)); break;
+		case TT_Plus: addInstruction(ir_initAdd(size)); break;
+		case TT_Minus: addInstruction(ir_initSub(size)); break;
+		case TT_Star: addInstruction(ir_initMul(size)); break;
 		default:
 	}
 }
@@ -361,12 +366,13 @@ static void visitExpressionNumber (AstExpression *expression)
 static void visitExpressionPostfix (AstExpression *expression)
 {
 	AstExpressionPostfix *e = expression->as.postfix;
+	size_t size = dataType_getSize(e->e->dataType);
 	visitExpression(e->e);
-	addInstruction(ir_initDeref());
+	addInstruction(ir_initDeref(size));
 	visitExpression(e->e);
 	switch (e->operator.type) {
-		case TT_Plus_Plus: addInstruction(ir_initInc()); break;
-		case TT_Minus_Minus: addInstruction(ir_initDec()); break;
+		case TT_Plus_Plus: addInstruction(ir_initInc(size)); break;
+		case TT_Minus_Minus: addInstruction(ir_initDec(size)); break;
 		default:
 	}
 	addInstruction(ir_initPop());
@@ -376,22 +382,27 @@ static void visitExpressionPrefix (AstExpression *expression)
 {
 	AstExpressionPrefix *e = expression->as.prefix;
 	visitExpression(e->e);
+	size_t size = dataType_getSize(e->e->dataType);
 	switch (e->operator.type) {
 		case TT_Bang:
-			addInstruction(ir_initNot());
+			addInstruction(ir_initNot(size));
 			addInstruction(ir_initPush(1));
-			addInstruction(ir_initAnd());
+			addInstruction(ir_initAnd(size));
 			break;
-		case TT_Minus: addInstruction(ir_initNeg()); break;
+		case TT_Minus:
+			addInstruction(ir_initNeg(size));
+			break;
 		case TT_Minus_Minus:
-			addInstruction(ir_initDec());
-			addInstruction(ir_initDeref());
+			addInstruction(ir_initDec(size));
+			addInstruction(ir_initDeref(size));
 			break;
 		case TT_Plus_Plus:
-			addInstruction(ir_initInc());
-			addInstruction(ir_initDeref());
+			addInstruction(ir_initInc(size));
+			addInstruction(ir_initDeref(size));
 			break;
-		case TT_Tilde: addInstruction(ir_initNot()); break;
+		case TT_Tilde:
+			addInstruction(ir_initNot(size));
+			break;
 		default:
 	}
 }
@@ -416,7 +427,7 @@ static void visitExpressionVar (AstExpression *expression)
 	if (expression->modifiable) {
 		addInstruction(ir_initRef(telescope_get(gen.scope, e->identifier)->physicalIndex));
 	} else {
-		addInstruction(ir_initVal(telescope_get(gen.scope, e->identifier)->physicalIndex));
+		addInstruction(ir_initVal(telescope_get(gen.scope, e->identifier)->physicalIndex, dataType_getSize(expression->dataType)));
 	}
 }
 

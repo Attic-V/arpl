@@ -8,4 +8,9 @@
 #define PB (1024 * TB)
 #define EB (1024 * PB)
 
+#define BYTE 1
+#define WORD 2
+#define DWORD 4
+#define QWORD 8
+
 #endif

@@ -1,3 +1,4 @@
+#include "data.h"
 #include "data_type.h"
 #include "memory.h"
 
@@ -92,8 +93,8 @@ void dataType_setNumber (DataType *t)
 size_t dataType_getSize (DataType *t)
 {
 	if (dataType_isPrimitive(t)) {
-		if (dataType_isBoolean(t)) return 1;
-		if (dataType_isNumber(t)) return 4;
+		if (dataType_isBoolean(t)) return BYTE;
+		if (dataType_isNumber(t)) return DWORD;
 	}
 	if (dataType_isArray(t)) {
 		return t->as.array->length * dataType_getSize(t->as.array->type);

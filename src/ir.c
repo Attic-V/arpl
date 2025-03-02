@@ -2,59 +2,59 @@
 #include "linked_list.h"
 #include "memory.h"
 
-static IrAdd *irAdd_init (void);
-static IrAnd *irAnd_init (void);
-static IrAssign *irAssign_init (void);
+static IrAdd *irAdd_init (size_t size);
+static IrAnd *irAnd_init (size_t size);
+static IrAssign *irAssign_init (size_t size);
 static IrCopy *irCopy_init (void);
-static IrDec *irDec_init (void);
-static IrDeref *irDeref_init (void);
-static IrEqu *irEqu_init (void);
-static IrInc *irInc_init (void);
+static IrDec *irDec_init (size_t size);
+static IrDeref *irDeref_init (size_t size);
+static IrEqu *irEqu_init (size_t size);
+static IrInc *irInc_init (size_t size);
 static IrJmp *irJmp_init (int n);
 static IrJmpFalse *irJmpFalse_init (int n);
 static IrJmpTrue *irJmpTrue_init (int n);
 static IrLabel *irLabel_init (int n);
-static IrLess *irLess_init (void);
-static IrLessEqu *irLessEqu_init (void);
-static IrMul *irMul_init (void);
-static IrNeg *irNeg_init (void);
-static IrNot *irNot_init (void);
-static IrNotEqu *irNotEqu_init (void);
-static IrOr *irOr_init (void);
+static IrLess *irLess_init (size_t size);
+static IrLessEqu *irLessEqu_init (size_t size);
+static IrMul *irMul_init (size_t size);
+static IrNeg *irNeg_init (size_t size);
+static IrNot *irNot_init (size_t size);
+static IrNotEqu *irNotEqu_init (size_t size);
+static IrOr *irOr_init (size_t size);
 static IrPop *irPop_init (void);
 static IrPush *irPush_init (int32_t value);
 static IrRef *irRef_init (size_t idx);
 static IrReserve *irReserve_init (size_t bytes);
 static IrRet *irRet_init (void);
-static IrSar *irSar_init (void);
-static IrShl *irShl_init (void);
-static IrSub *irSub_init (void);
-static IrVal *irVal_init (size_t idx);
-static IrXor *irXor_init (void);
+static IrSar *irSar_init (size_t size);
+static IrShl *irShl_init (size_t size);
+static IrSub *irSub_init (size_t size);
+static IrVal *irVal_init (size_t idx, size_t size);
+static IrXor *irXor_init (size_t size);
 
-Ir *ir_initAdd (void)
+Ir *ir_initAdd (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Add;
-	ir->as.add = irAdd_init();
+	ir->as.add = irAdd_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initAnd (void)
+Ir *ir_initAnd (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_And;
-	ir->as.and = irAnd_init();
+	ir->as.and = irAnd_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initAssign (void)
+Ir *ir_initAssign (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Assign;
-	ir->as.assign = irAssign_init();
+	ir->as.assign = irAssign_init(size);
 	dll_init(ir);
 	return ir;
 }
@@ -68,38 +68,38 @@ Ir *ir_initCopy (void)
 	return ir;
 }
 
-Ir *ir_initDec (void)
+Ir *ir_initDec (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Dec;
-	ir->as.dec = irDec_init();
+	ir->as.dec = irDec_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initDeref (void)
+Ir *ir_initDeref (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Deref;
-	ir->as.deref = irDeref_init();
+	ir->as.deref = irDeref_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initEqu (void)
+Ir *ir_initEqu (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Equ;
-	ir->as.equ = irEqu_init();
+	ir->as.equ = irEqu_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initInc (void)
+Ir *ir_initInc (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Inc;
-	ir->as.inc = irInc_init();
+	ir->as.inc = irInc_init(size);
 	dll_init(ir);
 	return ir;
 }
@@ -140,65 +140,65 @@ Ir *ir_initLabel (int n)
 	return ir;
 }
 
-Ir *ir_initLess (void)
+Ir *ir_initLess (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Less;
-	ir->as.less = irLess_init();
+	ir->as.less = irLess_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initLessEqu (void)
+Ir *ir_initLessEqu (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_LessEqu;
-	ir->as.lessEqu = irLessEqu_init();
+	ir->as.lessEqu = irLessEqu_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initMul (void)
+Ir *ir_initMul (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Mul;
-	ir->as.mul = irMul_init();
+	ir->as.mul = irMul_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initNeg (void)
+Ir *ir_initNeg (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Neg;
-	ir->as.neg = irNeg_init();
+	ir->as.neg = irNeg_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initNot (void)
+Ir *ir_initNot (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Not;
-	ir->as.not = irNot_init();
+	ir->as.not = irNot_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initNotEqu (void)
+Ir *ir_initNotEqu (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_NotEqu;
-	ir->as.notEqu = irNotEqu_init();
+	ir->as.notEqu = irNotEqu_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initOr (void)
+Ir *ir_initOr (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Or;
-	ir->as.or = irOr_init();
+	ir->as.or = irOr_init(size);
 	dll_init(ir);
 	return ir;
 }
@@ -248,66 +248,69 @@ Ir *ir_initRet (void)
 	return ir;
 }
 
-Ir *ir_initSar (void)
+Ir *ir_initSar (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Sar;
-	ir->as.sar = irSar_init();
+	ir->as.sar = irSar_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initShl (void)
+Ir *ir_initShl (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Shl;
-	ir->as.shl = irShl_init();
+	ir->as.shl = irShl_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initSub (void)
+Ir *ir_initSub (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Sub;
-	ir->as.sub = irSub_init();
+	ir->as.sub = irSub_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initVal (size_t idx)
+Ir *ir_initVal (size_t idx, size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Val;
-	ir->as.val = irVal_init(idx);
+	ir->as.val = irVal_init(idx, size);
 	dll_init(ir);
 	return ir;
 }
 
-Ir *ir_initXor (void)
+Ir *ir_initXor (size_t size)
 {
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = Ir_Xor;
-	ir->as.xor = irXor_init();
+	ir->as.xor = irXor_init(size);
 	dll_init(ir);
 	return ir;
 }
 
-static IrAdd *irAdd_init (void)
+static IrAdd *irAdd_init (size_t size)
 {
 	IrAdd *add = mem_alloc(sizeof(*add));
+	add->size = size;
 	return add;
 }
 
-static IrAnd *irAnd_init (void)
+static IrAnd *irAnd_init (size_t size)
 {
 	IrAnd *and = mem_alloc(sizeof(*and));
+	and->size = size;
 	return and;
 }
 
-static IrAssign *irAssign_init (void)
+static IrAssign *irAssign_init (size_t size)
 {
 	IrAssign *assign = mem_alloc(sizeof(*assign));
+	assign->size = size;
 	return assign;
 }
 
@@ -317,27 +320,31 @@ static IrCopy *irCopy_init (void)
 	return copy;
 }
 
-static IrDec *irDec_init (void)
+static IrDec *irDec_init (size_t size)
 {
 	IrDec *dec = mem_alloc(sizeof(*dec));
+	dec->size = size;
 	return dec;
 }
 
-static IrDeref *irDeref_init (void)
+static IrDeref *irDeref_init (size_t size)
 {
 	IrDeref *deref = mem_alloc(sizeof(*deref));
+	deref->size = size;
 	return deref;
 }
 
-static IrEqu *irEqu_init (void)
+static IrEqu *irEqu_init (size_t size)
 {
 	IrEqu *equ = mem_alloc(sizeof(*equ));
+	equ->size = size;
 	return equ;
 }
 
-static IrInc *irInc_init (void)
+static IrInc *irInc_init (size_t size)
 {
 	IrInc *inc = mem_alloc(sizeof(*inc));
+	inc->size = size;
 	return inc;
 }
 
@@ -369,45 +376,52 @@ static IrLabel *irLabel_init (int n)
 	return label;
 }
 
-static IrLess *irLess_init (void)
+static IrLess *irLess_init (size_t size)
 {
 	IrLess *less = mem_alloc(sizeof(*less));
+	less->size = size;
 	return less;
 }
 
-static IrLessEqu *irLessEqu_init (void)
+static IrLessEqu *irLessEqu_init (size_t size)
 {
 	IrLessEqu *lessEqu = mem_alloc(sizeof(*lessEqu));
+	lessEqu->size = size;
 	return lessEqu;
 }
 
-static IrMul *irMul_init (void)
+static IrMul *irMul_init (size_t size)
 {
 	IrMul *mul = mem_alloc(sizeof(*mul));
+	mul->size = size;
 	return mul;
 }
 
-static IrNeg *irNeg_init (void)
+static IrNeg *irNeg_init (size_t size)
 {
 	IrNeg *neg = mem_alloc(sizeof(*neg));
+	neg->size = size;
 	return neg;
 }
 
-static IrNot *irNot_init (void)
+static IrNot *irNot_init (size_t size)
 {
 	IrNot *not = mem_alloc(sizeof(*not));
+	not->size = size;
 	return not;
 }
 
-static IrNotEqu *irNotEqu_init (void)
+static IrNotEqu *irNotEqu_init (size_t size)
 {
 	IrNotEqu *notEqu = mem_alloc(sizeof(*notEqu));
+	notEqu->size = size;
 	return notEqu;
 }
 
-static IrOr *irOr_init (void)
+static IrOr *irOr_init (size_t size)
 {
 	IrOr *or = mem_alloc(sizeof(*or));
+	or->size = size;
 	return or;
 }
 
@@ -444,33 +458,38 @@ static IrRet *irRet_init (void)
 	return ret;
 }
 
-static IrSar *irSar_init (void)
+static IrSar *irSar_init (size_t size)
 {
 	IrSar *sar = mem_alloc(sizeof(*sar));
+	sar->size = size;
 	return sar;
 }
 
-static IrShl *irShl_init (void)
+static IrShl *irShl_init (size_t size)
 {
 	IrShl *shl = mem_alloc(sizeof(*shl));
+	shl->size = size;
 	return shl;
 }
 
-static IrSub *irSub_init (void)
+static IrSub *irSub_init (size_t size)
 {
 	IrSub *sub = mem_alloc(sizeof(*sub));
+	sub->size = size;
 	return sub;
 }
 
-static IrVal *irVal_init (size_t idx)
+static IrVal *irVal_init (size_t idx, size_t size)
 {
 	IrVal *val = mem_alloc(sizeof(*val));
 	val->idx = idx;
+	val->size = size;
 	return val;
 }
 
-static IrXor *irXor_init (void)
+static IrXor *irXor_init (size_t size)
 {
 	IrXor *xor = mem_alloc(sizeof(*xor));
+	xor->size = size;
 	return xor;
 }

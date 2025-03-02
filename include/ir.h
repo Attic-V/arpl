@@ -6,27 +6,34 @@
 #include "token.h"
 
 typedef struct {
+	size_t size;
 } IrAdd;
 
 typedef struct {
+	size_t size;
 } IrAnd;
 
 typedef struct {
+	size_t size;
 } IrAssign;
 
 typedef struct {
 } IrCopy;
 
 typedef struct {
+	size_t size;
 } IrDec;
 
 typedef struct {
+	size_t size;
 } IrDeref;
 
 typedef struct {
+	size_t size;
 } IrEqu;
 
 typedef struct {
+	size_t size;
 } IrInc;
 
 typedef struct {
@@ -46,24 +53,31 @@ typedef struct {
 } IrLabel;
 
 typedef struct {
+	size_t size;
 } IrLess;
 
 typedef struct {
+	size_t size;
 } IrLessEqu;
 
 typedef struct {
+	size_t size;
 } IrMul;
 
 typedef struct {
+	size_t size;
 } IrNeg;
 
 typedef struct {
+	size_t size;
 } IrNot;
 
 typedef struct {
+	size_t size;
 } IrNotEqu;
 
 typedef struct {
+	size_t size;
 } IrOr;
 
 typedef struct {
@@ -85,19 +99,24 @@ typedef struct {
 } IrRet;
 
 typedef struct {
+	size_t size;
 } IrSar;
 
 typedef struct {
+	size_t size;
 } IrShl;
 
 typedef struct {
+	size_t size;
 } IrSub;
 
 typedef struct {
 	size_t idx;
+	size_t size;
 } IrVal;
 
 typedef struct {
+	size_t size;
 } IrXor;
 
 typedef enum {
@@ -171,34 +190,34 @@ struct Ir {
 	Ir *previous;
 };
 
-Ir *ir_initAdd (void);
-Ir *ir_initAnd (void);
-Ir *ir_initAssign (void);
+Ir *ir_initAdd (size_t size);
+Ir *ir_initAnd (size_t size);
+Ir *ir_initAssign (size_t size);
 Ir *ir_initCopy (void);
-Ir *ir_initDec (void);
-Ir *ir_initDeref (void);
-Ir *ir_initEqu (void);
-Ir *ir_initInc (void);
+Ir *ir_initDec (size_t size);
+Ir *ir_initDeref (size_t size);
+Ir *ir_initEqu (size_t size);
+Ir *ir_initInc (size_t size);
 Ir *ir_initJmp (int n);
 Ir *ir_initJmpFalse (int n);
 Ir *ir_initJmpTrue (int n);
 Ir *ir_initLabel (int n);
-Ir *ir_initLess (void);
-Ir *ir_initLessEqu (void);
-Ir *ir_initMul (void);
-Ir *ir_initNeg (void);
-Ir *ir_initNot (void);
-Ir *ir_initNotEqu (void);
-Ir *ir_initOr (void);
+Ir *ir_initLess (size_t size);
+Ir *ir_initLessEqu (size_t size);
+Ir *ir_initMul (size_t size);
+Ir *ir_initNeg (size_t size);
+Ir *ir_initNot (size_t size);
+Ir *ir_initNotEqu (size_t size);
+Ir *ir_initOr (size_t size);
 Ir *ir_initPop (void);
 Ir *ir_initPush (int32_t value);
 Ir *ir_initRef (size_t idx);
 Ir *ir_initReserve (size_t bytes);
 Ir *ir_initRet (void);
-Ir *ir_initSar (void);
-Ir *ir_initShl (void);
-Ir *ir_initSub (void);
-Ir *ir_initVal (size_t idx);
-Ir *ir_initXor (void);
+Ir *ir_initSar (size_t size);
+Ir *ir_initShl (size_t size);
+Ir *ir_initSub (size_t size);
+Ir *ir_initVal (size_t idx, size_t size);
+Ir *ir_initXor (size_t size);
 
 #endif

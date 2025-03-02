@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "data.h"
 #include "memory.h"
 #include "x86_gen.h"
 
@@ -40,6 +41,23 @@ static void transformShl (Ir *ir);
 static void transformSub (Ir *ir);
 static void transformVal (Ir *ir);
 static void transformXor (Ir *ir);
+
+typedef enum {
+	r8,
+	r9,
+} Register;
+
+static char *reg[][QWORD + 1] = {
+	[r8] = { [QWORD] = "r8", [DWORD] = "r8d", [WORD] = "r8w", [BYTE] = "r8b" },
+	[r9] = { [QWORD] = "r9", [DWORD] = "r9d", [WORD] = "r9w", [BYTE] = "r9b" },
+};
+
+static char *quantity[] = {
+	[BYTE] = "byte",
+	[WORD] = "word",
+	[DWORD] = "dword",
+	[QWORD] = "qword",
+};
 
 typedef struct {
 	FILE *fp;
@@ -127,7 +145,7 @@ static void transformAdd (Ir *ir)
 	(void)instruction;
 	pop(r9);
 	pop(r8);
-	emit("\tadd     r8d, r9d");
+	emit("\tadd     %s, %s", reg[r8][instruction->size], reg[r9][instruction->size]);
 	push(r8);
 }
 
@@ -137,7 +155,7 @@ static void transformAnd (Ir *ir)
 	(void)instruction;
 	pop(r9);
 	pop(r8);
-	emit("\tand     r8d, r9d");
+	emit("\tand     %s, %s", reg[r8][instruction->size], reg[r9][instruction->size]);
 	push(r8);
 }
 
@@ -147,7 +165,7 @@ static void transformAssign (Ir *ir)
 	(void)instruction;
 	pop(r9);
 	pop(r8);
-	emit("\tmov     dword [r8], r9d");
+	emit("\tmov     %s [r8], %s", quantity[instruction->size], reg[r9][instruction->size]);
 	push(r8);
 }
 
@@ -165,7 +183,7 @@ static void transformDec (Ir *ir)
 	IrDec *instruction = ir->as.dec;
 	(void)instruction;
 	pop(r8);
-	emit("\tdec     dword [r8]");
+	emit("\tdec     %s [r8]", quantity[instruction->size]);
 	push(r8);
 }
 
@@ -174,7 +192,7 @@ static void transformDeref (Ir *ir)
 	IrDeref *instruction = ir->as.deref;
 	(void)instruction;
 	pop(r8);
-	emit("\tmov     r8d, dword [r8]");
+	emit("\tmov     %s, %s [r8]", reg[r8][instruction->size], quantity[instruction->size]);
 	push(r8);
 }
 
@@ -184,7 +202,7 @@ static void transformEqu (Ir *ir)
 	(void)instruction;
 	pop(r9);
 	pop(r8);
-	emit("\tcmp     r8, r9");
+	emit("\tcmp     %s, %s", reg[r8][instruction->size], reg[r9][instruction->size]);
 	emit("\tsete    r8b");
 	push(r8);
 }
@@ -194,7 +212,7 @@ static void transformInc (Ir *ir)
 	IrInc *instruction = ir->as.inc;
 	(void)instruction;
 	pop(r8);
-	emit("\tinc     dword [r8]");
+	emit("\tinc     %s [r8]", quantity[instruction->size]);
 	push(r8);
 }
 
@@ -210,7 +228,7 @@ static void transformJmpFalse (Ir *ir)
 	IrJmpFalse *instruction = ir->as.jmpFalse;
 	(void)instruction;
 	pop(r8);
-	emit("\ttest    r8d, r8d");
+	emit("\ttest    %s, %s", reg[r8][BYTE], reg[r8][BYTE]);
 	emit("\tjz      .LB%d", instruction->n);
 }
 
@@ -219,7 +237,7 @@ static void transformJmpTrue (Ir *ir)
 	IrJmpTrue *instruction = ir->as.jmpTrue;
 	(void)instruction;
 	pop(r8);
-	emit("\ttest    r8d, r8d");
+	emit("\ttest    %s, %s", reg[r8][BYTE], reg[r8][BYTE]);
 	emit("\tjnz     .LB%d", instruction->n);
 }
 
@@ -236,8 +254,8 @@ static void transformLess (Ir *ir)
 	(void)instruction;
 	pop(r9);
 	pop(r8);
-	emit("\tcmp     r8, r9");
-	emit("\tsetl    r8b");
+	emit("\tcmp     %s, %s", reg[r8][instruction->size], reg[r9][instruction->size]);
+	emit("\tsetl    %s", reg[r8][BYTE]);
 	push(r8);
 }
 
@@ -247,8 +265,8 @@ static void transformLessEqu (Ir *ir)
 	(void)instruction;
 	pop(r9);
 	pop(r8);
-	emit("\tcmp     r8, r9");
-	emit("\tsetle   r8b");
+	emit("\tcmp     %s, %s", reg[r8][instruction->size], reg[r9][instruction->size]);
+	emit("\tsetle   %s", reg[r8][BYTE]);
 	push(r8);
 }
 
@@ -258,7 +276,7 @@ static void transformMul (Ir *ir)
 	(void)instruction;
 	pop(r9);
 	pop(r8);
-	emit("\timul    r8d, r9d");
+	emit("\timul    %s, %s", reg[r8][instruction->size], reg[r9][instruction->size]);
 	push(r8);
 }
 
@@ -267,7 +285,7 @@ static void transformNeg (Ir *ir)
 	IrNeg *instruction = ir->as.neg;
 	(void)instruction;
 	pop(r9);
-	emit("\tneg     r9d");
+	emit("\tneg     %s", reg[r9][instruction->size]);
 	push(r9);
 }
 
@@ -276,7 +294,7 @@ static void transformNot (Ir *ir)
 	IrNot *instruction = ir->as.not;
 	(void)instruction;
 	pop(r8);
-	emit("\tnot     r8d");
+	emit("\tnot     %s", reg[r8][instruction->size]);
 	push(r8);
 }
 
@@ -286,8 +304,8 @@ static void transformNotEqu (Ir *ir)
 	(void)instruction;
 	pop(r9);
 	pop(r8);
-	emit("\tcmp     r8, r9");
-	emit("\tsetne   r8b");
+	emit("\tcmp     %s, %s", reg[r8][instruction->size], reg[r9][instruction->size]);
+	emit("\tsetne   %s", reg[r8][BYTE]);
 	push(r8);
 }
 
@@ -297,7 +315,7 @@ static void transformOr (Ir *ir)
 	(void)instruction;
 	pop(r9);
 	pop(r8);
-	emit("\tor      r8d, r9d");
+	emit("\tor      %s, %s", reg[r8][instruction->size], reg[r9][instruction->size]);
 	push(r8);
 }
 
@@ -319,7 +337,7 @@ static void transformRef (Ir *ir)
 {
 	IrRef *instruction = ir->as.ref;
 	(void)instruction;
-	emit("\tlea     r9, [rbp - %d]", instruction->idx);
+	emit("\tlea     %s, [rbp - %d]", reg[r9][QWORD], instruction->idx);
 	push(r9);
 }
 
@@ -346,7 +364,7 @@ static void transformSar (Ir *ir)
 	(void)instruction;
 	pop(rcx);
 	pop(r8);
-	emit("\tsar     r8d, cl");
+	emit("\tsar     %s, cl", reg[r8][instruction->size]);
 	push(r8);
 }
 
@@ -356,7 +374,7 @@ static void transformShl (Ir *ir)
 	(void)instruction;
 	pop(rcx);
 	pop(r8);
-	emit("\tshl     r8d, cl");
+	emit("\tshl     %s, cl", reg[r8][instruction->size]);
 	push(r8);
 }
 
@@ -366,7 +384,7 @@ static void transformSub (Ir *ir)
 	(void)instruction;
 	pop(r9);
 	pop(r8);
-	emit("\tsub     r8, r9");
+	emit("\tsub     %s, %s", reg[r8][instruction->size], reg[r9][instruction->size]);
 	push(r8);
 }
 
@@ -374,7 +392,7 @@ static void transformVal (Ir *ir)
 {
 	IrVal *instruction = ir->as.val;
 	(void)instruction;
-	emit("\tmov     r9d, dword [rbp - %d]", instruction->idx);
+	emit("\tmov     %s, %s [rbp - %d]", reg[r9][instruction->size], quantity[instruction->size], instruction->idx);
 	push(r9);
 }
 
@@ -384,7 +402,7 @@ static void transformXor (Ir *ir)
 	(void)instruction;
 	pop(r9);
 	pop(r8);
-	emit("\txor     r8d, r9d");
+	emit("\txor     %s, %s", reg[r8][instruction->size], reg[r9][instruction->size]);
 	push(r8);
 }
 
