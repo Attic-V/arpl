@@ -403,7 +403,7 @@ static AstExpression *getExpressionProduct (void)
 
 static AstExpression *getExpressionUnaryPrefix (void)
 {
-	if (check(TT_Minus) || check(TT_Bang) || check(TT_Tilde) || check(TT_Plus_Plus) || check(TT_Minus_Minus)) {
+	if (check(TT_Minus) || check(TT_Bang) || check(TT_Tilde) || check(TT_Plus_Plus) || check(TT_Minus_Minus) || check(TT_And) || check(TT_Star)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpressionUnaryPrefix();
 		return ast_initExpressionPrefix(operator, right);
@@ -473,6 +473,9 @@ static DataType *getType (void)
 			error(lengthToken, "array length cannot be less than 1");
 		}
 		return dataType_initArray(length, getType());
+	}
+	if (match(TT_Star)) {
+		return dataType_initPointer(getType());
 	}
 	error(parser.tokens[parser.current], "expected type");
 	exit(1);

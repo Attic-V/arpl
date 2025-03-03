@@ -292,6 +292,7 @@ static void visitExpression (AstExpression *node)
 			visitExpressionPostfix(node->as.postfix);
 			break;
 		case AstExpression_Prefix:
+			visitExpressionPrefix(node->as.prefix);
 			switch (node->as.prefix->operator.type) {
 				case TT_Bang:
 					node->dataType = dataType_initBoolean();
@@ -301,9 +302,15 @@ static void visitExpression (AstExpression *node)
 				case TT_Tilde:
 					node->dataType = dataType_initNumber();
 					break;
+				case TT_And:
+					node->dataType = dataType_initPointer(node->as.prefix->e->dataType);
+					break;
+				case TT_Star:
+					node->dataType = node->as.prefix->e->dataType->as.pointer->to;
+					node->modifiable = true;
+					break;
 				default:
 			}
-			visitExpressionPrefix(node->as.prefix);
 			break;
 		case AstExpression_Ternary:
 			visitExpressionTernary(node->as.ternary);
@@ -438,6 +445,23 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 			if (!node->e->modifiable) {
 				error(node->e->as.var->identifier, "expression must be modifiable");
 				analyzer.hadError = true;
+			}
+			break;
+		case TT_And:
+			if (!node->e->modifiable) {
+				analyzer.hadError = true;
+				error(node->operator, "operand must be modifiable");
+			}
+			break;
+		case TT_Star:
+			if (!node->e->modifiable) {
+				analyzer.hadError = true;
+				error(node->operator, "operand must be modifiable");
+			}
+			break;
+			if (!dataType_isPointer(node->e->dataType)) {
+				error(node->operator, "operand must be a pointer");
+				exit(1);
 			}
 			break;
 		default:

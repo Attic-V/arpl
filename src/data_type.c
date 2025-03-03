@@ -3,6 +3,7 @@
 #include "memory.h"
 
 DataTypeArray *dataTypeArray_init (size_t length, DataType *elementT);
+DataTypePointer *dataTypePointer_init (DataType *to);
 DataTypePrimitive *dataTypePrimitive_init (Primitive pType);
 
 DataType *dataType_initArray (size_t length, DataType *elementT)
@@ -18,6 +19,21 @@ DataTypeArray *dataTypeArray_init (size_t length, DataType *elementT)
 	DataTypeArray *t = mem_alloc(sizeof(*t));
 	t->length = length;
 	t->type = elementT;
+	return t;
+}
+
+DataType *dataType_initPointer (DataType *to)
+{
+	DataType *t = mem_alloc(sizeof(*t));
+	t->type = DataType_Pointer;
+	t->as.pointer = dataTypePointer_init(to);
+	return t;
+}
+
+DataTypePointer *dataTypePointer_init (DataType *to)
+{
+	DataTypePointer *t = mem_alloc(sizeof(*t));
+	t->to = to;
 	return t;
 }
 
@@ -52,6 +68,9 @@ bool dataType_equal (DataType *a, DataType *b)
 	if (a->type == DataType_Array) {
 		return dataType_equal(a->as.array->type, b->as.array->type);
 	}
+	if (a->type == DataType_Pointer) {
+		return dataType_equal(a->as.pointer->to, b->as.pointer->to);
+	}
 	if (a->type == DataType_Primitive) {
 		return a->as.primitive->type == b->as.primitive->type;
 	}
@@ -78,16 +97,9 @@ bool dataType_isNumber (DataType *t)
 	return dataType_isPrimitive(t) && t->as.primitive->type == Primitive_Number;
 }
 
-void dataType_setBoolean (DataType *t)
+bool dataType_isPointer (DataType *t)
 {
-	t->type = DataType_Primitive;
-	t->as.primitive->type = Primitive_Boolean;
-}
-
-void dataType_setNumber (DataType *t)
-{
-	t->type = DataType_Primitive;
-	t->as.primitive->type = Primitive_Number;
+	return t->type == DataType_Pointer;
 }
 
 size_t dataType_getSize (DataType *t)
@@ -98,6 +110,9 @@ size_t dataType_getSize (DataType *t)
 	}
 	if (dataType_isArray(t)) {
 		return t->as.array->length * dataType_getSize(t->as.array->type);
+	}
+	if (dataType_isPointer(t)) {
+		return QWORD;
 	}
 	return -1;
 }

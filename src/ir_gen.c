@@ -384,6 +384,8 @@ static void visitExpressionPrefix (AstExpression *expression)
 	visitExpression(e->e);
 	size_t size = dataType_getSize(e->e->dataType);
 	switch (e->operator.type) {
+		case TT_And:
+			break;
 		case TT_Bang:
 			addInstruction(ir_initNot(size));
 			addInstruction(ir_initPush(1));
@@ -399,6 +401,12 @@ static void visitExpressionPrefix (AstExpression *expression)
 		case TT_Plus_Plus:
 			addInstruction(ir_initInc(size));
 			addInstruction(ir_initDeref(size));
+			break;
+		case TT_Star:
+			addInstruction(ir_initDeref(size));
+			if (!expression->modifiable) {
+				addInstruction(ir_initDeref(size));
+			}
 			break;
 		case TT_Tilde:
 			addInstruction(ir_initNot(size));
@@ -424,10 +432,12 @@ static void visitExpressionTernary (AstExpression *expression)
 static void visitExpressionVar (AstExpression *expression)
 {
 	AstExpressionVar *e = expression->as.var;
+	Symbol *s = telescope_get(gen.scope, e->identifier);
+	size_t size = dataType_getSize(expression->dataType);
 	if (expression->modifiable) {
-		addInstruction(ir_initRef(telescope_get(gen.scope, e->identifier)->physicalIndex));
+		addInstruction(ir_initRef(s->physicalIndex + size));
 	} else {
-		addInstruction(ir_initVal(telescope_get(gen.scope, e->identifier)->physicalIndex, dataType_getSize(expression->dataType)));
+		addInstruction(ir_initVal(s->physicalIndex + size, size));
 	}
 }
 
