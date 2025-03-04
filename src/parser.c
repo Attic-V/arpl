@@ -392,13 +392,23 @@ static AstExpression *getExpressionSum (void)
 
 static AstExpression *getExpressionProduct (void)
 {
-	AstExpression *expression = getExpressionUnaryPrefix();
+	AstExpression *expression = getExpressionUnaryPostfix();
 	while (check(TT_Star)) {
 		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionUnaryPrefix();
+		AstExpression *right = getExpressionUnaryPostfix();
 		expression = ast_initExpressionBinary(expression, right, operator);
 	}
 	return expression;
+}
+
+static AstExpression *getExpressionUnaryPostfix (void)
+{
+	AstExpression *left = getExpressionUnaryPrefix();
+	while (check(TT_Plus_Plus) || check(TT_Minus_Minus)) {
+		Token operator = parser.tokens[parser.current++];
+		left = ast_initExpressionPostfix(operator, left);
+	}
+	return left;
 }
 
 static AstExpression *getExpressionUnaryPrefix (void)
@@ -408,17 +418,7 @@ static AstExpression *getExpressionUnaryPrefix (void)
 		AstExpression *right = getExpressionUnaryPrefix();
 		return ast_initExpressionPrefix(operator, right);
 	}
-	return getExpressionUnaryPostfix();
-}
-
-static AstExpression *getExpressionUnaryPostfix (void)
-{
-	AstExpression *left = getExpressionAccessElement();
-	while (check(TT_Plus_Plus) || check(TT_Minus_Minus)) {
-		Token operator = parser.tokens[parser.current++];
-		left = ast_initExpressionPostfix(operator, left);
-	}
-	return left;
+	return getExpressionAccessElement();
 }
 
 static AstExpression *getExpressionAccessElement (void)
