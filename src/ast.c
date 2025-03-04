@@ -2,6 +2,9 @@
 #include "linked_list.h"
 #include "memory.h"
 
+static AstStatement *ast_initStatement (AstStatementType type);
+static AstExpression *ast_initExpression (AstExpressionType type);
+
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementBreakL *astStatement_initBreakL (Token keyword);
 static AstStatementCaseL *astStatement_initCaseL (AstExpression *e, AstStatement *body, Token keyword);
@@ -40,111 +43,103 @@ AstRoot *ast_initRoot (AstStatement *statement)
 	return root;
 }
 
+AstStatement *ast_initStatement (AstStatementType type)
+{
+	AstStatement *s = mem_alloc(sizeof(*s));
+	s->type = type;
+	dll_init(s);
+	return s;
+}
+
+AstExpression *ast_initExpression (AstExpressionType type)
+{
+	AstExpression *e = mem_alloc(sizeof(*e));
+	e->type = type;
+	e->dataType = mem_alloc(sizeof(*e->dataType));
+	return e;
+}
+
 AstStatement *ast_initStatementBlock (AstStatement *children)
 {
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_Block;
+	AstStatement *statement = ast_initStatement(AstStatement_Block);
 	statement->as.block = astStatement_initBlock(children);
-	dll_init(statement);
 	return statement;
 }
 
 AstStatement *ast_initStatementBreakL (Token keyword)
 {
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_BreakL;
+	AstStatement *statement = ast_initStatement(AstStatement_BreakL);
 	statement->as.breakL = astStatement_initBreakL(keyword);
-	dll_init(statement);
 	return statement;
 }
 
 AstStatement *ast_initStatementCaseL (AstExpression *e, AstStatement *body, Token keyword)
 {
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_CaseL;
+	AstStatement *statement = ast_initStatement(AstStatement_CaseL);
 	statement->as.caseL = astStatement_initCaseL(e, body, keyword);
-	dll_init(statement);
 	return statement;
 }
 
 AstStatement *ast_initStatementContinueL (Token keyword)
 {
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_ContinueL;
+	AstStatement *statement = ast_initStatement(AstStatement_ContinueL);
 	statement->as.continueL = astStatement_initContinueL(keyword);
-	dll_init(statement);
 	return statement;
 }
 
 AstStatement *ast_initStatementDoWhile (AstStatement *a, AstExpression *condition, Token keyword)
 {
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_DoWhile;
+	AstStatement *statement = ast_initStatement(AstStatement_DoWhile);
 	statement->as.doWhile = astStatement_initDoWhile(a, condition, keyword);
-	dll_init(statement);
 	return statement;
 }
 
 AstStatement *ast_initStatementExpr (AstExpression *expression)
 {
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_Expr;
+	AstStatement *statement = ast_initStatement(AstStatement_Expr);
 	statement->as.expr = astStatement_initExpr(expression);
-	dll_init(statement);
 	return statement;
 }
 
 AstStatement *ast_initStatementForI (AstStatement *init, AstExpression *condition, AstExpression *update, AstStatement *body, Token keyword)
 {
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_ForI;
+	AstStatement *statement = ast_initStatement(AstStatement_ForI);
 	statement->as.forI = astStatement_initForI(init, condition, update, body, keyword);
-	dll_init(statement);
 	return statement;
 }
 
 AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword)
 {
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_IfE;
+	AstStatement *statement = ast_initStatement(AstStatement_IfE);
 	statement->as.ifE = astStatement_initIfE(condition, a, b, keyword);
-	dll_init(statement);
 	return statement;
 }
 
 AstStatement *ast_initStatementInit (Token identifier, DataType *type, AstExpression *expression, Token operator)
 {
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_Init;
+	AstStatement *statement = ast_initStatement(AstStatement_Init);
 	statement->as.init = astStatement_initInit(identifier, type, expression, operator);
-	dll_init(statement);
 	return statement;
 }
 
 AstStatement *ast_initStatementReturnE (AstExpression *expression)
 {
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_ReturnE;
+	AstStatement *statement = ast_initStatement(AstStatement_ReturnE);
 	statement->as.returnE = astStatement_initReturnE(expression);
-	dll_init(statement);
 	return statement;
 }
 
 AstStatement *ast_initStatementSwitchC (AstExpression *e, AstStatement *body)
 {
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_SwitchC;
+	AstStatement *statement = ast_initStatement(AstStatement_SwitchC);
 	statement->as.switchC = astStatement_initSwitchC(e, body);
-	dll_init(statement);
 	return statement;
 }
 
 AstStatement *ast_initStatementVar (Token identifier, DataType *type)
 {
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_Var;
+	AstStatement *statement = ast_initStatement(AstStatement_Var);
 	statement->as.var = astStatement_initVar(identifier, type);
-	dll_init(statement);
 	return statement;
 }
 
@@ -158,82 +153,64 @@ AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement *a
 
 AstExpression *ast_initExpressionAccessElement (AstExpression *a, AstExpression *b, Token operator)
 {
-	AstExpression *expression = mem_alloc(sizeof(*expression));
-	expression->type = AstExpression_AccessElement;
+	AstExpression *expression = ast_initExpression(AstExpression_AccessElement);
 	expression->as.accessElement = astExpression_initAccessElement(a, b, operator);
-	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
 AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator)
 {
-	AstExpression *expression = mem_alloc(sizeof(*expression));
-	expression->type = AstExpression_Assign;
+	AstExpression *expression = ast_initExpression(AstExpression_Assign);
 	expression->as.assign = astExpression_initAssign(a, b, operator);
-	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator)
 {
-	AstExpression *expression = mem_alloc(sizeof(*expression));
-	expression->type = AstExpression_Binary;
+	AstExpression *expression = ast_initExpression(AstExpression_Binary);
 	expression->as.binary = astExpression_initBinary(a, b, operator);
-	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
 AstExpression *ast_initExpressionBoolean (bool value)
 {
-	AstExpression *expression = mem_alloc(sizeof(*expression));
-	expression->type = AstExpression_Boolean;
+	AstExpression *expression = ast_initExpression(AstExpression_Boolean);
 	expression->as.boolean = astExpression_initBoolean(value);
-	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
 AstExpression *ast_initExpressionNumber (Token value)
 {
-	AstExpression *expression = mem_alloc(sizeof(*expression));
-	expression->type = AstExpression_Number;
+	AstExpression *expression = ast_initExpression(AstExpression_Number);
 	expression->as.number = astExpression_initNumber(value);
-	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
 AstExpression *ast_initExpressionPostfix (Token operator, AstExpression *e)
 {
-	AstExpression *expression = mem_alloc(sizeof(*expression));
-	expression->type = AstExpression_Postfix;
+	AstExpression *expression = ast_initExpression(AstExpression_Postfix);
 	expression->as.postfix = astExpression_initPostfix(operator, e);
-	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
 AstExpression *ast_initExpressionPrefix (Token operator, AstExpression *e)
 {
-	AstExpression *expression = mem_alloc(sizeof(*expression));
-	expression->type = AstExpression_Prefix;
+	AstExpression *expression = ast_initExpression(AstExpression_Prefix);
 	expression->as.prefix = astExpression_initPrefix(operator, e);
-	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
 AstExpression *ast_initExpressionTernary (AstExpression *condition, AstExpression *a, AstExpression *b, Token operator)
 {
-	AstExpression *expression = mem_alloc(sizeof(*expression));
-	expression->type = AstExpression_Ternary;
+	AstExpression *expression = ast_initExpression(AstExpression_Ternary);
 	expression->as.ternary = astExpression_initTernary(condition, a, b, operator);
-	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
 AstExpression *ast_initExpressionVar (Token identifier)
 {
-	AstExpression *expression = mem_alloc(sizeof(*expression));
-	expression->type = AstExpression_Var;
+	AstExpression *expression = ast_initExpression(AstExpression_Var);
 	expression->as.var = astExpression_initVar(identifier);
-	expression->dataType = mem_alloc(sizeof(*expression->dataType));
 	return expression;
 }
 
