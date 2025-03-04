@@ -56,6 +56,7 @@ AstExpression *ast_initExpression (AstExpressionType type)
 	AstExpression *e = mem_alloc(sizeof(*e));
 	e->type = type;
 	e->dataType = mem_alloc(sizeof(*e->dataType));
+	e->modifiable = false;
 	return e;
 }
 

@@ -240,7 +240,6 @@ static void visitStatementWhileC (AstStatementWhileC *node)
 
 static void visitExpression (AstExpression *node)
 {
-	node->modifiable = false;
 	switch (node->type) {
 		case AstExpression_AccessElement:
 			visitExpressionAccessElement(node->as.accessElement);
