@@ -2,15 +2,23 @@
 #include "data_type.h"
 #include "memory.h"
 
+DataType *dataType_init (DataTypeType type);
+
 DataTypeArray *dataTypeArray_init (size_t length, DataType *elementT);
 DataTypeBoolean *dataTypeBoolean_init (void);
 DataTypeNumber *dataTypeNumber_init (void);
 DataTypePointer *dataTypePointer_init (DataType *to);
 
-DataType *dataType_initArray (size_t length, DataType *elementT)
+DataType *dataType_init (DataTypeType type)
 {
 	DataType *t = mem_alloc(sizeof(*t));
-	t->type = DataType_Array;
+	t->type = type;
+	return t;
+}
+
+DataType *dataType_initArray (size_t length, DataType *elementT)
+{
+	DataType *t = dataType_init(DataType_Array);
 	t->as.array = dataTypeArray_init(length, elementT);
 	return t;
 }
@@ -25,8 +33,7 @@ DataTypeArray *dataTypeArray_init (size_t length, DataType *elementT)
 
 DataType *dataType_initBoolean (void)
 {
-	DataType *t = mem_alloc(sizeof(*t));
-	t->type = DataType_Boolean;
+	DataType *t = dataType_init(DataType_Boolean);
 	t->as.boolean = dataTypeBoolean_init();
 	return t;
 }
@@ -39,8 +46,7 @@ DataTypeBoolean *dataTypeBoolean_init (void)
 
 DataType *dataType_initNumber (void)
 {
-	DataType *t = mem_alloc(sizeof(*t));
-	t->type = DataType_Number;
+	DataType *t = dataType_init(DataType_Number);
 	t->as.number = dataTypeNumber_init();
 	return t;
 }
@@ -53,8 +59,7 @@ DataTypeNumber *dataTypeNumber_init (void)
 
 DataType *dataType_initPointer (DataType *to)
 {
-	DataType *t = mem_alloc(sizeof(*t));
-	t->type = DataType_Pointer;
+	DataType *t = dataType_init(DataType_Pointer);
 	t->as.pointer = dataTypePointer_init(to);
 	return t;
 }
