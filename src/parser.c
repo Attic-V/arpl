@@ -457,7 +457,7 @@ static AstExpression *getExpressionPrimary (void)
 
 static DataType *getType (void)
 {
-	if (match(TT_Int)) {
+	if (match(TT_I32)) {
 		return dataType_initNumber();
 	}
 	if (match(TT_Bool)) {
