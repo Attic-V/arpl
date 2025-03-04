@@ -13,30 +13,29 @@ typedef struct {
 } DataTypeArray;
 
 typedef struct {
+} DataTypeBoolean;
+
+typedef struct {
+} DataTypeNumber;
+
+typedef struct {
 	DataType *to;
 } DataTypePointer;
 
 typedef enum {
-	Primitive_Boolean,
-	Primitive_Number,
-} Primitive;
-
-typedef struct {
-	Primitive type;
-} DataTypePrimitive;
-
-typedef enum {
 	DataType_Array,
+	DataType_Boolean,
+	DataType_Number,
 	DataType_Pointer,
-	DataType_Primitive,
 } DataTypeType;
 
 struct DataType {
 	DataTypeType type;
 	union {
 		DataTypeArray *array;
+		DataTypeBoolean *boolean;
+		DataTypeNumber *number;
 		DataTypePointer *pointer;
-		DataTypePrimitive *primitive;
 	} as;
 };
 
@@ -45,12 +44,12 @@ DataType *dataType_initBoolean (void);
 DataType *dataType_initNumber (void);
 DataType *dataType_initPointer (DataType *to);
 
-bool dataType_equal (DataType *a, DataType *b);
-bool dataType_isPrimitive (DataType *t);
 bool dataType_isArray (DataType *t);
 bool dataType_isBoolean (DataType *t);
 bool dataType_isNumber (DataType *t);
 bool dataType_isPointer (DataType *t);
+
+bool dataType_equal (DataType *a, DataType *b);
 size_t dataType_getSize (DataType *type);
 
 #endif
