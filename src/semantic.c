@@ -12,7 +12,6 @@ static void visitStatement (AstStatement *node);
 static void visitStatementBlock (AstStatementBlock *node);
 static void visitStatementBreakL (AstStatementBreakL *node);
 static void visitStatementCaseL (AstStatementCaseL *node);
-static void visitStatementConstD (AstStatementConstD *node);
 static void visitStatementContinueL (AstStatementContinueL *node);
 static void visitStatementDoWhile (AstStatementDoWhile *node);
 static void visitStatementExpr (AstStatementExpr *node);
@@ -79,7 +78,6 @@ static void visitStatement (AstStatement *node)
 		case AstStatement_Block: visitStatementBlock(node->as.block); break;
 		case AstStatement_BreakL: visitStatementBreakL(node->as.breakL); break;
 		case AstStatement_CaseL: visitStatementCaseL(node->as.caseL); break;
-		case AstStatement_ConstD: visitStatementConstD(node->as.constD); break;
 		case AstStatement_ContinueL: visitStatementContinueL(node->as.continueL); break;
 		case AstStatement_DoWhile: visitStatementDoWhile(node->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
@@ -133,13 +131,6 @@ static void visitStatementCaseL (AstStatementCaseL *node)
 	for (AstStatement *s = node->body; s != NULL; s = s->next) {
 		visitStatement(s);
 	}
-}
-
-static void visitStatementConstD (AstStatementConstD *node)
-{
-	visitStatement(ast_initStatementInit(node->identifier, node->type, node->expression, node->operator));
-	Symbol *symbol = scope_get(analyzer.currentScope, node->identifier);
-	symbol->type->mutable = false;
 }
 
 static void visitStatementContinueL (AstStatementContinueL *node)
@@ -202,8 +193,16 @@ static void visitStatementIfE (AstStatementIfE *node)
 
 static void visitStatementInit (AstStatementInit *node)
 {
-	visitStatement(ast_initStatementVar(node->identifier, node->type));
-	visitExpression(ast_initExpressionAssign(ast_initExpressionVar(node->identifier), node->expression, node->operator));
+	AstStatement *statementVar = ast_initStatementVar(node->identifier, node->type);
+	AstExpression *expressionVar = ast_initExpressionVar(node->identifier);
+	AstExpression *expressionAssign = ast_initExpressionAssign(expressionVar, node->expression, node->operator);
+
+	visitStatement(statementVar);
+	Symbol *symbol = scope_get(analyzer.currentScope, node->identifier);
+	bool mutability = symbol->type->mutable;
+	symbol->type->mutable = true;
+	visitExpression(expressionAssign);
+	symbol->type->mutable = mutability;
 }
 
 static void visitStatementReturnE (AstStatementReturnE *node)
@@ -359,17 +358,16 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 {
 	visitExpression(node->a);
 	visitExpression(node->b);
-	if (!dataType_equal(node->a->dataType, node->b->dataType)) {
+	if (!node->a->dataType->mutable) {
+		analyzer.hadError = true;
+		error(node->operator, "left operand is immutable");
+	} else if (!dataType_equal(node->a->dataType, node->b->dataType)) {
 		analyzer.hadError = true;
 		error(node->operator, "operands must have the same type");
 	}
 	if (!node->a->modifiable) {
 		error(node->operator, "assignee must be modifiable");
 		analyzer.hadError = true;
-	}
-	if (!node->a->dataType->mutable) {
-		analyzer.hadError = true;
-		error(node->operator, "left side expression is immutable");
 	}
 	node->b->modifiable = false;
 }

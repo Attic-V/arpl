@@ -8,7 +8,6 @@ static AstExpression *ast_initExpression (AstExpressionType type);
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementBreakL *astStatement_initBreakL (Token keyword);
 static AstStatementCaseL *astStatement_initCaseL (AstExpression *e, AstStatement *body, Token keyword);
-static AstStatementConstD *astStatement_initConstD (Token keyword, Token identifier, DataType *type, Token operator, AstExpression *expression);
 static AstStatementContinueL *astStatement_initContinueL (Token keyword);
 static AstStatementDoWhile *astStatement_initDoWhile (AstStatement *a, AstExpression *condition, Token operator);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
@@ -79,13 +78,6 @@ AstStatement *ast_initStatementCaseL (AstExpression *e, AstStatement *body, Toke
 {
 	AstStatement *statement = ast_initStatement(AstStatement_CaseL);
 	statement->as.caseL = astStatement_initCaseL(e, body, keyword);
-	return statement;
-}
-
-AstStatement *ast_initStatementConstD (Token keyword, Token identifier, DataType *type, Token operator, AstExpression *expression)
-{
-	AstStatement *statement = ast_initStatement(AstStatement_ConstD);
-	statement->as.constD = astStatement_initConstD(keyword, identifier, type, operator, expression);
 	return statement;
 }
 
@@ -244,17 +236,6 @@ static AstStatementCaseL *astStatement_initCaseL (AstExpression *e, AstStatement
 	caseL->body = body;
 	caseL->keyword = keyword;
 	return caseL;
-}
-
-static AstStatementConstD *astStatement_initConstD (Token keyword, Token identifier, DataType *type, Token operator, AstExpression *expression)
-{
-	AstStatementConstD *constD = mem_alloc(sizeof(*constD));
-	constD->keyword = keyword;
-	constD->identifier = identifier;
-	constD->type = type;
-	constD->operator = operator;
-	constD->expression = expression;
-	return constD;
 }
 
 static AstStatementContinueL *astStatement_initContinueL (Token keyword)

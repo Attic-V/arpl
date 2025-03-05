@@ -14,7 +14,6 @@ static AstStatement *getStatement(void);
 static AstStatement *getStatementBlock (void);
 static AstStatement *getStatementBreakL (void);
 static AstStatement *getStatementCaseL (void);
-static AstStatement *getStatementConst (void);
 static AstStatement *getStatementContinueL (void);
 static AstStatement *getStatementDoWhile (void);
 static AstStatement *getStatementExpr (void);
@@ -76,7 +75,6 @@ static AstStatement *getStatement (void)
 {
 	switch (parser.tokens[parser.current].type) {
 		case TT_Break: return getStatementBreakL();
-		case TT_Const: return getStatementConst();
 		case TT_Continue: return getStatementContinueL();
 		case TT_Do: return getStatementDoWhile();
 		case TT_For: return getStatementForI();
@@ -131,17 +129,6 @@ static AstStatement *getStatementCaseL (void)
 	}
 	for (; statements != NULL && statements->previous != NULL; statements = statements->previous);
 	return ast_initStatementCaseL(expression, statements, keyword);
-}
-
-static AstStatement *getStatementConst (void)
-{
-	Token keyword = consume(TT_Const, "expected 'const'");
-	Token identifier = consume(TT_Identifier, "expected identifier");
-	DataType *type = getType();
-	Token operator = consume(TT_Equal, "expected '='");
-	AstExpression *expression = getExpression();
-	consume(TT_Semicolon, "expected ';'");
-	return ast_initStatementConstD(keyword, identifier, type, operator, expression);
 }
 
 static AstStatement *getStatementContinueL (void)
@@ -470,11 +457,16 @@ static AstExpression *getExpressionPrimary (void)
 
 static DataType *getType (void)
 {
+	bool mutable = !match(TT_Const);
 	if (match(TT_I32)) {
-		return dataType_initNumber();
+		DataType *type = dataType_initNumber();
+		type->mutable = mutable;
+		return type;
 	}
 	if (match(TT_Bool)) {
-		return dataType_initBoolean();
+		DataType *type = dataType_initBoolean();
+		type->mutable = mutable;
+		return type;
 	}
 	if (match(TT_LBracket)) {
 		Token lengthToken = consume(TT_Number, "expected an integer");
@@ -485,10 +477,14 @@ static DataType *getType (void)
 		if (length < 1) {
 			error(lengthToken, "array length cannot be less than 1");
 		}
-		return dataType_initArray(length, getType());
+		DataType *type = dataType_initArray(length, getType());
+		type->mutable = mutable;
+		return type;
 	}
 	if (match(TT_Star)) {
-		return dataType_initPointer(getType());
+		DataType *type = dataType_initPointer(getType());
+		type->mutable = mutable;
+		return type;
 	}
 	error(parser.tokens[parser.current], "expected type");
 	exit(1);

@@ -22,7 +22,6 @@ static void visitStatement (AstStatement *statement);
 static void visitStatementBlock (AstStatementBlock *statement);
 static void visitStatementBreakL (AstStatementBreakL *statement);
 static void visitStatementCaseL (AstStatementCaseL *statement);
-static void visitStatementConstD (AstStatementConstD *statement);
 static void visitStatementContinueL (AstStatementContinueL *statement);
 static void visitStatementDoWhile (AstStatementDoWhile *statement);
 static void visitStatementExpr (AstStatementExpr *statement);
@@ -95,7 +94,6 @@ static void visitStatement (AstStatement *statement)
 		case AstStatement_Block: visitStatementBlock(statement->as.block); break;
 		case AstStatement_BreakL: visitStatementBreakL(statement->as.breakL); break;
 		case AstStatement_CaseL: visitStatementCaseL(statement->as.caseL); break;
-		case AstStatement_ConstD: visitStatementConstD(statement->as.constD); break;
 		case AstStatement_ContinueL: visitStatementContinueL(statement->as.continueL); break;
 		case AstStatement_DoWhile: visitStatementDoWhile(statement->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(statement->as.expr); break;
@@ -143,11 +141,6 @@ static void visitStatementCaseL (AstStatementCaseL *statement)
 	gen.nextCaseBodyLabel = gen.label++;
 	addInstruction(ir_initJmp(gen.nextCaseBodyLabel));
 	addInstruction(ir_initLabel(l0));
-}
-
-static void visitStatementConstD (AstStatementConstD *statement)
-{
-	visitStatement(ast_initStatementInit(statement->identifier, statement->type, statement->expression, statement->operator));
 }
 
 static void visitStatementContinueL (AstStatementContinueL *statement)
