@@ -476,7 +476,6 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 				analyzer.hadError = true;
 				error(node->operator, "operand must be modifiable");
 			}
-			break;
 			if (!dataType_isPointer(node->e->dataType)) {
 				error(node->operator, "operand must be a pointer");
 				exit(1);
