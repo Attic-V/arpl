@@ -13,6 +13,7 @@ static DataType *dataType_init (DataTypeType type)
 {
 	DataType *t = mem_alloc(sizeof(*t));
 	t->type = type;
+	t->mutable = true;
 	return t;
 }
 
@@ -93,6 +94,9 @@ bool dataType_isPointer (DataType *t)
 
 bool dataType_equal (DataType *a, DataType *b)
 {
+	if (a->mutable != b->mutable) {
+		return false;
+	}
 	if (a->type != b->type) {
 		return false;
 	}

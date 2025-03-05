@@ -37,6 +37,7 @@ struct DataType {
 		DataTypeNumber *number;
 		DataTypePointer *pointer;
 	} as;
+	bool mutable;
 };
 
 DataType *dataType_initArray (size_t length, DataType *elementT);

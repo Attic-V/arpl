@@ -14,6 +14,7 @@ static AstStatement *getStatement(void);
 static AstStatement *getStatementBlock (void);
 static AstStatement *getStatementBreakL (void);
 static AstStatement *getStatementCaseL (void);
+static AstStatement *getStatementConst (void);
 static AstStatement *getStatementContinueL (void);
 static AstStatement *getStatementDoWhile (void);
 static AstStatement *getStatementExpr (void);
@@ -75,6 +76,7 @@ static AstStatement *getStatement (void)
 {
 	switch (parser.tokens[parser.current].type) {
 		case TT_Break: return getStatementBreakL();
+		case TT_Const: return getStatementConst();
 		case TT_Continue: return getStatementContinueL();
 		case TT_Do: return getStatementDoWhile();
 		case TT_For: return getStatementForI();
@@ -129,6 +131,17 @@ static AstStatement *getStatementCaseL (void)
 	}
 	for (; statements != NULL && statements->previous != NULL; statements = statements->previous);
 	return ast_initStatementCaseL(expression, statements, keyword);
+}
+
+static AstStatement *getStatementConst (void)
+{
+	Token keyword = consume(TT_Const, "expected 'const'");
+	Token identifier = consume(TT_Identifier, "expected identifier");
+	DataType *type = getType();
+	Token operator = consume(TT_Equal, "expected '='");
+	AstExpression *expression = getExpression();
+	consume(TT_Semicolon, "expected ';'");
+	return ast_initStatementConstD(keyword, identifier, type, operator, expression);
 }
 
 static AstStatement *getStatementContinueL (void)
