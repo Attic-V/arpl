@@ -268,7 +268,7 @@ static void visitExpression (AstExpression *node)
 				case TT_Plus:
 				case TT_Minus:
 				case TT_Star:
-					node->dataType = dataType_initNumber();
+					node->dataType = dataType_initI32();
 					break;
 				case TT_And_And:
 				case TT_Bang_Equal:
@@ -286,13 +286,13 @@ static void visitExpression (AstExpression *node)
 			visitExpressionBoolean(node->as.boolean);
 			break;
 		case AstExpression_Number:
-			node->dataType = dataType_initNumber();
+			node->dataType = dataType_initI32();
 			visitExpressionNumber(node->as.number);
 			break;
 		case AstExpression_Postfix:
 			switch (node->as.postfix->operator.type) {
 				case TT_Plus_Plus:
-					node->dataType = dataType_initNumber();
+					node->dataType = dataType_initI32();
 					break;
 				default:
 			}
@@ -307,7 +307,7 @@ static void visitExpression (AstExpression *node)
 				case TT_Minus:
 				case TT_Plus_Plus:
 				case TT_Tilde:
-					node->dataType = dataType_initNumber();
+					node->dataType = dataType_initI32();
 					break;
 				case TT_And:
 					node->dataType = dataType_initPointer(node->as.prefix->e->dataType);
@@ -344,7 +344,7 @@ static void visitExpressionAccessElement (AstExpressionAccessElement *node)
 	if (!dataType_isArray(node->a->dataType)) {
 		error(node->operator, "reference must be an array");
 	}
-	if (!dataType_isNumber(node->b->dataType)) {
+	if (!dataType_isI32(node->b->dataType)) {
 		error(node->operator, "index must be a number");
 	}
 	if (!node->a->modifiable) {
@@ -386,7 +386,7 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 		case TT_Plus:
 		case TT_Minus:
 		case TT_Star:
-			if (!dataType_isNumber(node->a->dataType) || !dataType_isNumber(node->b->dataType)) {
+			if (!dataType_isI32(node->a->dataType) || !dataType_isI32(node->b->dataType)) {
 				error(node->operator, "operands must be numbers");
 			}
 			break;
@@ -420,7 +420,7 @@ static void visitExpressionPostfix (AstExpressionPostfix *node)
 	switch (node->operator.type) {
 		case TT_Minus_Minus:
 		case TT_Plus_Plus:
-			if (!dataType_isNumber(node->e->dataType)) {
+			if (!dataType_isI32(node->e->dataType)) {
 				error(node->operator, "operand must be a number");
 			}
 			if (!node->e->modifiable) {
@@ -447,13 +447,13 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 			break;
 		case TT_Minus:
 		case TT_Tilde:
-			if (!dataType_isNumber(node->e->dataType)) {
+			if (!dataType_isI32(node->e->dataType)) {
 				error(node->operator, "operand must be a number");
 			}
 			break;
 		case TT_Minus_Minus:
 		case TT_Plus_Plus:
-			if (!dataType_isNumber(node->e->dataType)) {
+			if (!dataType_isI32(node->e->dataType)) {
 				error(node->operator, "operand must be a number");
 			}
 			if (!node->e->modifiable) {

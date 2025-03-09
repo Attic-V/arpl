@@ -459,7 +459,7 @@ static DataType *getType (void)
 {
 	bool mutable = !match(TT_Const);
 	if (match(TT_I32)) {
-		DataType *type = dataType_initNumber();
+		DataType *type = dataType_initI32();
 		type->mutable = mutable;
 		return type;
 	}

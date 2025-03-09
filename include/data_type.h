@@ -16,7 +16,7 @@ typedef struct {
 } DataTypeBoolean;
 
 typedef struct {
-} DataTypeNumber;
+} DataTypeI32;
 
 typedef struct {
 	DataType *to;
@@ -25,7 +25,7 @@ typedef struct {
 typedef enum {
 	DataType_Array,
 	DataType_Boolean,
-	DataType_Number,
+	DataType_I32,
 	DataType_Pointer,
 } DataTypeType;
 
@@ -34,7 +34,7 @@ struct DataType {
 	union {
 		DataTypeArray *array;
 		DataTypeBoolean *boolean;
-		DataTypeNumber *number;
+		DataTypeI32 *i32;
 		DataTypePointer *pointer;
 	} as;
 	bool mutable;
@@ -42,12 +42,12 @@ struct DataType {
 
 DataType *dataType_initArray (size_t length, DataType *elementT);
 DataType *dataType_initBoolean (void);
-DataType *dataType_initNumber (void);
+DataType *dataType_initI32 (void);
 DataType *dataType_initPointer (DataType *to);
 
 bool dataType_isArray (DataType *t);
 bool dataType_isBoolean (DataType *t);
-bool dataType_isNumber (DataType *t);
+bool dataType_isI32 (DataType *t);
 bool dataType_isPointer (DataType *t);
 
 bool dataType_equal (DataType *a, DataType *b);
