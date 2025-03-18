@@ -3,6 +3,7 @@
 
 #include "error.h"
 #include "linked_list.h"
+#include "memory.h"
 #include "semantic.h"
 
 static void visitAst (Ast *ast);
@@ -27,6 +28,7 @@ static void visitExpression (AstExpression *node);
 static void visitExpressionAccessElement (AstExpressionAccessElement *node);
 static void visitExpressionAssign (AstExpressionAssign *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
+static void visitExpressionCast (AstExpressionCast *node);
 static void visitExpressionBoolean (AstExpressionBoolean *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
 static void visitExpressionPostfix (AstExpressionPostfix *node);
@@ -256,9 +258,10 @@ static void visitExpression (AstExpression *node)
 			break;
 		case AstExpression_Assign:
 			visitExpressionAssign(node->as.assign);
-			node->dataType = node->as.assign->b->dataType;
+			node->dataType = node->as.assign->a->dataType;
 			break;
 		case AstExpression_Binary:
+			visitExpressionBinary(node->as.binary);
 			switch (node->as.binary->operator.type) {
 				case TT_And:
 				case TT_Caret:
@@ -268,7 +271,7 @@ static void visitExpression (AstExpression *node)
 				case TT_Plus:
 				case TT_Minus:
 				case TT_Star:
-					node->dataType = dataType_initI32();
+					node->dataType = node->as.binary->a->dataType;
 					break;
 				case TT_And_And:
 				case TT_Bang_Equal:
@@ -279,20 +282,26 @@ static void visitExpression (AstExpression *node)
 					break;
 				default:
 			}
-			visitExpressionBinary(node->as.binary);
 			break;
 		case AstExpression_Boolean:
-			node->dataType = dataType_initBoolean();
 			visitExpressionBoolean(node->as.boolean);
+			node->dataType = dataType_initBoolean();
+			break;
+		case AstExpression_Cast:
+			visitExpressionCast(node->as.cast);
+			node->dataType = node->as.cast->to;
 			break;
 		case AstExpression_Number:
-			node->dataType = dataType_initI32();
 			visitExpressionNumber(node->as.number);
+			char *buffer = mem_alloc(node->as.number->value.length + 1);
+			sprintf(buffer, "%.*s", node->as.number->value.length, node->as.number->value.lexeme);
+			size_t value = atoi(buffer);
+			node->dataType = dataType_smallestInt(value);
 			break;
 		case AstExpression_Postfix:
 			switch (node->as.postfix->operator.type) {
 				case TT_Plus_Plus:
-					node->dataType = dataType_initI32();
+					node->dataType = node->as.postfix->e->dataType;
 					break;
 				default:
 			}
@@ -307,7 +316,7 @@ static void visitExpression (AstExpression *node)
 				case TT_Minus:
 				case TT_Plus_Plus:
 				case TT_Tilde:
-					node->dataType = dataType_initI32();
+					node->dataType = node->as.prefix->e->dataType;
 					break;
 				case TT_And:
 					node->dataType = dataType_initPointer(node->as.prefix->e->dataType);
@@ -386,7 +395,7 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 		case TT_Plus:
 		case TT_Minus:
 		case TT_Star:
-			if (!dataType_isI32(node->a->dataType) || !dataType_isI32(node->b->dataType)) {
+			if (!dataType_isInt(node->a->dataType) || !dataType_isInt(node->b->dataType)) {
 				error(node->operator, "operands must be numbers");
 			}
 			break;
@@ -411,6 +420,23 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 static void visitExpressionBoolean (AstExpressionBoolean *node)
 { }
 
+static void visitExpressionCast (AstExpressionCast *node)
+{
+	visitExpression(node->e);
+	switch (node->operator.type) {
+		case TT_Minus_Greater:
+			break;
+		case TT_Tilde_Greater:
+			if (!dataType_castable(node->e->dataType, node->to)) {
+				analyzer.hadError = true;
+				error(node->operator, "invalid cast");
+			}
+			break;
+		default:
+	}
+	node->e->modifiable = false;
+}
+
 static void visitExpressionNumber (AstExpressionNumber *node)
 { }
 
@@ -420,7 +446,7 @@ static void visitExpressionPostfix (AstExpressionPostfix *node)
 	switch (node->operator.type) {
 		case TT_Minus_Minus:
 		case TT_Plus_Plus:
-			if (!dataType_isI32(node->e->dataType)) {
+			if (!dataType_isInt(node->e->dataType)) {
 				error(node->operator, "operand must be a number");
 			}
 			if (!node->e->modifiable) {
@@ -447,13 +473,13 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 			break;
 		case TT_Minus:
 		case TT_Tilde:
-			if (!dataType_isI32(node->e->dataType)) {
+			if (!dataType_isInt(node->e->dataType)) {
 				error(node->operator, "operand must be a number");
 			}
 			break;
 		case TT_Minus_Minus:
 		case TT_Plus_Plus:
-			if (!dataType_isI32(node->e->dataType)) {
+			if (!dataType_isInt(node->e->dataType)) {
 				error(node->operator, "operand must be a number");
 			}
 			if (!node->e->modifiable) {

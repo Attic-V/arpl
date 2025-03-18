@@ -58,7 +58,7 @@ Token *scan (char *source)
 			case '[': addToken(TT_LBracket); continue;
 			case '<': addToken(match('<') ? TT_Less_Less : match('=') ? TT_Less_Equal : TT_Less); continue;
 			case '(': addToken(TT_LParen); continue;
-			case '-': addToken(match('-') ? TT_Minus_Minus : match('=') ? TT_Minus_Equal : TT_Minus); continue;
+			case '-': addToken(match('>') ? TT_Minus_Greater : match('-') ? TT_Minus_Minus : match('=') ? TT_Minus_Equal : TT_Minus); continue;
 			case '|': addToken(match('|') ? TT_Pipe_Pipe : TT_Pipe); continue;
 			case '+': addToken(match('=') ? TT_Plus_Equal : match('+') ? TT_Plus_Plus : TT_Plus); continue;
 			case '?': addToken(TT_Question); continue;
@@ -67,7 +67,7 @@ Token *scan (char *source)
 			case ')': addToken(TT_RParen); continue;
 			case ';': addToken(TT_Semicolon); continue;
 			case '*': addToken(match('=') ? TT_Star_Equal : TT_Star); continue;
-			case '~': addToken(TT_Tilde); continue;
+			case '~': addToken(match('>') ? TT_Tilde_Greater : TT_Tilde); continue;
 			case '/':
 				if (match('/')) {
 					while (!check('\0') && !match('\n')) {
@@ -115,6 +115,7 @@ Token *scan (char *source)
 			keyword(false, False)
 			keyword(for, For)
 			keyword(i32, I32)
+			keyword(i8, I8)
 			keyword(if, If)
 			keyword(return, Return)
 			keyword(switch, Switch)

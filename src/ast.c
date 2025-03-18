@@ -22,6 +22,7 @@ static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, As
 static AstExpressionAccessElement *astExpression_initAccessElement (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
+static AstExpressionCast *astExpression_initCast (AstExpression *e, Token operator, DataType *to);
 static AstExpressionBoolean *astExpression_initBoolean (bool value);
 static AstExpressionNumber *astExpression_initNumber (Token value);
 static AstExpressionPostfix *astExpression_initPostfix (Token operator, AstExpression *e);
@@ -177,6 +178,13 @@ AstExpression *ast_initExpressionBoolean (bool value)
 {
 	AstExpression *expression = ast_initExpression(AstExpression_Boolean);
 	expression->as.boolean = astExpression_initBoolean(value);
+	return expression;
+}
+
+AstExpression *ast_initExpressionCast (AstExpression *e, Token operator, DataType *to)
+{
+	AstExpression *expression = ast_initExpression(AstExpression_Cast);
+	expression->as.cast = astExpression_initCast(e, operator, to);
 	return expression;
 }
 
@@ -356,6 +364,15 @@ static AstExpressionBoolean *astExpression_initBoolean (bool value)
 	AstExpressionBoolean *boolean = mem_alloc(sizeof(*boolean));
 	boolean->value = value;
 	return boolean;
+}
+
+static AstExpressionCast *astExpression_initCast (AstExpression *e, Token operator, DataType *to)
+{
+	AstExpressionCast *cast = mem_alloc(sizeof(*cast));
+	cast->e = e;
+	cast->operator = operator;
+	cast->to = to;
+	return cast;
 }
 
 static AstExpressionNumber *astExpression_initNumber (Token value)

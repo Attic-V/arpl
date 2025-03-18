@@ -38,6 +38,7 @@ static void visitExpressionAccessElement (AstExpression *expression);
 static void visitExpressionAssign (AstExpression *expression);
 static void visitExpressionBinary (AstExpression *expression);
 static void visitExpressionBoolean (AstExpression *expression);
+static void visitExpressionCast (AstExpression *expression);
 static void visitExpressionNumber (AstExpression *expression);
 static void visitExpressionPostfix (AstExpression *expression);
 static void visitExpressionPrefix (AstExpression *expression);
@@ -270,6 +271,7 @@ static void visitExpression (AstExpression *expression)
 		case AstExpression_Assign: visitExpressionAssign(expression); break;
 		case AstExpression_Binary: visitExpressionBinary(expression); break;
 		case AstExpression_Boolean: visitExpressionBoolean(expression); break;
+		case AstExpression_Cast: visitExpressionCast(expression); break;
 		case AstExpression_Number: visitExpressionNumber(expression); break;
 		case AstExpression_Postfix: visitExpressionPostfix(expression); break;
 		case AstExpression_Prefix: visitExpressionPrefix(expression); break;
@@ -353,6 +355,17 @@ static void visitExpressionBoolean (AstExpression *expression)
 {
 	AstExpressionBoolean *e = expression->as.boolean;
 	addInstruction(ir_initPush(e->value));
+}
+
+static void visitExpressionCast (AstExpression *expression)
+{
+	AstExpressionCast *e = expression->as.cast;
+	visitExpression(e->e);
+	switch (e->operator.type) {
+		case TT_Minus_Greater: addInstruction(ir_initCastReinterpret(e->e->dataType, e->to)); break;
+		case TT_Tilde_Greater: addInstruction(ir_initCastConvert(e->e->dataType, e->to)); break;
+		default:
+	}
 }
 
 static void visitExpressionNumber (AstExpression *expression)

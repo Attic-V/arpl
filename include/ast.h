@@ -33,6 +33,12 @@ typedef struct {
 } AstExpressionBoolean;
 
 typedef struct {
+	AstExpression *e;
+	Token operator;
+	DataType *to;
+} AstExpressionCast;
+
+typedef struct {
 	Token value;
 } AstExpressionNumber;
 
@@ -62,6 +68,7 @@ typedef enum {
 	AstExpression_Assign,
 	AstExpression_Binary,
 	AstExpression_Boolean,
+	AstExpression_Cast,
 	AstExpression_Number,
 	AstExpression_Postfix,
 	AstExpression_Prefix,
@@ -76,6 +83,7 @@ struct AstExpression {
 		AstExpressionAssign *assign;
 		AstExpressionBinary *binary;
 		AstExpressionBoolean *boolean;
+		AstExpressionCast *cast;
 		AstExpressionNumber *number;
 		AstExpressionPostfix *postfix;
 		AstExpressionPrefix *prefix;
@@ -225,6 +233,7 @@ AstExpression *ast_initExpressionAccessElement (AstExpression *a, AstExpression 
 AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBoolean (bool value);
+AstExpression *ast_initExpressionCast (AstExpression *e, Token operator, DataType *to);
 AstExpression *ast_initExpressionNumber (Token value);
 AstExpression *ast_initExpressionPostfix (Token operator, AstExpression *e);
 AstExpression *ast_initExpressionPrefix (Token operator, AstExpression *e);

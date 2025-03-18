@@ -15,6 +15,8 @@ static void transform (Ir *r);
 static void transformAdd (Ir *ir);
 static void transformAnd (Ir *ir);
 static void transformAssign (Ir *ir);
+static void transformCastConvert (Ir *ir);
+static void transformCastReinterpret (Ir *ir);
 static void transformCopy (Ir *ir);
 static void transformDec (Ir *ir);
 static void transformDeref (Ir *ir);
@@ -108,6 +110,8 @@ static void transform (Ir *r)
 		transformer(Add),
 		transformer(And),
 		transformer(Assign),
+		transformer(CastConvert),
+		transformer(CastReinterpret),
 		transformer(Copy),
 		transformer(Dec),
 		transformer(Deref),
@@ -167,6 +171,28 @@ static void transformAssign (Ir *ir)
 	pop(r8);
 	emit("\tmov     %s [r8], %s", quantity[instruction->size], reg[r9][instruction->size]);
 	push(r8);
+}
+
+static void transformCastConvert (Ir *ir)
+{
+	IrCastConvert *instruction = ir->as.castConvert;
+	(void)instruction;
+	size_t sizeFrom = dataType_getSize(instruction->from);
+	size_t sizeTo = dataType_getSize(instruction->to);
+	pop(r8);
+	if (dataType_isI8(instruction->from) && dataType_isI32(instruction->to)) {
+		emit("\tmovsx   %s, %s", reg[r8][sizeTo], reg[r8][sizeFrom]);
+	}
+	if (dataType_isI32(instruction->from) && dataType_isI8(instruction->to)) {
+		emit("\tmov     %s, %s", reg[r8][sizeTo], reg[r8][sizeTo]);
+	}
+	push(r8);
+}
+
+static void transformCastReinterpret (Ir *ir)
+{
+	IrCastReinterpret *instruction = ir->as.castReinterpret;
+	(void)instruction;
 }
 
 static void transformCopy (Ir *ir)

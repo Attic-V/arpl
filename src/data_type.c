@@ -7,6 +7,7 @@ static DataType *dataType_init (DataTypeType type);
 static DataTypeArray *dataTypeArray_init (size_t length, DataType *elementT);
 static DataTypeBoolean *dataTypeBoolean_init (void);
 static DataTypeI32 *dataTypeI32_init (void);
+static DataTypeI8 *dataTypeI8_init (void);
 static DataTypePointer *dataTypePointer_init (DataType *to);
 
 static DataType *dataType_init (DataTypeType type)
@@ -58,6 +59,19 @@ static DataTypeI32 *dataTypeI32_init (void)
 	return t;
 }
 
+DataType *dataType_initI8 (void)
+{
+	DataType *t = dataType_init(DataType_I8);
+	t->as.i8 = dataTypeI8_init();
+	return t;
+}
+
+static DataTypeI8 *dataTypeI8_init (void)
+{
+	DataTypeI8 *t = mem_alloc(sizeof(*t));
+	return t;
+}
+
 DataType *dataType_initPointer (DataType *to)
 {
 	DataType *t = dataType_init(DataType_Pointer);
@@ -87,9 +101,29 @@ bool dataType_isI32 (DataType *t)
 	return t->type == DataType_I32;
 }
 
+bool dataType_isI8 (DataType *t)
+{
+	return t->type == DataType_I8;
+}
+
 bool dataType_isPointer (DataType *t)
 {
 	return t->type == DataType_Pointer;
+}
+
+bool dataType_isInt (DataType *t)
+{
+	return dataType_isI8(t) || dataType_isI32(t);
+}
+
+bool dataType_castable (DataType *from, DataType *to)
+{
+	return dataType_expandable(from, to) || dataType_expandable(to, from);
+}
+
+bool dataType_expandable (DataType *from, DataType *to)
+{
+	return dataType_isI8(from) && dataType_isI32(to);
 }
 
 bool dataType_equal (DataType *a, DataType *b)
@@ -104,6 +138,7 @@ bool dataType_equal (DataType *a, DataType *b)
 		case DataType_Array: return dataType_equal(a->as.array->type, b->as.array->type);
 		case DataType_Boolean: return true;
 		case DataType_I32: return true;
+		case DataType_I8: return true;
 		case DataType_Pointer: return dataType_equal(a->as.pointer->to, b->as.pointer->to);
 	}
 	return false;
@@ -115,7 +150,22 @@ size_t dataType_getSize (DataType *t)
 		case DataType_Array: return t->as.array->length * dataType_getSize(t->as.array->type);
 		case DataType_Boolean: return BYTE;
 		case DataType_I32: return DWORD;
+		case DataType_I8: return BYTE;
 		case DataType_Pointer: return QWORD;
 	}
 	return -1;
+}
+
+DataType *dataType_smallestInt (size_t value)
+{
+	size_t numBits = 0;
+	for (size_t n = value; n != 0; n >>= 1, numBits++);
+	if (numBits <= 8 * BYTE) return dataType_initI8();
+	if (numBits <= 8 * DWORD) return dataType_initI32();
+	return NULL;
+}
+
+DataType *dataType_larger (DataType *a, DataType *b)
+{
+	return dataType_getSize(a) > dataType_getSize(b) ? a : b;
 }

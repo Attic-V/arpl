@@ -29,6 +29,7 @@ static AstExpression *getExpressionAccessElement (void);
 static AstExpression *getExpressionAndBitwise (void);
 static AstExpression *getExpressionAndLogical (void);
 static AstExpression *getExpressionAssign (void);
+static AstExpression *getExpressionCast (void);
 static AstExpression *getExpressionEquality (void);
 static AstExpression *getExpressionOrBitwise (void);
 static AstExpression *getExpressionOrLogical (void);
@@ -423,12 +424,23 @@ static AstExpression *getExpressionUnaryPrefix (void)
 
 static AstExpression *getExpressionAccessElement (void)
 {
-	AstExpression *left = getExpressionPrimary();
+	AstExpression *left = getExpressionCast();
 	while (check(TT_LBracket)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *i = getExpression();
 		consume(TT_RBracket, "expected ']'");
 		left = ast_initExpressionAccessElement(left, i, operator);
+	}
+	return left;
+}
+
+static AstExpression *getExpressionCast (void)
+{
+	AstExpression *left = getExpressionPrimary();
+	while (check(TT_Minus_Greater) || check (TT_Tilde_Greater)) {
+		Token operator = parser.tokens[parser.current++];
+		DataType *to = getType();
+		left = ast_initExpressionCast(left, operator, to);
 	}
 	return left;
 }
@@ -460,6 +472,11 @@ static DataType *getType (void)
 	bool mutable = !match(TT_Const);
 	if (match(TT_I32)) {
 		DataType *type = dataType_initI32();
+		type->mutable = mutable;
+		return type;
+	}
+	if (match(TT_I8)) {
+		DataType *type = dataType_initI8();
 		type->mutable = mutable;
 		return type;
 	}
