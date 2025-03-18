@@ -353,7 +353,7 @@ static void visitExpressionAccessElement (AstExpressionAccessElement *node)
 	if (!dataType_isArray(node->a->dataType)) {
 		error(node->operator, "reference must be an array");
 	}
-	if (!dataType_isI32(node->b->dataType)) {
+	if (!dataType_isInt(node->b->dataType)) {
 		error(node->operator, "index must be a number");
 	}
 	if (!node->a->modifiable) {

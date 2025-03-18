@@ -470,8 +470,18 @@ static AstExpression *getExpressionPrimary (void)
 static DataType *getType (void)
 {
 	bool mutable = !match(TT_Const);
+	if (match(TT_I16)) {
+		DataType *type = dataType_initI16();
+		type->mutable = mutable;
+		return type;
+	}
 	if (match(TT_I32)) {
 		DataType *type = dataType_initI32();
+		type->mutable = mutable;
+		return type;
+	}
+	if (match(TT_I64)) {
+		DataType *type = dataType_initI64();
 		type->mutable = mutable;
 		return type;
 	}

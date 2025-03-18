@@ -6,7 +6,9 @@ static DataType *dataType_init (DataTypeType type);
 
 static DataTypeArray *dataTypeArray_init (size_t length, DataType *elementT);
 static DataTypeBoolean *dataTypeBoolean_init (void);
+static DataTypeI16 *dataTypeI16_init (void);
 static DataTypeI32 *dataTypeI32_init (void);
+static DataTypeI64 *dataTypeI64_init (void);
 static DataTypeI8 *dataTypeI8_init (void);
 static DataTypePointer *dataTypePointer_init (DataType *to);
 
@@ -46,6 +48,19 @@ static DataTypeBoolean *dataTypeBoolean_init (void)
 	return t;
 }
 
+DataType *dataType_initI16 (void)
+{
+	DataType *t = dataType_init(DataType_I16);
+	t->as.i16 = dataTypeI16_init();
+	return t;
+}
+
+static DataTypeI16 *dataTypeI16_init (void)
+{
+	DataTypeI16 *t = mem_alloc(sizeof(*t));
+	return t;
+}
+
 DataType *dataType_initI32 (void)
 {
 	DataType *t = dataType_init(DataType_I32);
@@ -56,6 +71,19 @@ DataType *dataType_initI32 (void)
 static DataTypeI32 *dataTypeI32_init (void)
 {
 	DataTypeI32 *t = mem_alloc(sizeof(*t));
+	return t;
+}
+
+DataType *dataType_initI64 (void)
+{
+	DataType *t = dataType_init(DataType_I64);
+	t->as.i64 = dataTypeI64_init();
+	return t;
+}
+
+static DataTypeI64 *dataTypeI64_init (void)
+{
+	DataTypeI64 *t = mem_alloc(sizeof(*t));
 	return t;
 }
 
@@ -96,9 +124,19 @@ bool dataType_isBoolean (DataType *t)
 	return t->type == DataType_Boolean;
 }
 
+bool dataType_isI16 (DataType *t)
+{
+	return t->type == DataType_I16;
+}
+
 bool dataType_isI32 (DataType *t)
 {
 	return t->type == DataType_I32;
+}
+
+bool dataType_isI64 (DataType *t)
+{
+	return t->type == DataType_I64;
 }
 
 bool dataType_isI8 (DataType *t)
@@ -113,7 +151,7 @@ bool dataType_isPointer (DataType *t)
 
 bool dataType_isInt (DataType *t)
 {
-	return dataType_isI8(t) || dataType_isI32(t);
+	return dataType_isI8(t) || dataType_isI16(t) || dataType_isI32(t) || dataType_isI64(t);
 }
 
 bool dataType_castable (DataType *from, DataType *to)
@@ -123,7 +161,17 @@ bool dataType_castable (DataType *from, DataType *to)
 
 bool dataType_expandable (DataType *from, DataType *to)
 {
-	return dataType_isI8(from) && dataType_isI32(to);
+	#define expanding(fromType, toType) \
+		(dataType_is##fromType(from) && dataType_is##toType(to))
+	return
+		expanding(I8, I16) ||
+		expanding(I8, I32) ||
+		expanding(I8, I64) ||
+		expanding(I16, I32) ||
+		expanding(I16, I64) ||
+		expanding(I32, I64)
+	;
+	#undef expanding
 }
 
 bool dataType_equal (DataType *a, DataType *b)
@@ -137,7 +185,9 @@ bool dataType_equal (DataType *a, DataType *b)
 	switch (a->type) {
 		case DataType_Array: return dataType_equal(a->as.array->type, b->as.array->type);
 		case DataType_Boolean: return true;
+		case DataType_I16: return true;
 		case DataType_I32: return true;
+		case DataType_I64: return true;
 		case DataType_I8: return true;
 		case DataType_Pointer: return dataType_equal(a->as.pointer->to, b->as.pointer->to);
 	}
@@ -149,7 +199,9 @@ size_t dataType_getSize (DataType *t)
 	switch (t->type) {
 		case DataType_Array: return t->as.array->length * dataType_getSize(t->as.array->type);
 		case DataType_Boolean: return BYTE;
+		case DataType_I16: return WORD;
 		case DataType_I32: return DWORD;
+		case DataType_I64: return QWORD;
 		case DataType_I8: return BYTE;
 		case DataType_Pointer: return QWORD;
 	}
@@ -161,7 +213,9 @@ DataType *dataType_smallestInt (size_t value)
 	size_t numBits = 0;
 	for (size_t n = value; n != 0; n >>= 1, numBits++);
 	if (numBits <= 8 * BYTE) return dataType_initI8();
+	if (numBits <= 8 * WORD) return dataType_initI16();
 	if (numBits <= 8 * DWORD) return dataType_initI32();
+	if (numBits <= 8 * QWORD) return dataType_initI64();
 	return NULL;
 }
 

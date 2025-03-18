@@ -16,7 +16,13 @@ typedef struct {
 } DataTypeBoolean;
 
 typedef struct {
+} DataTypeI16;
+
+typedef struct {
 } DataTypeI32;
+
+typedef struct {
+} DataTypeI64;
 
 typedef struct {
 } DataTypeI8;
@@ -28,7 +34,9 @@ typedef struct {
 typedef enum {
 	DataType_Array,
 	DataType_Boolean,
+	DataType_I16,
 	DataType_I32,
+	DataType_I64,
 	DataType_I8,
 	DataType_Pointer,
 } DataTypeType;
@@ -38,7 +46,9 @@ struct DataType {
 	union {
 		DataTypeArray *array;
 		DataTypeBoolean *boolean;
+		DataTypeI16 *i16;
 		DataTypeI32 *i32;
+		DataTypeI64 *i64;
 		DataTypeI8 *i8;
 		DataTypePointer *pointer;
 	} as;
@@ -47,7 +57,9 @@ struct DataType {
 
 DataType *dataType_initArray (size_t length, DataType *elementT);
 DataType *dataType_initBoolean (void);
+DataType *dataType_initI16 (void);
 DataType *dataType_initI32 (void);
+DataType *dataType_initI64 (void);
 DataType *dataType_initI8 (void);
 DataType *dataType_initPointer (DataType *to);
 
@@ -55,7 +67,9 @@ DataType *dataType_smallestInt (size_t value);
 
 bool dataType_isArray (DataType *t);
 bool dataType_isBoolean (DataType *t);
+bool dataType_isI16 (DataType *t);
 bool dataType_isI32 (DataType *t);
+bool dataType_isI64 (DataType *t);
 bool dataType_isI8 (DataType *t);
 bool dataType_isPointer (DataType *t);
 
