@@ -469,7 +469,7 @@ static AstExpression *getExpressionPrimary (void)
 
 static DataType *getType (void)
 {
-	bool mutable = !match(TT_Const);
+	bool mutable = match(TT_Mut);
 	if (match(TT_U16)) {
 		DataType *type = dataType_initU16();
 		type->mutable = mutable;
