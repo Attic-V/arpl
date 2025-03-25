@@ -58,6 +58,10 @@ typedef enum {
 	TT_Tilde,
 	TT_Tilde_Greater,
 	TT_True,
+	TT_U8,
+	TT_U16,
+	TT_U32,
+	TT_U64,
 	TT_Var,
 	TT_While,
 } TokenType;

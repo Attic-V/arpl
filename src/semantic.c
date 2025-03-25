@@ -425,6 +425,10 @@ static void visitExpressionCast (AstExpressionCast *node)
 	visitExpression(node->e);
 	switch (node->operator.type) {
 		case TT_Minus_Greater:
+			if (dataType_getSize(node->e->dataType) != dataType_getSize(node->to)) {
+				analyzer.hadError = true;
+				error(node->operator, "cannot perform reinterpret cast with datatypes of different sizes");
+			}
 			break;
 		case TT_Tilde_Greater:
 			if (!dataType_castable(node->e->dataType, node->to)) {
@@ -498,10 +502,6 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 			}
 			break;
 		case TT_Star:
-			if (!node->e->modifiable) {
-				analyzer.hadError = true;
-				error(node->operator, "operand must be modifiable");
-			}
 			if (!dataType_isPointer(node->e->dataType)) {
 				error(node->operator, "operand must be a pointer");
 				exit(1);

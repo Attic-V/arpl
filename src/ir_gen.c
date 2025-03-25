@@ -416,7 +416,9 @@ static void visitExpressionPrefix (AstExpression *expression)
 			addInstruction(ir_initDeref(size));
 			break;
 		case TT_Star:
-			addInstruction(ir_initDeref(size));
+			if (expression->as.prefix->e->modifiable) {
+				addInstruction(ir_initDeref(size));
+			}
 			if (!expression->modifiable) {
 				addInstruction(ir_initDeref(size));
 			}

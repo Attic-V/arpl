@@ -1,6 +1,7 @@
 #include "data.h"
 #include "data_type.h"
 #include "memory.h"
+#include "x86_gen.h"
 
 static DataType *dataType_init (DataTypeType type);
 
@@ -11,6 +12,10 @@ static DataTypeI32 *dataTypeI32_init (void);
 static DataTypeI64 *dataTypeI64_init (void);
 static DataTypeI8 *dataTypeI8_init (void);
 static DataTypePointer *dataTypePointer_init (DataType *to);
+static DataTypeU16 *dataTypeU16_init (void);
+static DataTypeU32 *dataTypeU32_init (void);
+static DataTypeU64 *dataTypeU64_init (void);
+static DataTypeU8 *dataTypeU8_init (void);
 
 static DataType *dataType_init (DataTypeType type)
 {
@@ -114,6 +119,58 @@ static DataTypePointer *dataTypePointer_init (DataType *to)
 	return t;
 }
 
+DataType *dataType_initU16 (void)
+{
+	DataType *t = dataType_init(DataType_U16);
+	t->as.u16 = dataTypeU16_init();
+	return t;
+}
+
+static DataTypeU16 *dataTypeU16_init (void)
+{
+	DataTypeU16 *t = mem_alloc(sizeof(*t));
+	return t;
+}
+
+DataType *dataType_initU32 (void)
+{
+	DataType *t = dataType_init(DataType_U32);
+	t->as.u32 = dataTypeU32_init();
+	return t;
+}
+
+static DataTypeU32 *dataTypeU32_init (void)
+{
+	DataTypeU32 *t = mem_alloc(sizeof(*t));
+	return t;
+}
+
+DataType *dataType_initU64 (void)
+{
+	DataType *t = dataType_init(DataType_U64);
+	t->as.u64 = dataTypeU64_init();
+	return t;
+}
+
+static DataTypeU64 *dataTypeU64_init (void)
+{
+	DataTypeU64 *t = mem_alloc(sizeof(*t));
+	return t;
+}
+
+DataType *dataType_initU8 (void)
+{
+	DataType *t = dataType_init(DataType_U8);
+	t->as.u8 = dataTypeU8_init();
+	return t;
+}
+
+static DataTypeU8 *dataTypeU8_init (void)
+{
+	DataTypeU8 *t = mem_alloc(sizeof(*t));
+	return t;
+}
+
 bool dataType_isArray (DataType *t)
 {
 	return t->type == DataType_Array;
@@ -149,29 +206,44 @@ bool dataType_isPointer (DataType *t)
 	return t->type == DataType_Pointer;
 }
 
+bool dataType_isU16 (DataType *t)
+{
+	return t->type == DataType_U16;
+}
+
+bool dataType_isU32 (DataType *t)
+{
+	return t->type == DataType_U32;
+}
+
+bool dataType_isU64 (DataType *t)
+{
+	return t->type == DataType_U64;
+}
+
+bool dataType_isU8 (DataType *t)
+{
+	return t->type == DataType_U8;
+}
+
 bool dataType_isInt (DataType *t)
+{
+	return dataType_isIntSigned(t) || dataType_isIntUnsigned(t);
+}
+
+bool dataType_isIntSigned (DataType *t)
 {
 	return dataType_isI8(t) || dataType_isI16(t) || dataType_isI32(t) || dataType_isI64(t);
 }
 
-bool dataType_castable (DataType *from, DataType *to)
+bool dataType_isIntUnsigned (DataType *t)
 {
-	return dataType_expandable(from, to) || dataType_expandable(to, from);
+	return dataType_isU8(t) || dataType_isU16(t) || dataType_isU32(t) || dataType_isU64(t);
 }
 
-bool dataType_expandable (DataType *from, DataType *to)
+bool dataType_castable (DataType *from, DataType *to)
 {
-	#define expanding(fromType, toType) \
-		(dataType_is##fromType(from) && dataType_is##toType(to))
-	return
-		expanding(I8, I16) ||
-		expanding(I8, I32) ||
-		expanding(I8, I64) ||
-		expanding(I16, I32) ||
-		expanding(I16, I64) ||
-		expanding(I32, I64)
-	;
-	#undef expanding
+	return CastTable[from->type][to->type] != NULL;
 }
 
 bool dataType_equal (DataType *a, DataType *b)
@@ -190,6 +262,11 @@ bool dataType_equal (DataType *a, DataType *b)
 		case DataType_I64: return true;
 		case DataType_I8: return true;
 		case DataType_Pointer: return dataType_equal(a->as.pointer->to, b->as.pointer->to);
+		case DataType_U16: return true;
+		case DataType_U32: return true;
+		case DataType_U64: return true;
+		case DataType_U8: return true;
+		default:
 	}
 	return false;
 }
@@ -204,6 +281,11 @@ size_t dataType_getSize (DataType *t)
 		case DataType_I64: return QWORD;
 		case DataType_I8: return BYTE;
 		case DataType_Pointer: return QWORD;
+		case DataType_U16: return WORD;
+		case DataType_U32: return DWORD;
+		case DataType_U64: return QWORD;
+		case DataType_U8: return BYTE;
+		default:
 	}
 	return -1;
 }

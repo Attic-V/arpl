@@ -73,11 +73,13 @@ Token *scan (char *source)
 					while (!check('\0') && !match('\n')) {
 						scanner.current++;
 					}
+					scanner.line++;
 					continue;
 				}
 				if (match('*')) {
 					while (!check('\0') && !(match('*') && match('/'))) {
-						scanner.current++;
+						if (match('\n')) scanner.line++;
+						else scanner.current++;
 					}
 					if (check('\0')) {
 						fprintf(stderr, "%d: error at EOF: unclosed comment\n", scanner.line);
@@ -122,6 +124,10 @@ Token *scan (char *source)
 			keyword(return, Return)
 			keyword(switch, Switch)
 			keyword(true, True)
+			keyword(u16, U16)
+			keyword(u32, U32)
+			keyword(u64, U64)
+			keyword(u8, U8)
 			keyword(var, Var)
 			keyword(while, While)
 			#undef keyword

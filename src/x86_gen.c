@@ -61,6 +61,85 @@ static char *quantity[] = {
 	[QWORD] = "qword",
 };
 
+static void Cast_U_U_expand (DataType *from, DataType *to)
+{
+	pop(r8);
+	emit("\tmovzx   %s, %s", reg[r8][dataType_getSize(to)], reg[r8][dataType_getSize(from)]);
+	push(r8);
+}
+
+static void Cast_I_I_expand (DataType *from, DataType *to)
+{
+	pop(r8);
+	emit("\tmovsx   %s, %s", reg[r8][dataType_getSize(to)], reg[r8][dataType_getSize(from)]);
+	push(r8);
+}
+
+static void Cast_narrow (DataType *from, DataType *to)
+{
+	pop(r8);
+	emit("\tmov     %s, %s", reg[r8][dataType_getSize(to)], reg[r8][dataType_getSize(to)]);
+	push(r8);
+}
+
+#define Cast_U_U_narrow Cast_narrow
+#define Cast_I_I_narrow Cast_narrow
+
+#define Cast_U8_U16 Cast_U_U_expand
+#define Cast_U8_U32 Cast_U_U_expand
+#define Cast_U8_U64 Cast_U_U_expand
+#define Cast_U16_U32 Cast_U_U_expand
+#define Cast_U16_U64 Cast_U_U_expand
+#define Cast_U32_U64 Cast_U_U_expand
+
+#define Cast_I8_I16 Cast_I_I_expand
+#define Cast_I8_I32 Cast_I_I_expand
+#define Cast_I8_I64 Cast_I_I_expand
+#define Cast_I16_I32 Cast_I_I_expand
+#define Cast_I16_I64 Cast_I_I_expand
+#define Cast_I32_I64 Cast_I_I_expand
+
+#define Cast_U64_U32 Cast_U_U_narrow
+#define Cast_U64_U16 Cast_U_U_narrow
+#define Cast_U64_U8 Cast_U_U_narrow
+#define Cast_U32_U16 Cast_U_U_narrow
+#define Cast_U32_U8 Cast_U_U_narrow
+#define Cast_U16_U8 Cast_U_U_narrow
+
+#define Cast_I64_I32 Cast_I_I_narrow
+#define Cast_I64_I16 Cast_I_I_narrow
+#define Cast_I64_I8 Cast_I_I_narrow
+#define Cast_I32_I16 Cast_I_I_narrow
+#define Cast_I32_I8 Cast_I_I_narrow
+#define Cast_I16_I8 Cast_I_I_narrow
+
+void (*CastTable[DataTypeType_Count][DataTypeType_Count])(DataType *from, DataType *to) = {
+	[DataType_U8][DataType_U16] = Cast_U8_U16,
+	[DataType_U8][DataType_U32] = Cast_U8_U32,
+	[DataType_U8][DataType_U64] = Cast_U8_U64,
+	[DataType_U16][DataType_U32] = Cast_U16_U32,
+	[DataType_U16][DataType_U64] = Cast_U16_U64,
+	[DataType_U32][DataType_U64] = Cast_U32_U64,
+	[DataType_I8][DataType_I16] = Cast_I8_I16,
+	[DataType_I8][DataType_I32] = Cast_I8_I32,
+	[DataType_I8][DataType_I64] = Cast_I8_I64,
+	[DataType_I16][DataType_I32] = Cast_I16_I32,
+	[DataType_I16][DataType_I64] = Cast_I16_I64,
+	[DataType_I32][DataType_I64] = Cast_I32_I64,
+	[DataType_U64][DataType_U32] = Cast_U64_U32,
+	[DataType_U64][DataType_U16] = Cast_U64_U16,
+	[DataType_U64][DataType_U8] = Cast_U64_U8,
+	[DataType_U32][DataType_U16] = Cast_U32_U16,
+	[DataType_U32][DataType_U8] = Cast_U32_U8,
+	[DataType_U16][DataType_U8] = Cast_U16_U8,
+	[DataType_I64][DataType_I32] = Cast_I64_I32,
+	[DataType_I64][DataType_I16] = Cast_I64_I16,
+	[DataType_I64][DataType_I8] = Cast_I64_I8,
+	[DataType_I32][DataType_I16] = Cast_I32_I16,
+	[DataType_I32][DataType_I8] = Cast_I32_I8,
+	[DataType_I16][DataType_I8] = Cast_I16_I8,
+};
+
 typedef struct {
 	FILE *fp;
 } AsmGenerator;
@@ -177,16 +256,9 @@ static void transformCastConvert (Ir *ir)
 {
 	IrCastConvert *instruction = ir->as.castConvert;
 	(void)instruction;
-	size_t sizeFrom = dataType_getSize(instruction->from);
-	size_t sizeTo = dataType_getSize(instruction->to);
-	pop(r8);
-	if (dataType_isI8(instruction->from) && dataType_isI32(instruction->to)) {
-		emit("\tmovsx   %s, %s", reg[r8][sizeTo], reg[r8][sizeFrom]);
-	}
-	if (dataType_isI32(instruction->from) && dataType_isI8(instruction->to)) {
-		emit("\tmov     %s, %s", reg[r8][sizeTo], reg[r8][sizeTo]);
-	}
-	push(r8);
+	DataType *from = instruction->from;
+	DataType *to = instruction->to;
+	CastTable[from->type][to->type](from, to);
 }
 
 static void transformCastReinterpret (Ir *ir)

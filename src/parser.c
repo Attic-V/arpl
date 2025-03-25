@@ -281,15 +281,26 @@ static AstExpression *getExpressionAssign (void)
 
 static AstExpression *getExpressionTernary (void)
 {
-	AstExpression *expression = getExpressionOrLogical();
+	AstExpression *expression = getExpressionCast();
 	if (check(TT_Question)) {
 		Token operator = parser.tokens[parser.current++];
-		AstExpression *a = getExpressionOrLogical();
+		AstExpression *a = getExpressionCast();
 		consume(TT_Colon, "expected ':'");
 		AstExpression *b = getExpressionTernary();
 		expression = ast_initExpressionTernary(expression, a, b, operator);
 	}
 	return expression;
+}
+
+static AstExpression *getExpressionCast (void)
+{
+	AstExpression *left = getExpressionOrLogical();
+	while (check(TT_Minus_Greater) || check(TT_Tilde_Greater)) {
+		Token operator = parser.tokens[parser.current++];
+		DataType *to = getType();
+		left = ast_initExpressionCast(left, operator, to);
+	}
+	return left;
 }
 
 static AstExpression *getExpressionOrLogical (void)
@@ -424,23 +435,12 @@ static AstExpression *getExpressionUnaryPrefix (void)
 
 static AstExpression *getExpressionAccessElement (void)
 {
-	AstExpression *left = getExpressionCast();
+	AstExpression *left = getExpressionPrimary();
 	while (check(TT_LBracket)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *i = getExpression();
 		consume(TT_RBracket, "expected ']'");
 		left = ast_initExpressionAccessElement(left, i, operator);
-	}
-	return left;
-}
-
-static AstExpression *getExpressionCast (void)
-{
-	AstExpression *left = getExpressionPrimary();
-	while (check(TT_Minus_Greater) || check (TT_Tilde_Greater)) {
-		Token operator = parser.tokens[parser.current++];
-		DataType *to = getType();
-		left = ast_initExpressionCast(left, operator, to);
 	}
 	return left;
 }
@@ -470,6 +470,26 @@ static AstExpression *getExpressionPrimary (void)
 static DataType *getType (void)
 {
 	bool mutable = !match(TT_Const);
+	if (match(TT_U16)) {
+		DataType *type = dataType_initU16();
+		type->mutable = mutable;
+		return type;
+	}
+	if (match(TT_U32)) {
+		DataType *type = dataType_initU32();
+		type->mutable = mutable;
+		return type;
+	}
+	if (match(TT_U64)) {
+		DataType *type = dataType_initU64();
+		type->mutable = mutable;
+		return type;
+	}
+	if (match(TT_U8)) {
+		DataType *type = dataType_initU8();
+		type->mutable = mutable;
+		return type;
+	}
 	if (match(TT_I16)) {
 		DataType *type = dataType_initI16();
 		type->mutable = mutable;
