@@ -344,7 +344,7 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 {
 	visitExpression(node->a);
 	visitExpression(node->b);
-	node->b->dataType->mutable = true;
+	node->b->dataType->mutable = node->a->dataType->mutable;
 	if (!node->a->dataType->mutable) {
 		analyzer.hadError = true;
 		error(node->operator, "left operand is immutable");
