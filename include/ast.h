@@ -14,12 +14,6 @@ typedef struct {
 	AstExpression *a;
 	AstExpression *b;
 	Token operator;
-} AstExpressionAccessElement;
-
-typedef struct {
-	AstExpression *a;
-	AstExpression *b;
-	Token operator;
 } AstExpressionAssign;
 
 typedef struct {
@@ -64,7 +58,6 @@ typedef struct {
 } AstExpressionVar;
 
 typedef enum {
-	AstExpression_AccessElement,
 	AstExpression_Assign,
 	AstExpression_Binary,
 	AstExpression_Boolean,
@@ -79,7 +72,6 @@ typedef enum {
 struct AstExpression {
 	AstExpressionType type;
 	union {
-		AstExpressionAccessElement *accessElement;
 		AstExpressionAssign *assign;
 		AstExpressionBinary *binary;
 		AstExpressionBoolean *boolean;
@@ -229,7 +221,6 @@ AstStatement *ast_initStatementSwitchC (AstExpression *e, AstStatement *body);
 AstStatement *ast_initStatementVar (Token identifier, DataType *type);
 AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement* a, Token keyword);
 
-AstExpression *ast_initExpressionAccessElement (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBoolean (bool value);

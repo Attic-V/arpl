@@ -25,7 +25,6 @@ static AstStatement *getStatementVar (void);
 static AstStatement *getStatementWhileC (void);
 
 static AstExpression *getExpression (void);
-static AstExpression *getExpressionAccessElement (void);
 static AstExpression *getExpressionAndBitwise (void);
 static AstExpression *getExpressionAndLogical (void);
 static AstExpression *getExpressionAssign (void);
@@ -430,19 +429,7 @@ static AstExpression *getExpressionUnaryPrefix (void)
 		AstExpression *right = getExpressionUnaryPrefix();
 		return ast_initExpressionPrefix(operator, right);
 	}
-	return getExpressionAccessElement();
-}
-
-static AstExpression *getExpressionAccessElement (void)
-{
-	AstExpression *left = getExpressionPrimary();
-	while (check(TT_LBracket)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *i = getExpression();
-		consume(TT_RBracket, "expected ']'");
-		left = ast_initExpressionAccessElement(left, i, operator);
-	}
-	return left;
+	return getExpressionPrimary();
 }
 
 static AstExpression *getExpressionPrimary (void)
@@ -512,19 +499,6 @@ static DataType *getType (void)
 	}
 	if (match(TT_Bool)) {
 		DataType *type = dataType_initBoolean();
-		type->mutable = mutable;
-		return type;
-	}
-	if (match(TT_LBracket)) {
-		Token lengthToken = consume(TT_Number, "expected an integer");
-		consume(TT_RBracket, "expected ']'");
-		char *buffer = mem_alloc(lengthToken.length + 1);
-		sprintf(buffer, "%.*s", lengthToken.length, lengthToken.lexeme);
-		size_t length = atoi(buffer);
-		if (length < 1) {
-			error(lengthToken, "array length cannot be less than 1");
-		}
-		DataType *type = dataType_initArray(length, getType());
 		type->mutable = mutable;
 		return type;
 	}

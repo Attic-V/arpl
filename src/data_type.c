@@ -5,7 +5,6 @@
 
 static DataType *dataType_init (DataTypeType type);
 
-static DataTypeArray *dataTypeArray_init (size_t length, DataType *elementT);
 static DataTypeBoolean *dataTypeBoolean_init (void);
 static DataTypeI16 *dataTypeI16_init (void);
 static DataTypeI32 *dataTypeI32_init (void);
@@ -22,21 +21,6 @@ static DataType *dataType_init (DataTypeType type)
 	DataType *t = mem_alloc(sizeof(*t));
 	t->type = type;
 	t->mutable = true;
-	return t;
-}
-
-DataType *dataType_initArray (size_t length, DataType *elementT)
-{
-	DataType *t = dataType_init(DataType_Array);
-	t->as.array = dataTypeArray_init(length, elementT);
-	return t;
-}
-
-static DataTypeArray *dataTypeArray_init (size_t length, DataType *elementT)
-{
-	DataTypeArray *t = mem_alloc(sizeof(*t));
-	t->length = length;
-	t->type = elementT;
 	return t;
 }
 
@@ -171,11 +155,6 @@ static DataTypeU8 *dataTypeU8_init (void)
 	return t;
 }
 
-bool dataType_isArray (DataType *t)
-{
-	return t->type == DataType_Array;
-}
-
 bool dataType_isBoolean (DataType *t)
 {
 	return t->type == DataType_Boolean;
@@ -255,7 +234,6 @@ bool dataType_equal (DataType *a, DataType *b)
 		return false;
 	}
 	switch (a->type) {
-		case DataType_Array: return dataType_equal(a->as.array->type, b->as.array->type);
 		case DataType_Boolean: return true;
 		case DataType_I16: return true;
 		case DataType_I32: return true;
@@ -274,7 +252,6 @@ bool dataType_equal (DataType *a, DataType *b)
 size_t dataType_getSize (DataType *t)
 {
 	switch (t->type) {
-		case DataType_Array: return t->as.array->length * dataType_getSize(t->as.array->type);
 		case DataType_Boolean: return BYTE;
 		case DataType_I16: return WORD;
 		case DataType_I32: return DWORD;

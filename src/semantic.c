@@ -25,7 +25,6 @@ static void visitStatementVar (AstStatementVar *node);
 static void visitStatementWhileC (AstStatementWhileC *node);
 
 static void visitExpression (AstExpression *node);
-static void visitExpressionAccessElement (AstExpressionAccessElement *node);
 static void visitExpressionAssign (AstExpressionAssign *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
 static void visitExpressionCast (AstExpressionCast *node);
@@ -251,11 +250,6 @@ static void visitStatementWhileC (AstStatementWhileC *node)
 static void visitExpression (AstExpression *node)
 {
 	switch (node->type) {
-		case AstExpression_AccessElement:
-			visitExpressionAccessElement(node->as.accessElement);
-			node->dataType = node->as.accessElement->a->dataType->as.array->type;
-			node->modifiable = true;
-			break;
 		case AstExpression_Assign:
 			visitExpressionAssign(node->as.assign);
 			node->dataType = node->as.assign->a->dataType;
@@ -344,23 +338,6 @@ static void visitExpression (AstExpression *node)
 			node->modifiable = true;
 			break;
 	}
-}
-
-static void visitExpressionAccessElement (AstExpressionAccessElement *node)
-{
-	visitExpression(node->a);
-	visitExpression(node->b);
-	if (!dataType_isArray(node->a->dataType)) {
-		error(node->operator, "reference must be an array");
-	}
-	if (!dataType_isInt(node->b->dataType)) {
-		error(node->operator, "index must be a number");
-	}
-	if (!node->a->modifiable) {
-		error(node->operator, "reference must be modifiable");
-		analyzer.hadError = true;
-	}
-	node->b->modifiable = false;
 }
 
 static void visitExpressionAssign (AstExpressionAssign *node)

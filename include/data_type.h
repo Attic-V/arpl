@@ -8,11 +8,6 @@
 typedef struct DataType DataType;
 
 typedef struct {
-	size_t length;
-	DataType *type;
-} DataTypeArray;
-
-typedef struct {
 } DataTypeBoolean;
 
 typedef struct {
@@ -44,7 +39,6 @@ typedef struct {
 } DataTypeU8;
 
 typedef enum {
-	DataType_Array,
 	DataType_Boolean,
 	DataType_I16,
 	DataType_I32,
@@ -62,7 +56,6 @@ typedef enum {
 struct DataType {
 	DataTypeType type;
 	union {
-		DataTypeArray *array;
 		DataTypeBoolean *boolean;
 		DataTypeI16 *i16;
 		DataTypeI32 *i32;
@@ -77,7 +70,6 @@ struct DataType {
 	bool mutable;
 };
 
-DataType *dataType_initArray (size_t length, DataType *elementT);
 DataType *dataType_initBoolean (void);
 DataType *dataType_initI16 (void);
 DataType *dataType_initI32 (void);
@@ -91,7 +83,6 @@ DataType *dataType_initU8 (void);
 
 DataType *dataType_smallestInt (size_t value);
 
-bool dataType_isArray (DataType *t);
 bool dataType_isBoolean (DataType *t);
 bool dataType_isI16 (DataType *t);
 bool dataType_isI32 (DataType *t);

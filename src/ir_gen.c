@@ -34,7 +34,6 @@ static void visitStatementVar (AstStatementVar *statement);
 static void visitStatementWhileC (AstStatementWhileC *statement);
 
 static void visitExpression (AstExpression *expression);
-static void visitExpressionAccessElement (AstExpression *expression);
 static void visitExpressionAssign (AstExpression *expression);
 static void visitExpressionBinary (AstExpression *expression);
 static void visitExpressionBoolean (AstExpression *expression);
@@ -267,7 +266,6 @@ static void visitStatementWhileC (AstStatementWhileC *statement)
 static void visitExpression (AstExpression *expression)
 {
 	switch (expression->type) {
-		case AstExpression_AccessElement: visitExpressionAccessElement(expression); break;
 		case AstExpression_Assign: visitExpressionAssign(expression); break;
 		case AstExpression_Binary: visitExpressionBinary(expression); break;
 		case AstExpression_Boolean: visitExpressionBoolean(expression); break;
@@ -277,19 +275,6 @@ static void visitExpression (AstExpression *expression)
 		case AstExpression_Prefix: visitExpressionPrefix(expression); break;
 		case AstExpression_Ternary: visitExpressionTernary(expression); break;
 		case AstExpression_Var: visitExpressionVar(expression); break;
-	}
-}
-
-static void visitExpressionAccessElement (AstExpression *expression)
-{
-	AstExpressionAccessElement *e = expression->as.accessElement;
-	visitExpression(e->a);
-	visitExpression(e->b);
-	addInstruction(ir_initPush(dataType_getSize(e->a->dataType->as.array->type)));
-	addInstruction(ir_initMul(QWORD));
-	addInstruction(ir_initSub(QWORD));
-	if (!expression->modifiable) {
-		addInstruction(ir_initDeref(dataType_getSize(e->a->dataType->as.array->type)));
 	}
 }
 

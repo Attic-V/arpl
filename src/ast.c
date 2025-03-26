@@ -19,7 +19,6 @@ static AstStatementSwitchC *astStatement_initSwitchC (AstExpression *e, AstState
 static AstStatementVar *astStatement_initVar (Token identifier, DataType *type);
 static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a, Token keyword);
 
-static AstExpressionAccessElement *astExpression_initAccessElement (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionCast *astExpression_initCast (AstExpression *e, Token operator, DataType *to);
@@ -151,13 +150,6 @@ AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement *a
 	statement->type = AstStatement_WhileC;
 	statement->as.whileC = astStatement_initWhileC(condition, a, keyword);
 	return statement;
-}
-
-AstExpression *ast_initExpressionAccessElement (AstExpression *a, AstExpression *b, Token operator)
-{
-	AstExpression *expression = ast_initExpression(AstExpression_AccessElement);
-	expression->as.accessElement = astExpression_initAccessElement(a, b, operator);
-	return expression;
 }
 
 AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator)
@@ -330,15 +322,6 @@ static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, As
 	whileC->a = a;
 	whileC->keyword = keyword;
 	return whileC;
-}
-
-static AstExpressionAccessElement *astExpression_initAccessElement (AstExpression *a, AstExpression *b, Token operator)
-{
-	AstExpressionAccessElement *accessElement = mem_alloc(sizeof(*accessElement));
-	accessElement->a = a;
-	accessElement->b = b;
-	accessElement->operator = operator;
-	return accessElement;
 }
 
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator)
