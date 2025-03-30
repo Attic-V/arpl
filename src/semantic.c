@@ -405,7 +405,7 @@ static void visitExpressionCast (AstExpressionCast *node)
 		case TT_Minus_Greater:
 			if (dataType_getSize(node->e->dataType) != dataType_getSize(node->to)) {
 				analyzer.hadError = true;
-				error(node->operator, "cannot perform reinterpret cast with datatypes of different sizes");
+				error(node->operator, "cannot perform reinterpret with datatypes of different sizes");
 			}
 			break;
 		case TT_Tilde_Greater:
