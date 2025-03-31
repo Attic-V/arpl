@@ -2,3 +2,7 @@ bin/
 build/
 
 *.arpl
+
+out
+out.o
+out.s
