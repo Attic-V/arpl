@@ -1,0 +1,4 @@
+{
+	var a u64 = 7;
+	return a;
+}

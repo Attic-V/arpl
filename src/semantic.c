@@ -35,6 +35,51 @@ static void visitExpressionPrefix (AstExpressionPrefix *node);
 static void visitExpressionTernary (AstExpressionTernary *node);
 static void visitExpressionVar (AstExpressionVar *node);
 
+typedef enum {
+	CT_None = 0,
+	CT_Convert,
+	CT_Reinterpret,
+} CoercionType;
+
+static bool canCoerce (DataType *from, DataType *to);
+static Token getCoercionToken (CoercionType type);
+static bool coerce (AstExpression* e, AstExpression *target);
+
+static CoercionType coercionMatrix[DataTypeType_Count][DataTypeType_Count] = {
+	[DataType_U8][DataType_U16] = CT_Convert,
+	[DataType_U8][DataType_U32] = CT_Convert,
+	[DataType_U8][DataType_U64] = CT_Convert,
+	[DataType_U8][DataType_I8] = CT_Reinterpret,
+	[DataType_U8][DataType_I16] = CT_Convert,
+	[DataType_U8][DataType_I32] = CT_Convert,
+	[DataType_U8][DataType_I64] = CT_Convert,
+	[DataType_U16][DataType_U32] = CT_Convert,
+	[DataType_U16][DataType_U64] = CT_Convert,
+	[DataType_U16][DataType_I32] = CT_Convert,
+	[DataType_U16][DataType_I64] = CT_Convert,
+	[DataType_U16][DataType_I16] = CT_Reinterpret,
+	[DataType_U32][DataType_U64] = CT_Convert,
+	[DataType_U32][DataType_I32] = CT_Reinterpret,
+	[DataType_U32][DataType_I64] = CT_Convert,
+	[DataType_U64][DataType_I64] = CT_Reinterpret,
+	[DataType_I8][DataType_I16] = CT_Convert,
+	[DataType_I8][DataType_I32] = CT_Convert,
+	[DataType_I8][DataType_I64] = CT_Convert,
+	[DataType_I8][DataType_U8] = CT_Reinterpret,
+	[DataType_I8][DataType_U16] = CT_Convert,
+	[DataType_I8][DataType_U32] = CT_Convert,
+	[DataType_I8][DataType_U64] = CT_Convert,
+	[DataType_I16][DataType_I32] = CT_Convert,
+	[DataType_I16][DataType_I64] = CT_Convert,
+	[DataType_I16][DataType_U16] = CT_Reinterpret,
+	[DataType_I16][DataType_U32] = CT_Convert,
+	[DataType_I16][DataType_U64] = CT_Convert,
+	[DataType_I32][DataType_I64] = CT_Convert,
+	[DataType_I32][DataType_U32] = CT_Reinterpret,
+	[DataType_I32][DataType_U64] = CT_Convert,
+	[DataType_I64][DataType_U64] = CT_Reinterpret,
+};
+
 typedef struct {
 	Scope *previousScope;
 	Scope *currentScope;
@@ -349,8 +394,10 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 		analyzer.hadError = true;
 		error(node->operator, "left operand is immutable");
 	} else if (!dataType_equal(node->a->dataType, node->b->dataType)) {
-		analyzer.hadError = true;
-		error(node->operator, "operands must have the same type");
+		if (!coerce(node->b, node->a)) {
+			analyzer.hadError = true;
+			error(node->operator, "operands must have the same type");
+		}
 	}
 	if (!node->a->modifiable) {
 		error(node->operator, "assignee must be modifiable");
@@ -389,7 +436,9 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 		default:
 	}
 	if (!dataType_equal(node->a->dataType, node->b->dataType)) {
-		error(node->operator, "operands must have the same type");
+		if (!coerce(node->a, node->b) && !coerce(node->b, node->a)) {
+			error(node->operator, "operands must have the same type");
+		}
 	}
 	node->a->modifiable = false;
 	node->b->modifiable = false;
@@ -501,7 +550,9 @@ static void visitExpressionTernary (AstExpressionTernary *node)
 		error(node->operator, "condition must be a boolean");
 	}
 	if (!dataType_equal(a->dataType, b->dataType)) {
-		error(node->operator, "operands must have the same type");
+		if (!coerce(node->a, node->b) && !coerce(node->b, node->a)) {
+			error(node->operator, "operands must have the same type");
+		}
 	}
 	c->modifiable = false;
 	a->modifiable = false;
@@ -510,3 +561,25 @@ static void visitExpressionTernary (AstExpressionTernary *node)
 
 static void visitExpressionVar (AstExpressionVar *node)
 { }
+
+static bool canCoerce (DataType *from, DataType *to)
+{
+	return coercionMatrix[from->type][to->type];
+}
+
+static Token getCoercionToken (CoercionType type)
+{
+	return (Token){
+		.type = type == CT_Convert ? TT_Tilde_Greater : TT_Minus_Greater,
+		.lexeme = type == CT_Convert ? "~>" : "->",
+		.length = 2,
+		.line = 0,
+	};
+}
+
+static bool coerce (AstExpression *e, AstExpression *target)
+{
+	if (!canCoerce(e->dataType, target->dataType)) return false;
+	e = ast_initExpressionCast(e, getCoercionToken(coercionMatrix[e->dataType->type][target->dataType->type]), target->dataType);
+	return true;
+}
