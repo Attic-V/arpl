@@ -580,6 +580,10 @@ static Token getCoercionToken (CoercionType type)
 static bool coerce (AstExpression *e, AstExpression *target)
 {
 	if (!canCoerce(e->dataType, target->dataType)) return false;
+	if (!dataType_castable(e->dataType, target->dataType)) {
+		fprintf(stderr, "deverr: attempted to use an invalid cast during coercion");
+		analyzer.hadError = true;
+	}
 	e = ast_initExpressionCast(e, getCoercionToken(coercionMatrix[e->dataType->type][target->dataType->type]), target->dataType);
 	return true;
 }
