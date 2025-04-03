@@ -67,7 +67,7 @@ Token *scan (char *source)
 			case ')': addToken(TT_RParen); continue;
 			case ';': addToken(TT_Semicolon); continue;
 			case '*': addToken(match('=') ? TT_Star_Equal : TT_Star); continue;
-			case '~': addToken(match('>') ? TT_Tilde_Greater : TT_Tilde); continue;
+			case '~': addToken(TT_Tilde); continue;
 			case '/':
 				if (match('/')) {
 					while (!check('\0') && !match('\n')) {

@@ -21,12 +21,7 @@ typedef struct {
 typedef struct {
 	DataType *from;
 	DataType *to;
-} IrCastConvert;
-
-typedef struct {
-	DataType *from;
-	DataType *to;
-} IrCastReinterpret;
+} IrCast;
 
 typedef struct {
 } IrCopy;
@@ -134,8 +129,7 @@ typedef enum {
 	Ir_Add,
 	Ir_And,
 	Ir_Assign,
-	Ir_CastConvert,
-	Ir_CastReinterpret,
+	Ir_Cast,
 	Ir_Copy,
 	Ir_Dec,
 	Ir_Deref,
@@ -172,8 +166,7 @@ struct Ir {
 		IrAdd *add;
 		IrAnd *and;
 		IrAssign *assign;
-		IrCastConvert *castConvert;
-		IrCastReinterpret *castReinterpret;
+		IrCast *cast;
 		IrCopy *copy;
 		IrDec *dec;
 		IrDeref *deref;
@@ -208,8 +201,7 @@ struct Ir {
 Ir *ir_initAdd (size_t size);
 Ir *ir_initAnd (size_t size);
 Ir *ir_initAssign (size_t size);
-Ir *ir_initCastConvert (DataType *from, DataType *to);
-Ir *ir_initCastReinterpret (DataType *from, DataType *to);
+Ir *ir_initCast (DataType *from, DataType *to);
 Ir *ir_initCopy (void);
 Ir *ir_initDec (size_t size);
 Ir *ir_initDeref (size_t size);

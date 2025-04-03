@@ -56,7 +56,6 @@ typedef enum {
 	TT_Star_Equal,
 	TT_Switch,
 	TT_Tilde,
-	TT_Tilde_Greater,
 	TT_True,
 	TT_U8,
 	TT_U16,

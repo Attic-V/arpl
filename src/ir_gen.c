@@ -346,11 +346,7 @@ static void visitExpressionCast (AstExpression *expression)
 {
 	AstExpressionCast *e = expression->as.cast;
 	visitExpression(e->e);
-	switch (e->operator.type) {
-		case TT_Minus_Greater: addInstruction(ir_initCastReinterpret(e->e->dataType, e->to)); break;
-		case TT_Tilde_Greater: addInstruction(ir_initCastConvert(e->e->dataType, e->to)); break;
-		default:
-	}
+	addInstruction(ir_initCast(e->e->dataType, e->to));
 }
 
 static void visitExpressionNumber (AstExpression *expression)

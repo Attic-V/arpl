@@ -15,8 +15,7 @@ static void transform (Ir *r);
 static void transformAdd (Ir *ir);
 static void transformAnd (Ir *ir);
 static void transformAssign (Ir *ir);
-static void transformCastConvert (Ir *ir);
-static void transformCastReinterpret (Ir *ir);
+static void transformCast (Ir *ir);
 static void transformCopy (Ir *ir);
 static void transformDec (Ir *ir);
 static void transformDeref (Ir *ir);
@@ -75,6 +74,12 @@ static void Cast_I_I_expand (DataType *from, DataType *to)
 	push(r8);
 }
 
+static void Cast_interpret (DataType *from, DataType *to)
+{
+	(void)from;
+	(void)to;
+}
+
 static void Cast_narrow (DataType *from, DataType *to)
 {
 	pop(r8);
@@ -113,6 +118,16 @@ static void Cast_narrow (DataType *from, DataType *to)
 #define Cast_I32_I8 Cast_I_I_narrow
 #define Cast_I16_I8 Cast_I_I_narrow
 
+#define Cast_U8_I8 Cast_interpret
+#define Cast_U16_I16 Cast_interpret
+#define Cast_U32_I32 Cast_interpret
+#define Cast_U64_I64 Cast_interpret
+
+#define Cast_I8_U8 Cast_interpret
+#define Cast_I16_U16 Cast_interpret
+#define Cast_I32_U32 Cast_interpret
+#define Cast_I64_U64 Cast_interpret
+
 void (*CastTable[DataTypeType_Count][DataTypeType_Count])(DataType *from, DataType *to) = {
 	[DataType_U8][DataType_U16] = Cast_U8_U16,
 	[DataType_U8][DataType_U32] = Cast_U8_U32,
@@ -138,6 +153,14 @@ void (*CastTable[DataTypeType_Count][DataTypeType_Count])(DataType *from, DataTy
 	[DataType_I32][DataType_I16] = Cast_I32_I16,
 	[DataType_I32][DataType_I8] = Cast_I32_I8,
 	[DataType_I16][DataType_I8] = Cast_I16_I8,
+	[DataType_U8][DataType_I8] = Cast_U8_I8,
+	[DataType_U16][DataType_I16] = Cast_U16_I16,
+	[DataType_U32][DataType_I32] = Cast_U32_I32,
+	[DataType_U64][DataType_I64] = Cast_U64_I64,
+	[DataType_I8][DataType_U8] = Cast_I8_U8,
+	[DataType_I16][DataType_U16] = Cast_I16_U16,
+	[DataType_I32][DataType_U32] = Cast_I32_U32,
+	[DataType_I64][DataType_U64] = Cast_I64_U64,
 };
 
 typedef struct {
@@ -189,8 +212,7 @@ static void transform (Ir *r)
 		transformer(Add),
 		transformer(And),
 		transformer(Assign),
-		transformer(CastConvert),
-		transformer(CastReinterpret),
+		transformer(Cast),
 		transformer(Copy),
 		transformer(Dec),
 		transformer(Deref),
@@ -252,19 +274,13 @@ static void transformAssign (Ir *ir)
 	push(r8);
 }
 
-static void transformCastConvert (Ir *ir)
+static void transformCast (Ir *ir)
 {
-	IrCastConvert *instruction = ir->as.castConvert;
+	IrCast *instruction = ir->as.cast;
 	(void)instruction;
 	DataType *from = instruction->from;
 	DataType *to = instruction->to;
 	CastTable[from->type][to->type](from, to);
-}
-
-static void transformCastReinterpret (Ir *ir)
-{
-	IrCastReinterpret *instruction = ir->as.castReinterpret;
-	(void)instruction;
 }
 
 static void transformCopy (Ir *ir)

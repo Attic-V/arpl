@@ -7,8 +7,7 @@ static Ir *ir_init (IrType type);
 static IrAdd *irAdd_init (size_t size);
 static IrAnd *irAnd_init (size_t size);
 static IrAssign *irAssign_init (size_t size);
-static IrCastConvert *irCastConvert_init (DataType *from, DataType *to);
-static IrCastReinterpret *irCastReinterpret_init (DataType *from, DataType *to);
+static IrCast *irCast_init (DataType *from, DataType *to);
 static IrCopy *irCopy_init (void);
 static IrDec *irDec_init (size_t size);
 static IrDeref *irDeref_init (size_t size);
@@ -65,17 +64,10 @@ Ir *ir_initAssign (size_t size)
 	return ir;
 }
 
-Ir *ir_initCastConvert (DataType *from, DataType *to)
+Ir *ir_initCast (DataType *from, DataType *to)
 {
-	Ir *ir = ir_init(Ir_CastConvert);
-	ir->as.castConvert = irCastConvert_init(from, to);
-	return ir;
-}
-
-Ir *ir_initCastReinterpret (DataType *from, DataType *to)
-{
-	Ir *ir = ir_init(Ir_CastReinterpret);
-	ir->as.castReinterpret = irCastReinterpret_init(from, to);
+	Ir *ir = ir_init(Ir_Cast);
+	ir->as.cast = irCast_init(from, to);
 	return ir;
 }
 
@@ -282,20 +274,12 @@ static IrAssign *irAssign_init (size_t size)
 	return assign;
 }
 
-static IrCastConvert *irCastConvert_init (DataType *from, DataType *to)
+static IrCast *irCast_init (DataType *from, DataType *to)
 {
-	IrCastConvert *castConvert = mem_alloc(sizeof(*castConvert));
-	castConvert->from = from;
-	castConvert->to = to;
-	return castConvert;
-}
-
-static IrCastReinterpret *irCastReinterpret_init (DataType *from, DataType *to)
-{
-	IrCastReinterpret *castReinterpret = mem_alloc(sizeof(*castReinterpret));
-	castReinterpret->from = from;
-	castReinterpret->to = to;
-	return castReinterpret;
+	IrCast *cast = mem_alloc(sizeof(*cast));
+	cast->from = from;
+	cast->to = to;
+	return cast;
 }
 
 static IrCopy *irCopy_init (void)

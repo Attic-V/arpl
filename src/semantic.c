@@ -450,20 +450,9 @@ static void visitExpressionBoolean (AstExpressionBoolean *node)
 static void visitExpressionCast (AstExpressionCast *node)
 {
 	visitExpression(node->e);
-	switch (node->operator.type) {
-		case TT_Minus_Greater:
-			if (dataType_getSize(node->e->dataType) != dataType_getSize(node->to)) {
-				analyzer.hadError = true;
-				error(node->operator, "cannot perform reinterpret with datatypes of different sizes");
-			}
-			break;
-		case TT_Tilde_Greater:
-			if (!dataType_castable(node->e->dataType, node->to)) {
-				analyzer.hadError = true;
-				error(node->operator, "invalid cast");
-			}
-			break;
-		default:
+	if (!dataType_castable(node->e->dataType, node->to)) {
+		analyzer.hadError = true;
+		error(node->operator, "invalid cast");
 	}
 	node->e->modifiable = false;
 }
@@ -570,8 +559,8 @@ static bool canCoerce (DataType *from, DataType *to)
 static Token getCoercionToken (CoercionType type)
 {
 	return (Token){
-		.type = type == CT_Convert ? TT_Tilde_Greater : TT_Minus_Greater,
-		.lexeme = type == CT_Convert ? "~>" : "->",
+		.type = TT_Minus_Greater,
+		.lexeme = "->",
 		.length = 2,
 		.line = 0,
 	};

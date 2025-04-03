@@ -294,7 +294,7 @@ static AstExpression *getExpressionTernary (void)
 static AstExpression *getExpressionCast (void)
 {
 	AstExpression *left = getExpressionOrLogical();
-	while (check(TT_Minus_Greater) || check(TT_Tilde_Greater)) {
+	while (check(TT_Minus_Greater)) {
 		Token operator = parser.tokens[parser.current++];
 		DataType *to = getType();
 		left = ast_initExpressionCast(left, operator, to);
