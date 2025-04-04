@@ -35,49 +35,46 @@ static void visitExpressionPrefix (AstExpressionPrefix *node);
 static void visitExpressionTernary (AstExpressionTernary *node);
 static void visitExpressionVar (AstExpressionVar *node);
 
-typedef enum {
-	CT_None = 0,
-	CT_Convert,
-	CT_Reinterpret,
-} CoercionType;
-
 static bool canCoerce (DataType *from, DataType *to);
-static Token getCoercionToken (CoercionType type);
+static Token getCoercionToken (void);
 static bool coerce (AstExpression* e, AstExpression *target);
 
-static CoercionType coercionMatrix[DataTypeType_Count][DataTypeType_Count] = {
-	[DataType_U8][DataType_U16] = CT_Convert,
-	[DataType_U8][DataType_U32] = CT_Convert,
-	[DataType_U8][DataType_U64] = CT_Convert,
-	[DataType_U8][DataType_I8] = CT_Reinterpret,
-	[DataType_U8][DataType_I16] = CT_Convert,
-	[DataType_U8][DataType_I32] = CT_Convert,
-	[DataType_U8][DataType_I64] = CT_Convert,
-	[DataType_U16][DataType_U32] = CT_Convert,
-	[DataType_U16][DataType_U64] = CT_Convert,
-	[DataType_U16][DataType_I32] = CT_Convert,
-	[DataType_U16][DataType_I64] = CT_Convert,
-	[DataType_U16][DataType_I16] = CT_Reinterpret,
-	[DataType_U32][DataType_U64] = CT_Convert,
-	[DataType_U32][DataType_I32] = CT_Reinterpret,
-	[DataType_U32][DataType_I64] = CT_Convert,
-	[DataType_U64][DataType_I64] = CT_Reinterpret,
-	[DataType_I8][DataType_I16] = CT_Convert,
-	[DataType_I8][DataType_I32] = CT_Convert,
-	[DataType_I8][DataType_I64] = CT_Convert,
-	[DataType_I8][DataType_U8] = CT_Reinterpret,
-	[DataType_I8][DataType_U16] = CT_Convert,
-	[DataType_I8][DataType_U32] = CT_Convert,
-	[DataType_I8][DataType_U64] = CT_Convert,
-	[DataType_I16][DataType_I32] = CT_Convert,
-	[DataType_I16][DataType_I64] = CT_Convert,
-	[DataType_I16][DataType_U16] = CT_Reinterpret,
-	[DataType_I16][DataType_U32] = CT_Convert,
-	[DataType_I16][DataType_U64] = CT_Convert,
-	[DataType_I32][DataType_I64] = CT_Convert,
-	[DataType_I32][DataType_U32] = CT_Reinterpret,
-	[DataType_I32][DataType_U64] = CT_Convert,
-	[DataType_I64][DataType_U64] = CT_Reinterpret,
+static bool coercionMatrix[DataTypeType_Count][DataTypeType_Count] = {
+	[DataType_U8][DataType_U16] = 1,
+	[DataType_U8][DataType_U32] = 1,
+	[DataType_U8][DataType_U64] = 1,
+	[DataType_U16][DataType_U32] = 1,
+	[DataType_U16][DataType_U64] = 1,
+	[DataType_U32][DataType_U64] = 1,
+
+	[DataType_I8][DataType_I16] = 1,
+	[DataType_I8][DataType_I32] = 1,
+	[DataType_I8][DataType_I64] = 1,
+	[DataType_I16][DataType_I32] = 1,
+	[DataType_I16][DataType_I64] = 1,
+	[DataType_I32][DataType_I64] = 1,
+
+	[DataType_U8][DataType_I8] = 1,
+	[DataType_U8][DataType_I16] = 1,
+	[DataType_U8][DataType_I32] = 1,
+	[DataType_U8][DataType_I64] = 1,
+	[DataType_U16][DataType_I16] = 1,
+	[DataType_U16][DataType_I32] = 1,
+	[DataType_U16][DataType_I64] = 1,
+	[DataType_U32][DataType_I32] = 1,
+	[DataType_U32][DataType_I64] = 1,
+	[DataType_U64][DataType_I64] = 1,
+
+	[DataType_I8][DataType_U8] = 1,
+	[DataType_I8][DataType_U16] = 1,
+	[DataType_I8][DataType_U32] = 1,
+	[DataType_I8][DataType_U64] = 1,
+	[DataType_I16][DataType_U16] = 1,
+	[DataType_I16][DataType_U32] = 1,
+	[DataType_I16][DataType_U64] = 1,
+	[DataType_I32][DataType_U32] = 1,
+	[DataType_I32][DataType_U64] = 1,
+	[DataType_I64][DataType_U64] = 1,
 };
 
 typedef struct {
@@ -556,7 +553,7 @@ static bool canCoerce (DataType *from, DataType *to)
 	return coercionMatrix[from->type][to->type];
 }
 
-static Token getCoercionToken (CoercionType type)
+static Token getCoercionToken (void)
 {
 	return (Token){
 		.type = TT_Minus_Greater,
@@ -573,6 +570,6 @@ static bool coerce (AstExpression *e, AstExpression *target)
 		fprintf(stderr, "deverr: attempted to use an invalid cast during coercion");
 		analyzer.hadError = true;
 	}
-	e = ast_initExpressionCast(e, getCoercionToken(coercionMatrix[e->dataType->type][target->dataType->type]), target->dataType);
+	e = ast_initExpressionCast(e, getCoercionToken(), target->dataType);
 	return true;
 }
