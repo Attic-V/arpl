@@ -196,8 +196,27 @@ struct AstStatement {
 	AstStatement* previous;
 };
 
+typedef struct AstDeclaration AstDeclaration;
+
 typedef struct {
-	AstStatement *statement;
+	Token keyword;
+	Token identifier;
+	AstStatement *body;
+} AstDeclarationFunction;
+
+typedef enum {
+	AstDeclaration_Function,
+} AstDeclarationType;
+
+struct AstDeclaration {
+	AstDeclarationType type;
+	union {
+		AstDeclarationFunction *function;
+	} as;
+};
+
+typedef struct {
+	AstDeclaration *declaration;
 } AstRoot;
 
 typedef struct {
@@ -205,7 +224,9 @@ typedef struct {
 } Ast;
 
 Ast *ast_init (AstRoot *root);
-AstRoot *ast_initRoot (AstStatement *statement);
+AstRoot *ast_initRoot (AstDeclaration *declaration);
+
+AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, AstStatement *body);
 
 AstStatement *ast_initStatementBlock (AstStatement *children);
 AstStatement *ast_initStatementBreakL (Token keyword);

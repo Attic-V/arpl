@@ -2,8 +2,11 @@
 #include "linked_list.h"
 #include "memory.h"
 
+static AstDeclaration *ast_initDeclaration (AstDeclarationType type);
 static AstStatement *ast_initStatement (AstStatementType type);
 static AstExpression *ast_initExpression (AstExpressionType type);
+
+static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token identifier, AstStatement *body);
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementBreakL *astStatement_initBreakL (Token keyword);
@@ -36,11 +39,18 @@ Ast *ast_init (AstRoot *root)
 	return ast;
 }
 
-AstRoot *ast_initRoot (AstStatement *statement)
+AstRoot *ast_initRoot (AstDeclaration *declaration)
 {
 	AstRoot *root = mem_alloc(sizeof(*root));
-	root->statement = statement;
+	root->declaration = declaration;
 	return root;
+}
+
+AstDeclaration *ast_initDeclaration (AstDeclarationType type)
+{
+	AstDeclaration *d = mem_alloc(sizeof(*d));
+	d->type = type;
+	return d;
 }
 
 AstStatement *ast_initStatement (AstStatementType type)
@@ -58,6 +68,13 @@ AstExpression *ast_initExpression (AstExpressionType type)
 	e->dataType = mem_alloc(sizeof(*e->dataType));
 	e->modifiable = false;
 	return e;
+}
+
+AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, AstStatement *body)
+{
+	AstDeclaration *declaration = ast_initDeclaration(AstDeclaration_Function);
+	declaration->as.function = astDeclaration_initFunction(keyword, identifier, body);
+	return declaration;
 }
 
 AstStatement *ast_initStatementBlock (AstStatement *children)
@@ -213,6 +230,15 @@ AstExpression *ast_initExpressionVar (Token identifier)
 	AstExpression *expression = ast_initExpression(AstExpression_Var);
 	expression->as.var = astExpression_initVar(identifier);
 	return expression;
+}
+
+static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token identifier, AstStatement *body)
+{
+	AstDeclarationFunction *function = mem_alloc(sizeof(*function));
+	function->keyword = keyword;
+	function->identifier = identifier;
+	function->body = body;
+	return function;
 }
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children)

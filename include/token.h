@@ -21,6 +21,7 @@ typedef enum {
 	TT_Equal,
 	TT_Equal_Equal,
 	TT_False,
+	TT_Fn,
 	TT_For,
 	TT_Greater_Greater,
 	TT_I16,

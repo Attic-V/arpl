@@ -12,6 +12,8 @@ static IrCopy *irCopy_init (void);
 static IrDec *irDec_init (size_t size);
 static IrDeref *irDeref_init (size_t size);
 static IrEqu *irEqu_init (size_t size);
+static IrFunctionEnd *irFunctionEnd_init (void);
+static IrFunctionStart *irFunctionStart_init (Token identifier);
 static IrInc *irInc_init (size_t size);
 static IrJmp *irJmp_init (int n);
 static IrJmpFalse *irJmpFalse_init (int n);
@@ -96,6 +98,20 @@ Ir *ir_initEqu (size_t size)
 {
 	Ir *ir = ir_init(Ir_Equ);
 	ir->as.equ = irEqu_init(size);
+	return ir;
+}
+
+Ir *ir_initFunctionEnd (void)
+{
+	Ir *ir = ir_init(Ir_FunctionEnd);
+	ir->as.functionEnd = irFunctionEnd_init();
+	return ir;
+}
+
+Ir *ir_initFunctionStart (Token identifier)
+{
+	Ir *ir = ir_init(Ir_FunctionStart);
+	ir->as.functionStart = irFunctionStart_init(identifier);
 	return ir;
 }
 
@@ -307,6 +323,19 @@ static IrEqu *irEqu_init (size_t size)
 	IrEqu *equ = mem_alloc(sizeof(*equ));
 	equ->size = size;
 	return equ;
+}
+
+static IrFunctionEnd *irFunctionEnd_init (void)
+{
+	IrFunctionEnd *functionEnd = mem_alloc(sizeof(*functionEnd));
+	return functionEnd;
+}
+
+static IrFunctionStart *irFunctionStart_init (Token identifier)
+{
+	IrFunctionStart *functionStart = mem_alloc(sizeof(*functionStart));
+	functionStart->identifier = identifier;
+	return functionStart;
 }
 
 static IrInc *irInc_init (size_t size)

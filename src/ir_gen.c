@@ -18,6 +18,9 @@
 static void visitAst (Ast *ast);
 static void visitRoot (AstRoot *root);
 
+static void visitDeclaration (AstDeclaration *declaration);
+static void visitDeclarationFunction (AstDeclarationFunction *declaration);
+
 static void visitStatement (AstStatement *statement);
 static void visitStatementBlock (AstStatementBlock *statement);
 static void visitStatementBreakL (AstStatementBreakL *statement);
@@ -84,8 +87,22 @@ static void visitAst (Ast *ast)
 
 static void visitRoot (AstRoot *root)
 {
-	gen.reservedBytes = root->statement->as.block->scope->physicalSize;
-	visitStatement(root->statement);
+	gen.reservedBytes = root->declaration->as.function->body->as.block->scope->physicalSize;
+	visitDeclaration(root->declaration);
+}
+
+static void visitDeclaration (AstDeclaration *declaration)
+{
+	switch (declaration->type) {
+		case AstDeclaration_Function: visitDeclarationFunction(declaration->as.function); break;
+	}
+}
+
+static void visitDeclarationFunction (AstDeclarationFunction *declaration)
+{
+	addInstruction(ir_initFunctionStart(declaration->identifier));
+	visitStatement(declaration->body);
+	addInstruction(ir_initFunctionEnd());
 }
 
 static void visitStatement (AstStatement *statement)

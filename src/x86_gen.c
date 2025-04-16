@@ -20,6 +20,8 @@ static void transformCopy (Ir *ir);
 static void transformDec (Ir *ir);
 static void transformDeref (Ir *ir);
 static void transformEqu (Ir *ir);
+static void transformFunctionEnd (Ir *ir);
+static void transformFunctionStart (Ir *ir);
 static void transformInc (Ir *ir);
 static void transformJmp (Ir *ir);
 static void transformJmpFalse (Ir *ir);
@@ -274,19 +276,9 @@ void gen_x86 (Ir *ir)
 	emit("\tmov     rax, 60");
 	emit("\tsyscall");
 
-	emit("");
-
-	emit("main:");
-	push(rbp);
-	emit("\tmov     rbp, rsp");
-
 	for (Ir *r = ir; r != NULL; r = r->next) {
 		transform(r);
 	}
-
-	emit("\tmov     rsp, rbp");
-	pop(rbp);
-	emit("\tret");
 
 	fclose(gen.fp);
 }
@@ -303,6 +295,8 @@ static void transform (Ir *r)
 		transformer(Dec),
 		transformer(Deref),
 		transformer(Equ),
+		transformer(FunctionEnd),
+		transformer(FunctionStart),
 		transformer(Inc),
 		transformer(Jmp),
 		transformer(JmpFalse),
@@ -405,6 +399,25 @@ static void transformEqu (Ir *ir)
 	emit("\tcmp     %s, %s", reg[r8][instruction->size], reg[r9][instruction->size]);
 	emit("\tsete    r8b");
 	push(r8);
+}
+
+static void transformFunctionEnd (Ir *ir)
+{
+	IrFunctionEnd *instruction = ir->as.functionEnd;
+	(void)instruction;
+	emit("\tmov     rsp, rbp");
+	pop(rbp);
+	emit("\tret");
+}
+
+static void transformFunctionStart (Ir *ir)
+{
+	IrFunctionStart *instruction = ir->as.functionStart;
+	(void)instruction;
+	emit("");
+	emit("%.*s:", instruction->identifier.length, instruction->identifier.lexeme);
+	push(rbp);
+	emit("\tmov     rbp, rsp");
 }
 
 static void transformInc (Ir *ir)

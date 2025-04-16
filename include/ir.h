@@ -39,6 +39,13 @@ typedef struct {
 } IrEqu;
 
 typedef struct {
+} IrFunctionEnd;
+
+typedef struct {
+	Token identifier;
+} IrFunctionStart;
+
+typedef struct {
 	size_t size;
 } IrInc;
 
@@ -134,6 +141,8 @@ typedef enum {
 	Ir_Dec,
 	Ir_Deref,
 	Ir_Equ,
+	Ir_FunctionEnd,
+	Ir_FunctionStart,
 	Ir_Inc,
 	Ir_Jmp,
 	Ir_JmpFalse,
@@ -171,6 +180,8 @@ struct Ir {
 		IrDec *dec;
 		IrDeref *deref;
 		IrEqu *equ;
+		IrFunctionEnd *functionEnd;
+		IrFunctionStart *functionStart;
 		IrInc *inc;
 		IrJmp *jmp;
 		IrJmpFalse *jmpFalse;
@@ -206,6 +217,8 @@ Ir *ir_initCopy (void);
 Ir *ir_initDec (size_t size);
 Ir *ir_initDeref (size_t size);
 Ir *ir_initEqu (size_t size);
+Ir *ir_initFunctionEnd (void);
+Ir *ir_initFunctionStart (Token identifier);
 Ir *ir_initInc (size_t size);
 Ir *ir_initJmp (int n);
 Ir *ir_initJmpFalse (int n);

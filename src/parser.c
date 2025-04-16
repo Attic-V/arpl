@@ -10,7 +10,9 @@
 
 static AstRoot *getRoot (void);
 
-static AstStatement *getStatement(void);
+static AstDeclaration *getDeclarationFunction (void);
+
+static AstStatement *getStatement (void);
 static AstStatement *getStatementBlock (void);
 static AstStatement *getStatementBreakL (void);
 static AstStatement *getStatementCaseL (void);
@@ -68,7 +70,14 @@ Ast *parse (Token *tokens)
 
 static AstRoot *getRoot (void)
 {
-	return ast_initRoot(getStatementBlock());
+	return ast_initRoot(getDeclarationFunction());
+}
+
+static AstDeclaration *getDeclarationFunction (void)
+{
+	Token keyword = consume(TT_Fn, "expected 'fn'");
+	Token identifier = consume(TT_Identifier, "expected identifier");
+	return ast_initDeclarationFunction(keyword, identifier, getStatementBlock());
 }
 
 static AstStatement *getStatement (void)

@@ -9,6 +9,9 @@
 static void visitAst (Ast *ast);
 static void visitRoot (AstRoot *node);
 
+static void visitDeclaration (AstDeclaration *node);
+static void visitDeclarationFunction (AstDeclarationFunction *node);
+
 static void visitStatement (AstStatement *node);
 static void visitStatementBlock (AstStatementBlock *node);
 static void visitStatementBreakL (AstStatementBreakL *node);
@@ -112,7 +115,19 @@ static void visitAst (Ast *ast)
 
 static void visitRoot (AstRoot *node)
 {
-	visitStatement(node->statement);
+	visitDeclaration(node->declaration);
+}
+
+static void visitDeclaration (AstDeclaration *node)
+{
+	switch (node->type) {
+		case AstDeclaration_Function: visitDeclarationFunction(node->as.function); break;
+	}
+}
+
+static void visitDeclarationFunction (AstDeclarationFunction *node)
+{
+	visitStatement(node->body);
 }
 
 static void visitStatement (AstStatement *node)
