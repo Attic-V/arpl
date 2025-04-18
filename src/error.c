@@ -12,7 +12,10 @@ void error (Token location, char *format, ...)
 
 void verror (Token location, char *format, va_list args)
 {
-	fprintf(stderr, "%d: error at ", location.line);
+	if (location.type != TT_EOF) {
+		fprintf(stderr, "%d: ", location.line);
+	}
+	fprintf(stderr, "error at ");
 	if (location.type == TT_EOF) {
 		fprintf(stderr, "EOF");
 	} else {

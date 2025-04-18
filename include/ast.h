@@ -202,6 +202,7 @@ typedef struct {
 	Token keyword;
 	Token identifier;
 	AstStatement *body;
+	DataType *dataType;
 } AstDeclarationFunction;
 
 typedef enum {
@@ -217,6 +218,7 @@ struct AstDeclaration {
 
 typedef struct {
 	AstDeclaration *declaration;
+	Scope *scope;
 } AstRoot;
 
 typedef struct {

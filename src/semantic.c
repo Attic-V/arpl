@@ -115,7 +115,25 @@ static void visitAst (Ast *ast)
 
 static void visitRoot (AstRoot *node)
 {
+	analyzer.currentScope = node->scope = scope_init();
+	node->scope->parent = analyzer.previousScope;
+	analyzer.previousScope = node->scope;
 	visitDeclaration(node->declaration);
+	analyzer.currentScope = node->scope;
+	if (node->scope->parent != NULL) {
+		node->scope->parent->physicalSize += node->scope->physicalSize;
+	}
+	if (!scope_get(node->scope, (Token){
+		.type = TT_Identifier,
+		.lexeme = "main",
+		.length = 4,
+		.line = 0,
+	})) {
+		analyzer.hadError = true;
+		error((Token){
+			.type = TT_EOF,
+		}, "missing main");
+	}
 }
 
 static void visitDeclaration (AstDeclaration *node)
@@ -127,6 +145,13 @@ static void visitDeclaration (AstDeclaration *node)
 
 static void visitDeclarationFunction (AstDeclarationFunction *node)
 {
+	Symbol *symbol = symbol_init(node->identifier, node->dataType);
+	if (scope_add(analyzer.currentScope, symbol)) {
+		symbol->physicalIndex = analyzer.currentPhysicalIndex;
+		analyzer.currentPhysicalIndex += dataType_getSize(symbol->type);
+	} else {
+		error(node->identifier, "identifier already exists in scope");
+	}
 	visitStatement(node->body);
 }
 

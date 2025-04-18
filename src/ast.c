@@ -238,6 +238,7 @@ static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token
 	function->keyword = keyword;
 	function->identifier = identifier;
 	function->body = body;
+	function->dataType = dataType_initFunction();
 	return function;
 }
 
