@@ -10,6 +10,7 @@
 
 static AstRoot *getRoot (void);
 
+static AstDeclaration *getDeclaration (void);
 static AstDeclaration *getDeclarationFunction (void);
 
 static AstStatement *getStatement (void);
@@ -30,6 +31,7 @@ static AstExpression *getExpression (void);
 static AstExpression *getExpressionAndBitwise (void);
 static AstExpression *getExpressionAndLogical (void);
 static AstExpression *getExpressionAssign (void);
+static AstExpression *getExpressionCall (void);
 static AstExpression *getExpressionCast (void);
 static AstExpression *getExpressionEquality (void);
 static AstExpression *getExpressionOrBitwise (void);
@@ -70,14 +72,32 @@ Ast *parse (Token *tokens)
 
 static AstRoot *getRoot (void)
 {
-	return ast_initRoot(getDeclarationFunction());
+	AstDeclaration *declarations = NULL;
+	while (!check(TT_EOF)) {
+		AstDeclaration *declaration = getDeclaration();
+		dll_insert(declarations, declaration);
+		declarations = declaration;
+	}
+	for (; declarations != NULL && declarations->previous != NULL; declarations = declarations->previous);
+	return ast_initRoot(declarations);
+}
+
+static AstDeclaration *getDeclaration (void)
+{
+	switch (parser.tokens[parser.current].type) {
+		case TT_Fn: return getDeclarationFunction();
+		default:
+	}
+	error(parser.tokens[parser.current], "expected start of declaration");
+	exit(1);
 }
 
 static AstDeclaration *getDeclarationFunction (void)
 {
 	Token keyword = consume(TT_Fn, "expected 'fn'");
 	Token identifier = consume(TT_Identifier, "expected identifier");
-	return ast_initDeclarationFunction(keyword, identifier, getStatementBlock());
+	DataType *returnType = getType();
+	return ast_initDeclarationFunction(keyword, identifier, getStatementBlock(), returnType);
 }
 
 static AstStatement *getStatement (void)
@@ -438,7 +458,18 @@ static AstExpression *getExpressionUnaryPrefix (void)
 		AstExpression *right = getExpressionUnaryPrefix();
 		return ast_initExpressionPrefix(operator, right);
 	}
-	return getExpressionPrimary();
+	return getExpressionCall();
+}
+
+static AstExpression *getExpressionCall (void)
+{
+	AstExpression *e = getExpressionPrimary();
+	if (match(TT_LParen)) {
+		Token lparen = parser.tokens[parser.current - 1];
+		Token rparen = consume(TT_RParen, "expected '0'");
+		return ast_initExpressionCall(e, lparen, rparen);
+	}
+	return e;
 }
 
 static AstExpression *getExpressionPrimary (void)

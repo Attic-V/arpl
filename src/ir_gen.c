@@ -40,6 +40,7 @@ static void visitExpression (AstExpression *expression);
 static void visitExpressionAssign (AstExpression *expression);
 static void visitExpressionBinary (AstExpression *expression);
 static void visitExpressionBoolean (AstExpression *expression);
+static void visitExpressionCall (AstExpression *expression);
 static void visitExpressionCast (AstExpression *expression);
 static void visitExpressionNumber (AstExpression *expression);
 static void visitExpressionPostfix (AstExpression *expression);
@@ -87,8 +88,15 @@ static void visitAst (Ast *ast)
 
 static void visitRoot (AstRoot *root)
 {
-	gen.reservedBytes = root->declaration->as.function->body->as.block->scope->physicalSize;
-	visitDeclaration(root->declaration);
+	gen.reservedBytes = root->scope->physicalSize;
+
+	pushLabels
+	gen.scope = root->scope;
+	for (AstDeclaration *decl = root->declarations; decl != NULL; decl = decl->next) {
+		visitDeclaration(decl);
+		gen.scope = root->scope;
+		popLabels
+	}
 }
 
 static void visitDeclaration (AstDeclaration *declaration)
@@ -286,6 +294,7 @@ static void visitExpression (AstExpression *expression)
 		case AstExpression_Assign: visitExpressionAssign(expression); break;
 		case AstExpression_Binary: visitExpressionBinary(expression); break;
 		case AstExpression_Boolean: visitExpressionBoolean(expression); break;
+		case AstExpression_Call: visitExpressionCall(expression); break;
 		case AstExpression_Cast: visitExpressionCast(expression); break;
 		case AstExpression_Number: visitExpressionNumber(expression); break;
 		case AstExpression_Postfix: visitExpressionPostfix(expression); break;
@@ -357,6 +366,13 @@ static void visitExpressionBoolean (AstExpression *expression)
 {
 	AstExpressionBoolean *e = expression->as.boolean;
 	addInstruction(ir_initPush(e->value));
+}
+
+static void visitExpressionCall (AstExpression *expression)
+{
+	AstExpressionCall *e = expression->as.call;
+	visitExpression(e->e);
+	addInstruction(ir_initCall());
 }
 
 static void visitExpressionCast (AstExpression *expression)
@@ -447,6 +463,10 @@ static void visitExpressionVar (AstExpression *expression)
 	AstExpressionVar *e = expression->as.var;
 	Symbol *s = telescope_get(gen.scope, e->identifier);
 	size_t size = dataType_getSize(expression->dataType);
+	if (dataType_isFunction(expression->dataType)) {
+		addInstruction(ir_initFnRef(e->identifier));
+		return;
+	}
 	if (expression->modifiable) {
 		addInstruction(ir_initRef(s->physicalIndex + size));
 	} else {

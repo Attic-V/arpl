@@ -15,11 +15,13 @@ static void transform (Ir *r);
 static void transformAdd (Ir *ir);
 static void transformAnd (Ir *ir);
 static void transformAssign (Ir *ir);
+static void transformCall (Ir *ir);
 static void transformCast (Ir *ir);
 static void transformCopy (Ir *ir);
 static void transformDec (Ir *ir);
 static void transformDeref (Ir *ir);
 static void transformEqu (Ir *ir);
+static void transformFnRef (Ir *ir);
 static void transformFunctionEnd (Ir *ir);
 static void transformFunctionStart (Ir *ir);
 static void transformInc (Ir *ir);
@@ -290,11 +292,13 @@ static void transform (Ir *r)
 		transformer(Add),
 		transformer(And),
 		transformer(Assign),
+		transformer(Call),
 		transformer(Cast),
 		transformer(Copy),
 		transformer(Dec),
 		transformer(Deref),
 		transformer(Equ),
+		transformer(FnRef),
 		transformer(FunctionEnd),
 		transformer(FunctionStart),
 		transformer(Inc),
@@ -320,6 +324,10 @@ static void transform (Ir *r)
 		transformer(Val),
 		transformer(Xor),
 	};
+	if (transformers[r->type] == NULL) {
+		fprintf(stderr, "deverr: x86gen: undefined transformer. ir type: %d\n", r->type);
+		exit(1);
+	}
 	transformers[r->type](r);
 	#undef transformer
 }
@@ -352,6 +360,15 @@ static void transformAssign (Ir *ir)
 	pop(r8);
 	emit("\tmov     %s [r8], %s", quantity[instruction->size], reg[r9][instruction->size]);
 	push(r8);
+}
+
+static void transformCall (Ir *ir)
+{
+	IrCall *instruction = ir->as.call;
+	(void)instruction;
+	pop(r8);
+	emit("\tcall    %s", reg[r8][QWORD]);
+	emit("\tpush    rax");
 }
 
 static void transformCast (Ir *ir)
@@ -399,6 +416,13 @@ static void transformEqu (Ir *ir)
 	emit("\tcmp     %s, %s", reg[r8][instruction->size], reg[r9][instruction->size]);
 	emit("\tsete    r8b");
 	push(r8);
+}
+
+static void transformFnRef (Ir *ir)
+{
+	IrFnRef *instruction = ir->as.fnRef;
+	(void)instruction;
+	emit("\tpush    %.*s", instruction->identifier.length, instruction->identifier.lexeme);
 }
 
 static void transformFunctionEnd (Ir *ir)

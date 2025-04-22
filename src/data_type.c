@@ -6,7 +6,7 @@
 static DataType *dataType_init (DataTypeType type);
 
 static DataTypeBoolean *dataTypeBoolean_init (void);
-static DataTypeFunction *dataTypeFunction_init (void);
+static DataTypeFunction *dataTypeFunction_init (DataType *returnType);
 static DataTypeI16 *dataTypeI16_init (void);
 static DataTypeI32 *dataTypeI32_init (void);
 static DataTypeI64 *dataTypeI64_init (void);
@@ -38,16 +38,17 @@ static DataTypeBoolean *dataTypeBoolean_init (void)
 	return t;
 }
 
-DataType *dataType_initFunction (void)
+DataType *dataType_initFunction (DataType *returnType)
 {
 	DataType *t = dataType_init(DataType_Function);
-	t->as.function = dataTypeFunction_init();
+	t->as.function = dataTypeFunction_init(returnType);
 	return t;
 }
 
-static DataTypeFunction *dataTypeFunction_init (void)
+static DataTypeFunction *dataTypeFunction_init (DataType *returnType)
 {
 	DataTypeFunction *t = mem_alloc(sizeof(*t));
+	t->returnType = returnType;
 	return t;
 }
 

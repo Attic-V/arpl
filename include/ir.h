@@ -19,6 +19,9 @@ typedef struct {
 } IrAssign;
 
 typedef struct {
+} IrCall;
+
+typedef struct {
 	DataType *from;
 	DataType *to;
 } IrCast;
@@ -37,6 +40,10 @@ typedef struct {
 typedef struct {
 	size_t size;
 } IrEqu;
+
+typedef struct {
+	Token identifier;
+} IrFnRef;
 
 typedef struct {
 } IrFunctionEnd;
@@ -136,11 +143,13 @@ typedef enum {
 	Ir_Add,
 	Ir_And,
 	Ir_Assign,
+	Ir_Call,
 	Ir_Cast,
 	Ir_Copy,
 	Ir_Dec,
 	Ir_Deref,
 	Ir_Equ,
+	Ir_FnRef,
 	Ir_FunctionEnd,
 	Ir_FunctionStart,
 	Ir_Inc,
@@ -175,11 +184,13 @@ struct Ir {
 		IrAdd *add;
 		IrAnd *and;
 		IrAssign *assign;
+		IrCall *call;
 		IrCast *cast;
 		IrCopy *copy;
 		IrDec *dec;
 		IrDeref *deref;
 		IrEqu *equ;
+		IrFnRef *fnRef;
 		IrFunctionEnd *functionEnd;
 		IrFunctionStart *functionStart;
 		IrInc *inc;
@@ -212,11 +223,13 @@ struct Ir {
 Ir *ir_initAdd (size_t size);
 Ir *ir_initAnd (size_t size);
 Ir *ir_initAssign (size_t size);
+Ir *ir_initCall (void);
 Ir *ir_initCast (DataType *from, DataType *to);
 Ir *ir_initCopy (void);
 Ir *ir_initDec (size_t size);
 Ir *ir_initDeref (size_t size);
 Ir *ir_initEqu (size_t size);
+Ir *ir_initFnRef (Token identifier);
 Ir *ir_initFunctionEnd (void);
 Ir *ir_initFunctionStart (Token identifier);
 Ir *ir_initInc (size_t size);

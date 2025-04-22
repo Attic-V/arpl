@@ -11,6 +11,7 @@ typedef struct {
 } DataTypeBoolean;
 
 typedef struct {
+	DataType *returnType;
 } DataTypeFunction;
 
 typedef struct {
@@ -76,7 +77,7 @@ struct DataType {
 };
 
 DataType *dataType_initBoolean (void);
-DataType *dataType_initFunction (void);
+DataType *dataType_initFunction (DataType *returnType);
 DataType *dataType_initI16 (void);
 DataType *dataType_initI32 (void);
 DataType *dataType_initI64 (void);

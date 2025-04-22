@@ -28,6 +28,12 @@ typedef struct {
 
 typedef struct {
 	AstExpression *e;
+	Token lparen;
+	Token rparen;
+} AstExpressionCall;
+
+typedef struct {
+	AstExpression *e;
 	Token operator;
 	DataType *to;
 } AstExpressionCast;
@@ -61,6 +67,7 @@ typedef enum {
 	AstExpression_Assign,
 	AstExpression_Binary,
 	AstExpression_Boolean,
+	AstExpression_Call,
 	AstExpression_Cast,
 	AstExpression_Number,
 	AstExpression_Postfix,
@@ -75,6 +82,7 @@ struct AstExpression {
 		AstExpressionAssign *assign;
 		AstExpressionBinary *binary;
 		AstExpressionBoolean *boolean;
+		AstExpressionCall *call;
 		AstExpressionCast *cast;
 		AstExpressionNumber *number;
 		AstExpressionPostfix *postfix;
@@ -214,10 +222,12 @@ struct AstDeclaration {
 	union {
 		AstDeclarationFunction *function;
 	} as;
+	AstDeclaration *next;
+	AstDeclaration *previous;
 };
 
 typedef struct {
-	AstDeclaration *declaration;
+	AstDeclaration *declarations;
 	Scope *scope;
 } AstRoot;
 
@@ -226,9 +236,9 @@ typedef struct {
 } Ast;
 
 Ast *ast_init (AstRoot *root);
-AstRoot *ast_initRoot (AstDeclaration *declaration);
+AstRoot *ast_initRoot (AstDeclaration *declarations);
 
-AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, AstStatement *body);
+AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType);
 
 AstStatement *ast_initStatementBlock (AstStatement *children);
 AstStatement *ast_initStatementBreakL (Token keyword);
@@ -247,6 +257,7 @@ AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement* a
 AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBoolean (bool value);
+AstExpression *ast_initExpressionCall (AstExpression *e, Token lparen, Token rparen);
 AstExpression *ast_initExpressionCast (AstExpression *e, Token operator, DataType *to);
 AstExpression *ast_initExpressionNumber (Token value);
 AstExpression *ast_initExpressionPostfix (Token operator, AstExpression *e);

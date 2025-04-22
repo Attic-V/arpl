@@ -6,7 +6,7 @@ static AstDeclaration *ast_initDeclaration (AstDeclarationType type);
 static AstStatement *ast_initStatement (AstStatementType type);
 static AstExpression *ast_initExpression (AstExpressionType type);
 
-static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token identifier, AstStatement *body);
+static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType);
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementBreakL *astStatement_initBreakL (Token keyword);
@@ -24,6 +24,7 @@ static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, As
 
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
+static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen);
 static AstExpressionCast *astExpression_initCast (AstExpression *e, Token operator, DataType *to);
 static AstExpressionBoolean *astExpression_initBoolean (bool value);
 static AstExpressionNumber *astExpression_initNumber (Token value);
@@ -39,10 +40,10 @@ Ast *ast_init (AstRoot *root)
 	return ast;
 }
 
-AstRoot *ast_initRoot (AstDeclaration *declaration)
+AstRoot *ast_initRoot (AstDeclaration *declarations)
 {
 	AstRoot *root = mem_alloc(sizeof(*root));
-	root->declaration = declaration;
+	root->declarations = declarations;
 	return root;
 }
 
@@ -50,6 +51,7 @@ AstDeclaration *ast_initDeclaration (AstDeclarationType type)
 {
 	AstDeclaration *d = mem_alloc(sizeof(*d));
 	d->type = type;
+	dll_init(d);
 	return d;
 }
 
@@ -70,10 +72,10 @@ AstExpression *ast_initExpression (AstExpressionType type)
 	return e;
 }
 
-AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, AstStatement *body)
+AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType)
 {
 	AstDeclaration *declaration = ast_initDeclaration(AstDeclaration_Function);
-	declaration->as.function = astDeclaration_initFunction(keyword, identifier, body);
+	declaration->as.function = astDeclaration_initFunction(keyword, identifier, body, returnType);
 	return declaration;
 }
 
@@ -190,6 +192,13 @@ AstExpression *ast_initExpressionBoolean (bool value)
 	return expression;
 }
 
+AstExpression *ast_initExpressionCall (AstExpression *e, Token lparen, Token rparen)
+{
+	AstExpression *expression = ast_initExpression(AstExpression_Call);
+	expression->as.call = astExpression_initCall(e, lparen, rparen);
+	return expression;
+}
+
 AstExpression *ast_initExpressionCast (AstExpression *e, Token operator, DataType *to)
 {
 	AstExpression *expression = ast_initExpression(AstExpression_Cast);
@@ -232,13 +241,13 @@ AstExpression *ast_initExpressionVar (Token identifier)
 	return expression;
 }
 
-static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token identifier, AstStatement *body)
+static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType)
 {
 	AstDeclarationFunction *function = mem_alloc(sizeof(*function));
 	function->keyword = keyword;
 	function->identifier = identifier;
 	function->body = body;
-	function->dataType = dataType_initFunction();
+	function->dataType = dataType_initFunction(returnType);
 	return function;
 }
 
@@ -374,6 +383,15 @@ static AstExpressionBoolean *astExpression_initBoolean (bool value)
 	AstExpressionBoolean *boolean = mem_alloc(sizeof(*boolean));
 	boolean->value = value;
 	return boolean;
+}
+
+static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen)
+{
+	AstExpressionCall *call = mem_alloc(sizeof(*call));
+	call->e = e;
+	call->lparen = lparen;
+	call->rparen = rparen;
+	return call;
 }
 
 static AstExpressionCast *astExpression_initCast (AstExpression *e, Token operator, DataType *to)

@@ -30,6 +30,7 @@ static void visitStatementWhileC (AstStatementWhileC *node);
 static void visitExpression (AstExpression *node);
 static void visitExpressionAssign (AstExpressionAssign *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
+static void visitExpressionCall (AstExpressionCall *node);
 static void visitExpressionCast (AstExpressionCast *node);
 static void visitExpressionBoolean (AstExpressionBoolean *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
@@ -117,9 +118,17 @@ static void visitRoot (AstRoot *node)
 {
 	analyzer.currentScope = node->scope = scope_init();
 	node->scope->parent = analyzer.previousScope;
-	analyzer.previousScope = node->scope;
-	visitDeclaration(node->declaration);
-	analyzer.currentScope = node->scope;
+	bool canContinue = analyzer.canContinue;
+	bool canBreak = analyzer.canBreak;
+	DataType *caseExpressionType = analyzer.caseExpressionType;
+	for (AstDeclaration *decl = node->declarations; decl != NULL; decl = decl->next) {
+		analyzer.previousScope = node->scope;
+		visitDeclaration(decl);
+		analyzer.currentScope = node->scope;
+		analyzer.canContinue = canContinue;
+		analyzer.canBreak = canBreak;
+		analyzer.caseExpressionType = caseExpressionType;
+	}
 	if (node->scope->parent != NULL) {
 		node->scope->parent->physicalSize += node->scope->physicalSize;
 	}
@@ -363,6 +372,10 @@ static void visitExpression (AstExpression *node)
 			visitExpressionBoolean(node->as.boolean);
 			node->dataType = dataType_initBoolean();
 			break;
+		case AstExpression_Call:
+			visitExpressionCall(node->as.call);
+			node->dataType = node->as.call->e->dataType->as.function->returnType;
+			break;
 		case AstExpression_Cast:
 			visitExpressionCast(node->as.cast);
 			node->dataType = node->as.cast->to;
@@ -483,6 +496,15 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 
 static void visitExpressionBoolean (AstExpressionBoolean *node)
 { }
+
+static void visitExpressionCall (AstExpressionCall *node)
+{
+	visitExpression(node->e);
+	if (!dataType_isFunction(node->e->dataType)) {
+		error(node->lparen, "cannot call non-function");
+		exit(1);
+	}
+}
 
 static void visitExpressionCast (AstExpressionCast *node)
 {
