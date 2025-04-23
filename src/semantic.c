@@ -304,11 +304,11 @@ static void visitStatementReturnE (AstStatementReturnE *node)
 	if (node->expression != NULL) {
 		visitExpression(node->expression);
 		node->expression->modifiable = false;
-	}
-	if (!dataType_equal(node->expression->dataType, analyzer.functionReturnType)) {
-		if (!coerce(node->expression, analyzer.functionReturnType)) {
-			analyzer.hadError = true;
-			error(node->keyword, "type of expression in return does not match function return type");
+		if (!dataType_equal(node->expression->dataType, analyzer.functionReturnType)) {
+			if (!coerce(node->expression, analyzer.functionReturnType)) {
+				analyzer.hadError = true;
+				error(node->keyword, "type of expression in return does not match function return type");
+			}
 		}
 	}
 }
