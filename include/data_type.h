@@ -5,6 +5,12 @@
 
 #include "token.h"
 
+typedef enum {
+	M_Immutable,
+	M_Mutable,
+	M_Flex,
+} Mutability;
+
 typedef struct DataType DataType;
 
 typedef struct {
@@ -73,7 +79,7 @@ struct DataType {
 		DataTypeU64 *u64;
 		DataTypeU8 *u8;
 	} as;
-	bool mutable;
+	Mutability mutability;
 };
 
 DataType *dataType_initBoolean (void);
@@ -110,5 +116,6 @@ bool dataType_castable (DataType *from, DataType *to);
 bool dataType_equal (DataType *a, DataType *b);
 size_t dataType_getSize (DataType *type);
 DataType *dataType_larger (DataType *a, DataType *b);
+bool dataType_mutable (DataType *t);
 
 #endif

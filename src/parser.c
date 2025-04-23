@@ -496,55 +496,55 @@ static AstExpression *getExpressionPrimary (void)
 
 static DataType *getType (void)
 {
-	bool mutable = match(TT_Mut);
+	Mutability mutability = match(TT_Mut) ? M_Mutable : M_Immutable;
 	if (match(TT_U16)) {
 		DataType *type = dataType_initU16();
-		type->mutable = mutable;
+		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_U32)) {
 		DataType *type = dataType_initU32();
-		type->mutable = mutable;
+		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_U64)) {
 		DataType *type = dataType_initU64();
-		type->mutable = mutable;
+		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_U8)) {
 		DataType *type = dataType_initU8();
-		type->mutable = mutable;
+		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_I16)) {
 		DataType *type = dataType_initI16();
-		type->mutable = mutable;
+		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_I32)) {
 		DataType *type = dataType_initI32();
-		type->mutable = mutable;
+		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_I64)) {
 		DataType *type = dataType_initI64();
-		type->mutable = mutable;
+		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_I8)) {
 		DataType *type = dataType_initI8();
-		type->mutable = mutable;
+		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_Bool)) {
 		DataType *type = dataType_initBoolean();
-		type->mutable = mutable;
+		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_Star)) {
 		DataType *type = dataType_initPointer(getType());
-		type->mutable = mutable;
+		type->mutability = mutability;
 		return type;
 	}
 	error(parser.tokens[parser.current], "expected type");

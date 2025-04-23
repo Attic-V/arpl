@@ -293,10 +293,10 @@ static void visitStatementInit (AstStatementInit *node)
 
 	visitStatement(statementVar);
 	Symbol *symbol = scope_get(analyzer.currentScope, node->identifier);
-	bool mutability = symbol->type->mutable;
-	symbol->type->mutable = true;
+	Mutability mutability = symbol->type->mutability;
+	symbol->type->mutability = M_Mutable;
 	visitExpression(expressionAssign);
-	symbol->type->mutable = mutability;
+	symbol->type->mutability = mutability;
 }
 
 static void visitStatementReturnE (AstStatementReturnE *node)
@@ -447,8 +447,7 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 {
 	visitExpression(node->a);
 	visitExpression(node->b);
-	node->b->dataType->mutable = node->a->dataType->mutable;
-	if (!node->a->dataType->mutable) {
+	if (!dataType_mutable(node->a->dataType)) {
 		analyzer.hadError = true;
 		error(node->operator, "left operand is immutable");
 	} else if (!dataType_equal(node->a->dataType, node->b->dataType)) {
@@ -540,7 +539,7 @@ static void visitExpressionPostfix (AstExpressionPostfix *node)
 				error(node->e->as.var->identifier, "expression must be modifiable");
 				analyzer.hadError = true;
 			}
-			if (!node->e->dataType->mutable) {
+			if (!dataType_mutable(node->e->dataType)) {
 				analyzer.hadError = true;
 				error(node->operator, "operand is immutable");
 			}
@@ -573,7 +572,7 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 				error(node->e->as.var->identifier, "expression must be modifiable");
 				analyzer.hadError = true;
 			}
-			if (!node->e->dataType->mutable) {
+			if (!dataType_mutable(node->e->dataType)) {
 				analyzer.hadError = true;
 				error(node->operator, "operand is immutable");
 			}
