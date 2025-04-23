@@ -17,7 +17,7 @@ static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
 static AstStatementForI *astStatement_initForI (AstStatement *init, AstExpression *condition, AstExpression *update, AstStatement *body, Token keyword);
 static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword);
 static AstStatementInit *astStatement_initInit (Token identifier, DataType *type, AstExpression *expression, Token operator);
-static AstStatementReturnE *astStatement_initReturnE (AstExpression *expression);
+static AstStatementReturnE *astStatement_initReturnE (Token keyword, AstExpression *expression);
 static AstStatementSwitchC *astStatement_initSwitchC (AstExpression *e, AstStatement *body);
 static AstStatementVar *astStatement_initVar (Token identifier, DataType *type);
 static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a, Token keyword);
@@ -142,10 +142,10 @@ AstStatement *ast_initStatementInit (Token identifier, DataType *type, AstExpres
 	return statement;
 }
 
-AstStatement *ast_initStatementReturnE (AstExpression *expression)
+AstStatement *ast_initStatementReturnE (Token keyword, AstExpression *expression)
 {
 	AstStatement *statement = ast_initStatement(AstStatement_ReturnE);
-	statement->as.returnE = astStatement_initReturnE(expression);
+	statement->as.returnE = astStatement_initReturnE(keyword, expression);
 	return statement;
 }
 
@@ -328,9 +328,10 @@ static AstStatementInit *astStatement_initInit (Token identifier, DataType *type
 	return init;
 }
 
-static AstStatementReturnE *astStatement_initReturnE (AstExpression *expression)
+static AstStatementReturnE *astStatement_initReturnE (Token keyword, AstExpression *expression)
 {
 	AstStatementReturnE *returnE = mem_alloc(sizeof(*returnE));
+	returnE->keyword = keyword;
 	returnE->expression = expression;
 	return returnE;
 }

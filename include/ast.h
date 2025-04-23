@@ -148,6 +148,7 @@ typedef struct {
 } AstStatementInit;
 
 typedef struct {
+	Token keyword;
 	AstExpression *expression;
 } AstStatementReturnE;
 
@@ -249,7 +250,7 @@ AstStatement *ast_initStatementExpr (AstExpression *expression);
 AstStatement *ast_initStatementForI (AstStatement *init, AstExpression* condition, AstExpression *update, AstStatement *body, Token keyword);
 AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyord);
 AstStatement *ast_initStatementInit (Token identifier, DataType *type, AstExpression *expression, Token operator);
-AstStatement *ast_initStatementReturnE (AstExpression *expression);
+AstStatement *ast_initStatementReturnE (Token keyword, AstExpression *expression);
 AstStatement *ast_initStatementSwitchC (AstExpression *e, AstStatement *body);
 AstStatement *ast_initStatementVar (Token identifier, DataType *type);
 AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement* a, Token keyword);

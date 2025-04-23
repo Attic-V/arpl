@@ -232,13 +232,13 @@ static AstStatement *getStatementIfE (void)
 
 static AstStatement *getStatementReturnE (void)
 {
-	consume(TT_Return, "expected 'return'");
+	Token keyword = consume(TT_Return, "expected 'return'");
 	AstExpression *expression = NULL;
 	if (!check(TT_Semicolon)) {
 		expression = getExpression();
 	}
 	consume(TT_Semicolon, "expected ';'");
-	return ast_initStatementReturnE(expression);
+	return ast_initStatementReturnE(keyword, expression);
 }
 
 static AstStatement *getStatementSwitchC (void)

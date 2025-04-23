@@ -41,7 +41,7 @@ static void visitExpressionVar (AstExpressionVar *node);
 
 static bool canCoerce (DataType *from, DataType *to);
 static Token getCoercionToken (void);
-static bool coerce (AstExpression* e, AstExpression *target);
+static bool coerce (AstExpression* e, DataType *target);
 
 static bool coercionMatrix[DataTypeType_Count][DataTypeType_Count] = {
 	[DataType_U8][DataType_U16] = 1,
@@ -89,6 +89,7 @@ typedef struct {
 	bool canContinue;
 	bool canBreak;
 	DataType *caseExpressionType;
+	DataType *functionReturnType;
 } Analyzer;
 
 static Analyzer analyzer;
@@ -161,6 +162,7 @@ static void visitDeclarationFunction (AstDeclarationFunction *node)
 	} else {
 		error(node->identifier, "identifier already exists in scope");
 	}
+	analyzer.functionReturnType = node->dataType->as.function->returnType;
 	visitStatement(node->body);
 }
 
@@ -303,6 +305,12 @@ static void visitStatementReturnE (AstStatementReturnE *node)
 		visitExpression(node->expression);
 		node->expression->modifiable = false;
 	}
+	if (!dataType_equal(node->expression->dataType, analyzer.functionReturnType)) {
+		if (!coerce(node->expression, analyzer.functionReturnType)) {
+			analyzer.hadError = true;
+			error(node->keyword, "type of expression in return does not match function return type");
+		}
+	}
 }
 
 static void visitStatementSwitchC (AstStatementSwitchC *node)
@@ -444,7 +452,7 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 		analyzer.hadError = true;
 		error(node->operator, "left operand is immutable");
 	} else if (!dataType_equal(node->a->dataType, node->b->dataType)) {
-		if (!coerce(node->b, node->a)) {
+		if (!coerce(node->b, node->a->dataType)) {
 			analyzer.hadError = true;
 			error(node->operator, "operands must have the same type");
 		}
@@ -486,7 +494,7 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 		default:
 	}
 	if (!dataType_equal(node->a->dataType, node->b->dataType)) {
-		if (!coerce(node->a, node->b) && !coerce(node->b, node->a)) {
+		if (!coerce(node->a, node->b->dataType) && !coerce(node->b, node->a->dataType)) {
 			error(node->operator, "operands must have the same type");
 		}
 	}
@@ -598,7 +606,7 @@ static void visitExpressionTernary (AstExpressionTernary *node)
 		error(node->operator, "condition must be a boolean");
 	}
 	if (!dataType_equal(a->dataType, b->dataType)) {
-		if (!coerce(node->a, node->b) && !coerce(node->b, node->a)) {
+		if (!coerce(node->a, node->b->dataType) && !coerce(node->b, node->a->dataType)) {
 			error(node->operator, "operands must have the same type");
 		}
 	}
@@ -625,13 +633,13 @@ static Token getCoercionToken (void)
 	};
 }
 
-static bool coerce (AstExpression *e, AstExpression *target)
+static bool coerce (AstExpression *e, DataType *target)
 {
-	if (!canCoerce(e->dataType, target->dataType)) return false;
-	if (!dataType_castable(e->dataType, target->dataType)) {
+	if (!canCoerce(e->dataType, target)) return false;
+	if (!dataType_castable(e->dataType, target)) {
 		fprintf(stderr, "deverr: attempted to use an invalid cast during coercion");
 		analyzer.hadError = true;
 	}
-	e = ast_initExpressionCast(e, getCoercionToken(), target->dataType);
+	e = ast_initExpressionCast(e, getCoercionToken(), target);
 	return true;
 }
