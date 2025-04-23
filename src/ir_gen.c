@@ -53,7 +53,6 @@ static void addInstruction (Ir *instruction);
 typedef struct {
 	Ir *current;
 	int label;
-	size_t reservedBytes;
 	size_t tableSegment;
 	Scope *scope;
 	int continueLabel;
@@ -67,17 +66,11 @@ Ir *gen_ir (Ast *ast)
 {
 	gen.current = NULL;
 	gen.label = 0;
-	gen.reservedBytes = 0;
 
 	visitAst(ast);
 
 	Ir *ir;
 	for (ir = gen.current; ir != NULL && ir->previous != NULL; ir = ir->previous);
-
-	Ir *reserve = ir_initReserve(gen.reservedBytes);
-	dll_insert(reserve, ir);
-	ir = reserve;
-
 	return ir;
 }
 
@@ -88,8 +81,6 @@ static void visitAst (Ast *ast)
 
 static void visitRoot (AstRoot *root)
 {
-	gen.reservedBytes = root->scope->physicalSize;
-
 	pushLabels
 	gen.scope = root->scope;
 	for (AstDeclaration *decl = root->declarations; decl != NULL; decl = decl->next) {
@@ -109,6 +100,7 @@ static void visitDeclaration (AstDeclaration *declaration)
 static void visitDeclarationFunction (AstDeclarationFunction *declaration)
 {
 	addInstruction(ir_initFunctionStart(declaration->identifier));
+	addInstruction(ir_initReserve(declaration->body->as.block->scope->physicalSize));
 	visitStatement(declaration->body);
 	addInstruction(ir_initFunctionEnd());
 }
