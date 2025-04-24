@@ -396,13 +396,13 @@ static void visitExpression (AstExpression *node)
 			node->dataType = dataType_smallestInt(value);
 			break;
 		case AstExpression_Postfix:
+			visitExpressionPostfix(node->as.postfix);
 			switch (node->as.postfix->operator.type) {
 				case TT_Plus_Plus:
 					node->dataType = node->as.postfix->e->dataType;
 					break;
 				default:
 			}
-			visitExpressionPostfix(node->as.postfix);
 			break;
 		case AstExpression_Prefix:
 			visitExpressionPrefix(node->as.prefix);
