@@ -38,12 +38,12 @@ Use `->` to perform type casting. For example: `n -> i32` is an expression that 
 ```arpl
 fn add (a i32, b i32) i32
 {
-	return a + b;
+    return a + b;
 }
 
 fn main () i32
 {
-	return add(2, 3);
+    return add(2, 3);
 }
 ```
 
@@ -51,8 +51,8 @@ fn main () i32
 ```arpl
 fn f () i8
 {
-	var a mut i32 = 7;
-	a = 6;
-	var b mut i8 = a;
+    var a mut i32 = 7;
+    a = 6;
+    var b mut i8 = a;
 }
 ```
