@@ -46,13 +46,3 @@ fn main () i32
     return add(2, 3);
 }
 ```
-
-### type casting
-```arpl
-fn f () i8
-{
-    var a mut i32 = 7;
-    a = 6;
-    var b mut i8 = a;
-}
-```
