@@ -92,6 +92,7 @@ typedef struct {
 	DataType *functionReturnType;
 	bool enteringFunctionBody;
 	AstParameter *functionParameters;
+	bool inInitStatement;
 } Analyzer;
 
 static Analyzer analyzer;
@@ -105,6 +106,7 @@ void analyze (Ast *ast)
 	analyzer.canBreak = false;
 	analyzer.enteringFunctionBody = false;
 	analyzer.functionParameters = NULL;
+	analyzer.inInitStatement = false;
 
 	visitAst(ast);
 
@@ -300,6 +302,7 @@ static void visitStatementIfE (AstStatementIfE *node)
 
 static void visitStatementInit (AstStatementInit *node)
 {
+	analyzer.inInitStatement = true;
 	AstStatement *statementVar = ast_initStatementVar(node->identifier, node->type);
 	AstExpression *expressionVar = ast_initExpressionVar(node->identifier);
 	AstExpression *expressionAssign = ast_initExpressionAssign(expressionVar, node->expression, node->operator);
@@ -310,6 +313,7 @@ static void visitStatementInit (AstStatementInit *node)
 	symbol->type->mutability = M_Mutable;
 	visitExpression(expressionAssign);
 	symbol->type->mutability = mutability;
+	analyzer.inInitStatement = false;
 }
 
 static void visitStatementReturnE (AstStatementReturnE *node)
@@ -465,8 +469,11 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 		error(node->operator, "left operand is immutable");
 	} else if (!dataType_equal(node->a->dataType, node->b->dataType)) {
 		if (!coerce(node->b, node->a->dataType)) {
-			analyzer.hadError = true;
-			error(node->operator, "operands must have the same type");
+			if (analyzer.inInitStatement && node->a->dataType->mutability != node->b->dataType->mutability) {
+			} else {
+				analyzer.hadError = true;
+				error(node->operator, "operands must have the same type");
+			}
 		}
 	}
 	if (!node->a->modifiable) {
