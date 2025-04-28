@@ -58,8 +58,6 @@ typedef struct {
 	int continueLabel;
 	int breakLabel;
 	int nextCaseBodyLabel;
-	bool enteringFunctionBody;
-	AstParameter *fnParams;
 } IrGenerator;
 
 static IrGenerator gen;
@@ -68,7 +66,6 @@ Ir *gen_ir (Ast *ast)
 {
 	gen.current = NULL;
 	gen.label = 0;
-	gen.enteringFunctionBody = false;
 
 	visitAst(ast);
 
@@ -103,9 +100,15 @@ static void visitDeclaration (AstDeclaration *declaration)
 static void visitDeclarationFunction (AstDeclarationFunction *declaration)
 {
 	addInstruction(ir_initFunctionStart(declaration->identifier));
-	addInstruction(ir_initReserve(declaration->body->as.block->scope->physicalSize));
-	gen.enteringFunctionBody = true;
-	gen.fnParams = declaration->parameters;
+	addInstruction(ir_initReserve(declaration->scope->physicalSize));
+	gen.scope = declaration->scope;
+	int idx = 0;
+	for (AstParameter *p = declaration->parameters; p != NULL; p = p->next, idx++) {
+		Symbol *s = scope_get(gen.scope, p->identifier);
+		size_t size = dataType_getSize(s->type);
+		addInstruction(ir_initParameter(idx, s->physicalIndex + size, size));
+		gen.scope = declaration->scope;
+	}
 	visitStatement(declaration->body);
 	addInstruction(ir_initFunctionEnd());
 }
@@ -133,17 +136,6 @@ static void visitStatementBlock (AstStatementBlock *statement)
 {
 	pushLabels
 	gen.scope = statement->scope;
-
-	if (gen.enteringFunctionBody) {
-		gen.enteringFunctionBody = false;
-		int idx = 0;
-		for (AstParameter *p = gen.fnParams; p != NULL; p = p->next, idx++) {
-			Symbol *s = scope_get(gen.scope, p->identifier);
-			size_t size = dataType_getSize(s->type);
-			addInstruction(ir_initParameter(idx, s->physicalIndex + size, size));
-		}
-	}
-
 	for (AstStatement *stmt = statement->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
 		gen.scope = statement->scope;

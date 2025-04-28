@@ -231,6 +231,7 @@ typedef struct {
 	AstStatement *body;
 	DataType *dataType;
 	AstParameter *parameters;
+	Scope *scope;
 } AstDeclarationFunction;
 
 typedef enum {

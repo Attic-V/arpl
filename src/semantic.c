@@ -90,8 +90,6 @@ typedef struct {
 	bool canBreak;
 	DataType *caseExpressionType;
 	DataType *functionReturnType;
-	bool enteringFunctionBody;
-	AstParameter *functionParameters;
 	bool inInitStatement;
 } Analyzer;
 
@@ -104,8 +102,6 @@ void analyze (Ast *ast)
 	analyzer.hadError = false;
 	analyzer.canContinue = false;
 	analyzer.canBreak = false;
-	analyzer.enteringFunctionBody = false;
-	analyzer.functionParameters = NULL;
 	analyzer.inInitStatement = false;
 
 	visitAst(ast);
@@ -169,9 +165,18 @@ static void visitDeclarationFunction (AstDeclarationFunction *node)
 		error(node->identifier, "identifier already exists in scope");
 	}
 	analyzer.functionReturnType = node->dataType->as.function->returnType;
-	analyzer.enteringFunctionBody = true;
-	analyzer.functionParameters = node->parameters;
+	analyzer.currentScope = node->scope = scope_init();
+	node->scope->parent = analyzer.previousScope;
+	for (AstParameter *parameter = node->parameters; parameter != NULL; parameter = parameter->next) {
+		analyzer.previousScope = node->scope;
+		AstStatement *paraminit = ast_initStatementVar(parameter->identifier, parameter->type);
+		visitStatement(paraminit);
+		analyzer.currentScope = node->scope;
+	}
 	visitStatement(node->body);
+	if (node->scope->parent != NULL) {
+		node->scope->parent->physicalSize += node->scope->physicalSize;
+	}
 }
 
 static void visitStatement (AstStatement *node)
@@ -200,13 +205,6 @@ static void visitStatementBlock (AstStatementBlock *node)
 	bool canContinue = analyzer.canContinue;
 	bool canBreak = analyzer.canBreak;
 	DataType *caseExpressionType = analyzer.caseExpressionType;
-	if (analyzer.enteringFunctionBody) {
-		analyzer.enteringFunctionBody = false;
-		for (AstParameter *parameter = analyzer.functionParameters; parameter != NULL; parameter = parameter->next) {
-			AstStatement *paraminit = ast_initStatementVar(parameter->identifier, parameter->type);
-			visitStatement(paraminit);
-		}
-	}
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
 		analyzer.previousScope = node->scope;
 		visitStatement(stmt);
