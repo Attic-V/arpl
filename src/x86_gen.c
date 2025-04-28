@@ -36,13 +36,16 @@ static void transformNeg (Ir *ir);
 static void transformNot (Ir *ir);
 static void transformNotEqu (Ir *ir);
 static void transformOr (Ir *ir);
+static void transformParameter (Ir *ir);
 static void transformPop (Ir *ir);
 static void transformPush (Ir *ir);
 static void transformRef (Ir *ir);
 static void transformReserve (Ir *ir);
+static void transformRestore (Ir *ir);
 static void transformRet (Ir *ir);
 static void transformSar (Ir *ir);
 static void transformShl (Ir *ir);
+static void transformStore (Ir *ir);
 static void transformSub (Ir *ir);
 static void transformVal (Ir *ir);
 static void transformXor (Ir *ir);
@@ -313,13 +316,16 @@ static void transform (Ir *r)
 		transformer(Not),
 		transformer(NotEqu),
 		transformer(Or),
+		transformer(Parameter),
 		transformer(Pop),
 		transformer(Push),
 		transformer(Ref),
 		transformer(Reserve),
+		transformer(Restore),
 		transformer(Ret),
 		transformer(Sar),
 		transformer(Shl),
+		transformer(Store),
 		transformer(Sub),
 		transformer(Val),
 		transformer(Xor),
@@ -556,6 +562,14 @@ static void transformOr (Ir *ir)
 	push(r8);
 }
 
+static void transformParameter (Ir *ir)
+{
+	IrParameter *instruction = ir->as.parameter;
+	(void)instruction;
+	emit("\tmov     %s, %s [rbp + %d]", reg[r8][instruction->size], quantity[instruction->size], instruction->pIdx * 8 + 16);
+	emit("\tmov     %s [rbp - %d], %s", quantity[instruction->size], instruction->vIdx, reg[r8][instruction->size]);
+}
+
 static void transformPop (Ir *ir)
 {
 	IrPop *instruction = ir->as.pop;
@@ -583,6 +597,13 @@ static void transformReserve (Ir *ir)
 	IrReserve *instruction = ir->as.reserve;
 	(void)instruction;
 	emit("\tsub     rsp, %d", instruction->bytes);
+}
+
+static void transformRestore (Ir *ir)
+{
+	IrRestore *instruction = ir->as.restore;
+	(void)instruction;
+	push(rax);
 }
 
 static void transformRet (Ir *ir)
@@ -613,6 +634,13 @@ static void transformShl (Ir *ir)
 	pop(r8);
 	emit("\tshl     %s, cl", reg[r8][instruction->size]);
 	push(r8);
+}
+
+static void transformStore (Ir *ir)
+{
+	IrStore *instruction = ir->as.store;
+	(void)instruction;
+	pop(rax);
 }
 
 static void transformSub (Ir *ir)

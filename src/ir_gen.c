@@ -58,6 +58,8 @@ typedef struct {
 	int continueLabel;
 	int breakLabel;
 	int nextCaseBodyLabel;
+	bool enteringFunctionBody;
+	AstParameter *fnParams;
 } IrGenerator;
 
 static IrGenerator gen;
@@ -66,6 +68,7 @@ Ir *gen_ir (Ast *ast)
 {
 	gen.current = NULL;
 	gen.label = 0;
+	gen.enteringFunctionBody = false;
 
 	visitAst(ast);
 
@@ -101,6 +104,8 @@ static void visitDeclarationFunction (AstDeclarationFunction *declaration)
 {
 	addInstruction(ir_initFunctionStart(declaration->identifier));
 	addInstruction(ir_initReserve(declaration->body->as.block->scope->physicalSize));
+	gen.enteringFunctionBody = true;
+	gen.fnParams = declaration->parameters;
 	visitStatement(declaration->body);
 	addInstruction(ir_initFunctionEnd());
 }
@@ -128,6 +133,17 @@ static void visitStatementBlock (AstStatementBlock *statement)
 {
 	pushLabels
 	gen.scope = statement->scope;
+
+	if (gen.enteringFunctionBody) {
+		gen.enteringFunctionBody = false;
+		int idx = 0;
+		for (AstParameter *p = gen.fnParams; p != NULL; p = p->next, idx++) {
+			Symbol *s = scope_get(gen.scope, p->identifier);
+			size_t size = dataType_getSize(s->type);
+			addInstruction(ir_initParameter(idx, s->physicalIndex + size, size));
+		}
+	}
+
 	for (AstStatement *stmt = statement->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
 		gen.scope = statement->scope;
@@ -363,8 +379,22 @@ static void visitExpressionBoolean (AstExpression *expression)
 static void visitExpressionCall (AstExpression *expression)
 {
 	AstExpressionCall *e = expression->as.call;
+
+	int nargs = 0;
+	AstArgument *a = e->arguments;
+	for (; a != NULL && a->next != NULL; a = a->next) {}
+	for (; a != NULL; a = a->previous, nargs++) {
+		visitExpression(a->expression);
+	}
+
 	visitExpression(e->e);
 	addInstruction(ir_initCall());
+
+	addInstruction(ir_initStore());
+	for (int i = 0; i < nargs; i++) {
+		addInstruction(ir_initPop());
+	}
+	addInstruction(ir_initRestore());
 }
 
 static void visitExpressionCast (AstExpression *expression)

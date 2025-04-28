@@ -46,6 +46,7 @@ Token *scan (char *source)
 			case '!':	addToken(match('=') ? TT_Bang_Equal : TT_Bang); continue;
 			case '^': addToken(TT_Caret); continue;
 			case ':': addToken(TT_Colon); continue;
+			case ',': addToken(TT_Comma); continue;
 			case '=': addToken(match('=') ? TT_Equal_Equal : TT_Equal); continue;
 			case '>':
 				if (check('>')) {

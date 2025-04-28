@@ -46,6 +46,9 @@ static AstExpression *getExpressionUnaryPostfix (void);
 static AstExpression *getExpressionUnaryPrefix (void);
 static AstExpression *getExpressionXor (void);
 
+static AstArgument *getArgument (void);
+static AstParameter *getParameter (void);
+
 static DataType *getType (void);
 
 static bool check (TokenType type);
@@ -96,8 +99,19 @@ static AstDeclaration *getDeclarationFunction (void)
 {
 	Token keyword = consume(TT_Fn, "expected 'fn'");
 	Token identifier = consume(TT_Identifier, "expected identifier");
+	consume(TT_LParen, "expected '('");
+	AstParameter *parameters = NULL;
+	if (!check(TT_RParen)) {
+		do {
+			AstParameter *parameter = getParameter();
+			dll_insert(parameters, parameter);
+			parameters = parameter;
+		} while (match(TT_Comma));
+	}
+	for (; parameters != NULL && parameters->previous != NULL; parameters = parameters->previous);
+	consume(TT_RParen, "expected ')'");
 	DataType *returnType = getType();
-	return ast_initDeclarationFunction(keyword, identifier, getStatementBlock(), returnType);
+	return ast_initDeclarationFunction(keyword, identifier, getStatementBlock(), returnType, parameters);
 }
 
 static AstStatement *getStatement (void)
@@ -466,8 +480,17 @@ static AstExpression *getExpressionCall (void)
 	AstExpression *e = getExpressionPrimary();
 	if (match(TT_LParen)) {
 		Token lparen = parser.tokens[parser.current - 1];
-		Token rparen = consume(TT_RParen, "expected '0'");
-		return ast_initExpressionCall(e, lparen, rparen);
+		AstArgument *arguments = NULL;
+		if (!check(TT_RParen)) {
+			do {
+				AstArgument *argument = getArgument();
+				dll_insert(arguments, argument);
+				arguments = argument;
+			} while (match(TT_Comma));
+		}
+		for (; arguments != NULL && arguments->previous != NULL; arguments = arguments->previous);
+		Token rparen = consume(TT_RParen, "expected ')'");
+		return ast_initExpressionCall(e, lparen, rparen, arguments);
 	}
 	return e;
 }
@@ -492,6 +515,18 @@ static AstExpression *getExpressionPrimary (void)
 	}
 	error(token, "expected expression");
 	exit(1);
+}
+
+static AstArgument *getArgument (void)
+{
+	return ast_initArgument(getExpression());
+}
+
+static AstParameter *getParameter (void)
+{
+	Token identifier = consume(TT_Identifier, "expected identifier");
+	DataType *type = getType();
+	return ast_initParameter(identifier, type);
 }
 
 static DataType *getType (void)

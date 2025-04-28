@@ -90,6 +90,8 @@ typedef struct {
 	bool canBreak;
 	DataType *caseExpressionType;
 	DataType *functionReturnType;
+	bool enteringFunctionBody;
+	AstParameter *functionParameters;
 } Analyzer;
 
 static Analyzer analyzer;
@@ -98,10 +100,11 @@ void analyze (Ast *ast)
 {
 	analyzer.previousScope = NULL;
 	analyzer.currentScope = NULL;
-	analyzer.currentPhysicalIndex = 0;
 	analyzer.hadError = false;
 	analyzer.canContinue = false;
 	analyzer.canBreak = false;
+	analyzer.enteringFunctionBody = false;
+	analyzer.functionParameters = NULL;
 
 	visitAst(ast);
 
@@ -155,6 +158,7 @@ static void visitDeclaration (AstDeclaration *node)
 
 static void visitDeclarationFunction (AstDeclarationFunction *node)
 {
+	analyzer.currentPhysicalIndex = 0;
 	Symbol *symbol = symbol_init(node->identifier, node->dataType);
 	if (scope_add(analyzer.currentScope, symbol)) {
 		symbol->physicalIndex = analyzer.currentPhysicalIndex;
@@ -163,6 +167,8 @@ static void visitDeclarationFunction (AstDeclarationFunction *node)
 		error(node->identifier, "identifier already exists in scope");
 	}
 	analyzer.functionReturnType = node->dataType->as.function->returnType;
+	analyzer.enteringFunctionBody = true;
+	analyzer.functionParameters = node->parameters;
 	visitStatement(node->body);
 }
 
@@ -192,6 +198,13 @@ static void visitStatementBlock (AstStatementBlock *node)
 	bool canContinue = analyzer.canContinue;
 	bool canBreak = analyzer.canBreak;
 	DataType *caseExpressionType = analyzer.caseExpressionType;
+	if (analyzer.enteringFunctionBody) {
+		analyzer.enteringFunctionBody = false;
+		for (AstParameter *parameter = analyzer.functionParameters; parameter != NULL; parameter = parameter->next) {
+			AstStatement *paraminit = ast_initStatementVar(parameter->identifier, parameter->type);
+			visitStatement(paraminit);
+		}
+	}
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
 		analyzer.previousScope = node->scope;
 		visitStatement(stmt);
@@ -433,7 +446,7 @@ static void visitExpression (AstExpression *node)
 			Symbol *symbol = telescope_get(analyzer.currentScope, node->as.var->identifier);
 			if (symbol == NULL) {
 				error(node->as.var->identifier, "undeclared identifier");
-				analyzer.hadError = true;
+				exit(1);
 				break;
 			}
 			node->dataType = symbol->type;
@@ -510,6 +523,27 @@ static void visitExpressionCall (AstExpressionCall *node)
 	if (!dataType_isFunction(node->e->dataType)) {
 		error(node->lparen, "cannot call non-function");
 		exit(1);
+	}
+	if (node->e->type != AstExpression_Var) {
+		error(node->lparen, "cannot perform call here");
+		analyzer.hadError = true;
+		return;
+	}
+	Symbol *fn = telescope_get(analyzer.currentScope, node->e->as.var->identifier);
+	DataType *parameter = fn->type->as.function->parameters;
+	AstArgument *argument = node->arguments;
+	for (; argument != NULL && parameter != NULL; argument = argument->next, parameter = parameter->next) {
+		visitExpression(argument->expression);
+		if (!dataType_equal(argument->expression->dataType, parameter)) {
+			if (!coerce(argument->expression, parameter)) {
+				error(node->lparen, "call does not match function signature");
+				analyzer.hadError = true;
+			}
+		}
+	}
+	if (argument != NULL || parameter != NULL) {
+		error(node->lparen, "call does not match function signature");
+		analyzer.hadError = true;
 	}
 }
 

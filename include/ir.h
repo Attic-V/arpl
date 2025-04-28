@@ -101,6 +101,12 @@ typedef struct {
 } IrOr;
 
 typedef struct {
+	size_t pIdx;
+	size_t vIdx;
+	size_t size;
+} IrParameter;
+
+typedef struct {
 } IrPop;
 
 typedef struct {
@@ -116,6 +122,9 @@ typedef struct {
 } IrReserve;
 
 typedef struct {
+} IrRestore;
+
+typedef struct {
 } IrRet;
 
 typedef struct {
@@ -125,6 +134,9 @@ typedef struct {
 typedef struct {
 	size_t size;
 } IrShl;
+
+typedef struct {
+} IrStore;
 
 typedef struct {
 	size_t size;
@@ -164,13 +176,16 @@ typedef enum {
 	Ir_Not,
 	Ir_NotEqu,
 	Ir_Or,
+	Ir_Parameter,
 	Ir_Pop,
 	Ir_Push,
 	Ir_Ref,
 	Ir_Reserve,
+	Ir_Restore,
 	Ir_Ret,
 	Ir_Sar,
 	Ir_Shl,
+	Ir_Store,
 	Ir_Sub,
 	Ir_Val,
 	Ir_Xor,
@@ -205,13 +220,16 @@ struct Ir {
 		IrNot *not;
 		IrNotEqu *notEqu;
 		IrOr *or;
+		IrParameter *parameter;
 		IrPop *pop;
 		IrPush *push;
 		IrRef *ref;
 		IrReserve *reserve;
+		IrRestore *restore;
 		IrRet *ret;
 		IrSar *sar;
 		IrShl *shl;
+		IrStore *store;
 		IrSub *sub;
 		IrVal *val;
 		IrXor *xor;
@@ -244,13 +262,16 @@ Ir *ir_initNeg (size_t size);
 Ir *ir_initNot (size_t size);
 Ir *ir_initNotEqu (size_t size);
 Ir *ir_initOr (size_t size);
+Ir *ir_initParameter (size_t pIdx, size_t vIdx, size_t size);
 Ir *ir_initPop (void);
 Ir *ir_initPush (int32_t value);
 Ir *ir_initRef (size_t idx);
 Ir *ir_initReserve (size_t bytes);
+Ir *ir_initRestore (void);
 Ir *ir_initRet (void);
 Ir *ir_initSar (size_t size);
 Ir *ir_initShl (size_t size);
+Ir *ir_initStore (void);
 Ir *ir_initSub (size_t size);
 Ir *ir_initVal (size_t idx, size_t size);
 Ir *ir_initXor (size_t size);

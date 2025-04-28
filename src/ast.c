@@ -6,7 +6,7 @@ static AstDeclaration *ast_initDeclaration (AstDeclarationType type);
 static AstStatement *ast_initStatement (AstStatementType type);
 static AstExpression *ast_initExpression (AstExpressionType type);
 
-static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType);
+static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType, AstParameter *parameters);
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementBreakL *astStatement_initBreakL (Token keyword);
@@ -24,7 +24,7 @@ static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, As
 
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
-static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen);
+static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen, AstArgument *arguments);
 static AstExpressionCast *astExpression_initCast (AstExpression *e, Token operator, DataType *to);
 static AstExpressionBoolean *astExpression_initBoolean (bool value);
 static AstExpressionNumber *astExpression_initNumber (Token value);
@@ -72,10 +72,10 @@ AstExpression *ast_initExpression (AstExpressionType type)
 	return e;
 }
 
-AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType)
+AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType, AstParameter *parameters)
 {
 	AstDeclaration *declaration = ast_initDeclaration(AstDeclaration_Function);
-	declaration->as.function = astDeclaration_initFunction(keyword, identifier, body, returnType);
+	declaration->as.function = astDeclaration_initFunction(keyword, identifier, body, returnType, parameters);
 	return declaration;
 }
 
@@ -192,10 +192,10 @@ AstExpression *ast_initExpressionBoolean (bool value)
 	return expression;
 }
 
-AstExpression *ast_initExpressionCall (AstExpression *e, Token lparen, Token rparen)
+AstExpression *ast_initExpressionCall (AstExpression *e, Token lparen, Token rparen, AstArgument *arguments)
 {
 	AstExpression *expression = ast_initExpression(AstExpression_Call);
-	expression->as.call = astExpression_initCall(e, lparen, rparen);
+	expression->as.call = astExpression_initCall(e, lparen, rparen, arguments);
 	return expression;
 }
 
@@ -241,13 +241,37 @@ AstExpression *ast_initExpressionVar (Token identifier)
 	return expression;
 }
 
-static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType)
+AstArgument *ast_initArgument (AstExpression *expression)
+{
+	AstArgument *argument = mem_alloc(sizeof(*argument));
+	argument->expression = expression;
+	dll_init(argument);
+	return argument;
+}
+
+AstParameter *ast_initParameter (Token identifier, DataType *type)
+{
+	AstParameter *parameter = mem_alloc(sizeof(*parameter));
+	parameter->identifier = identifier;
+	parameter->type = type;
+	dll_init(parameter);
+	return parameter;
+}
+
+static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType, AstParameter *parameters)
 {
 	AstDeclarationFunction *function = mem_alloc(sizeof(*function));
 	function->keyword = keyword;
 	function->identifier = identifier;
 	function->body = body;
-	function->dataType = dataType_initFunction(returnType);
+	DataType *params = NULL;
+	for (AstParameter *parameter = parameters; parameter != NULL; parameter = parameter->next) {
+		dll_insert(params, parameter->type);
+		params = parameter->type;
+	}
+	for (; params != NULL && params->previous != NULL; params = params->previous);
+	function->dataType = dataType_initFunction(returnType, params);
+	function->parameters = parameters;
 	return function;
 }
 
@@ -386,12 +410,13 @@ static AstExpressionBoolean *astExpression_initBoolean (bool value)
 	return boolean;
 }
 
-static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen)
+static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen, AstArgument *arguments)
 {
 	AstExpressionCall *call = mem_alloc(sizeof(*call));
 	call->e = e;
 	call->lparen = lparen;
 	call->rparen = rparen;
+	call->arguments = arguments;
 	return call;
 }
 

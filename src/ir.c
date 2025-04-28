@@ -28,13 +28,16 @@ static IrNeg *irNeg_init (size_t size);
 static IrNot *irNot_init (size_t size);
 static IrNotEqu *irNotEqu_init (size_t size);
 static IrOr *irOr_init (size_t size);
+static IrParameter *irParameter_init (size_t pIdx, size_t vIdx, size_t size);
 static IrPop *irPop_init (void);
 static IrPush *irPush_init (int32_t value);
 static IrRef *irRef_init (size_t idx);
 static IrReserve *irReserve_init (size_t bytes);
+static IrRestore *irRestore_init (void);
 static IrRet *irRet_init (void);
 static IrSar *irSar_init (size_t size);
 static IrShl *irShl_init (size_t size);
+static IrStore *irStore_init (void);
 static IrSub *irSub_init (size_t size);
 static IrVal *irVal_init (size_t idx, size_t size);
 static IrXor *irXor_init (size_t size);
@@ -215,6 +218,13 @@ Ir *ir_initOr (size_t size)
 	return ir;
 }
 
+Ir *ir_initParameter (size_t pIdx, size_t vIdx, size_t size)
+{
+	Ir *ir = ir_init(Ir_Parameter);
+	ir->as.parameter = irParameter_init(pIdx, vIdx, size);
+	return ir;
+}
+
 Ir *ir_initPop (void)
 {
 	Ir *ir = ir_init(Ir_Pop);
@@ -243,6 +253,13 @@ Ir *ir_initReserve (size_t bytes)
 	return ir;
 }
 
+Ir *ir_initRestore (void)
+{
+	Ir *ir = ir_init(Ir_Restore);
+	ir->as.restore = irRestore_init();
+	return ir;
+}
+
 Ir *ir_initRet (void)
 {
 	Ir *ir = ir_init(Ir_Ret);
@@ -261,6 +278,13 @@ Ir *ir_initShl (size_t size)
 {
 	Ir *ir = ir_init(Ir_Shl);
 	ir->as.shl = irShl_init(size);
+	return ir;
+}
+
+Ir *ir_initStore (void)
+{
+	Ir *ir = ir_init(Ir_Store);
+	ir->as.store = irStore_init();
 	return ir;
 }
 
@@ -451,6 +475,15 @@ static IrOr *irOr_init (size_t size)
 	return or;
 }
 
+static IrParameter *irParameter_init (size_t pIdx, size_t vIdx, size_t size)
+{
+	IrParameter *parameter = mem_alloc(sizeof(*parameter));
+	parameter->pIdx = pIdx;
+	parameter->vIdx = vIdx;
+	parameter->size = size;
+	return parameter;
+}
+
 static IrPop *irPop_init (void)
 {
 	IrPop *pop = mem_alloc(sizeof(*pop));
@@ -478,6 +511,12 @@ static IrReserve *irReserve_init (size_t bytes)
 	return reserve;
 }
 
+static IrRestore *irRestore_init (void)
+{
+	IrRestore *restore = mem_alloc(sizeof(*restore));
+	return restore;
+}
+
 static IrRet *irRet_init (void)
 {
 	IrRet *ret = mem_alloc(sizeof(*ret));
@@ -496,6 +535,12 @@ static IrShl *irShl_init (size_t size)
 	IrShl *shl = mem_alloc(sizeof(*shl));
 	shl->size = size;
 	return shl;
+}
+
+static IrStore *irStore_init (void)
+{
+	IrStore *store = mem_alloc(sizeof(*store));
+	return store;
 }
 
 static IrSub *irSub_init (size_t size)

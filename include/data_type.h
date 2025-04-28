@@ -18,6 +18,7 @@ typedef struct {
 
 typedef struct {
 	DataType *returnType;
+	DataType *parameters;
 } DataTypeFunction;
 
 typedef struct {
@@ -80,10 +81,12 @@ struct DataType {
 		DataTypeU8 *u8;
 	} as;
 	Mutability mutability;
+	DataType *next;
+	DataType *previous;
 };
 
 DataType *dataType_initBoolean (void);
-DataType *dataType_initFunction (DataType *returnType);
+DataType *dataType_initFunction (DataType *returnType, DataType *parameters);
 DataType *dataType_initI16 (void);
 DataType *dataType_initI32 (void);
 DataType *dataType_initI64 (void);

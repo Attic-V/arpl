@@ -1,12 +1,13 @@
 #include "data.h"
 #include "data_type.h"
+#include "linked_list.h"
 #include "memory.h"
 #include "x86_gen.h"
 
 static DataType *dataType_init (DataTypeType type);
 
 static DataTypeBoolean *dataTypeBoolean_init (void);
-static DataTypeFunction *dataTypeFunction_init (DataType *returnType);
+static DataTypeFunction *dataTypeFunction_init (DataType *returnType, DataType *parameters);
 static DataTypeI16 *dataTypeI16_init (void);
 static DataTypeI32 *dataTypeI32_init (void);
 static DataTypeI64 *dataTypeI64_init (void);
@@ -22,6 +23,7 @@ static DataType *dataType_init (DataTypeType type)
 	DataType *t = mem_alloc(sizeof(*t));
 	t->type = type;
 	t->mutability = M_Flex;
+	dll_init(t);
 	return t;
 }
 
@@ -38,17 +40,18 @@ static DataTypeBoolean *dataTypeBoolean_init (void)
 	return t;
 }
 
-DataType *dataType_initFunction (DataType *returnType)
+DataType *dataType_initFunction (DataType *returnType, DataType *parameters)
 {
 	DataType *t = dataType_init(DataType_Function);
-	t->as.function = dataTypeFunction_init(returnType);
+	t->as.function = dataTypeFunction_init(returnType, parameters);
 	return t;
 }
 
-static DataTypeFunction *dataTypeFunction_init (DataType *returnType)
+static DataTypeFunction *dataTypeFunction_init (DataType *returnType, DataType *parameters)
 {
 	DataTypeFunction *t = mem_alloc(sizeof(*t));
 	t->returnType = returnType;
+	t->parameters = parameters;
 	return t;
 }
 
@@ -284,7 +287,7 @@ size_t dataType_getSize (DataType *t)
 		case DataType_U8: return BYTE;
 		default:
 	}
-	return -1;
+	return 0;
 }
 
 DataType *dataType_smallestInt (size_t value)

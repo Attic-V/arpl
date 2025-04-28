@@ -13,6 +13,7 @@ typedef enum {
 	TT_Caret,
 	TT_Case,
 	TT_Colon,
+	TT_Comma,
 	TT_Continue,
 	TT_Default,
 	TT_Do,

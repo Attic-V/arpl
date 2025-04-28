@@ -26,10 +26,19 @@ typedef struct {
 	bool value;
 } AstExpressionBoolean;
 
+typedef struct AstArgument AstArgument;
+
+struct AstArgument {
+	AstExpression *expression;
+	AstArgument *next;
+	AstArgument *previous;
+};
+
 typedef struct {
 	AstExpression *e;
 	Token lparen;
 	Token rparen;
+	AstArgument *arguments;
 } AstExpressionCall;
 
 typedef struct {
@@ -207,11 +216,21 @@ struct AstStatement {
 
 typedef struct AstDeclaration AstDeclaration;
 
+typedef struct AstParameter AstParameter;
+
+struct AstParameter {
+	Token identifier;
+	DataType *type;
+	AstParameter *next;
+	AstParameter *previous;
+};
+
 typedef struct {
 	Token keyword;
 	Token identifier;
 	AstStatement *body;
 	DataType *dataType;
+	AstParameter *parameters;
 } AstDeclarationFunction;
 
 typedef enum {
@@ -239,7 +258,7 @@ typedef struct {
 Ast *ast_init (AstRoot *root);
 AstRoot *ast_initRoot (AstDeclaration *declarations);
 
-AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType);
+AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType, AstParameter *parameters);
 
 AstStatement *ast_initStatementBlock (AstStatement *children);
 AstStatement *ast_initStatementBreakL (Token keyword);
@@ -258,12 +277,15 @@ AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement* a
 AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBoolean (bool value);
-AstExpression *ast_initExpressionCall (AstExpression *e, Token lparen, Token rparen);
+AstExpression *ast_initExpressionCall (AstExpression *e, Token lparen, Token rparen, AstArgument *arguments);
 AstExpression *ast_initExpressionCast (AstExpression *e, Token operator, DataType *to);
 AstExpression *ast_initExpressionNumber (Token value);
 AstExpression *ast_initExpressionPostfix (Token operator, AstExpression *e);
 AstExpression *ast_initExpressionPrefix (Token operator, AstExpression *e);
 AstExpression *ast_initExpressionTernary (AstExpression *condition, AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionVar (Token identifier);
+
+AstArgument *ast_initArgument (AstExpression *expression);
+AstParameter *ast_initParameter (Token identifier, DataType *type);
 
 #endif
