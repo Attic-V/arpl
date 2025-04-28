@@ -55,6 +55,9 @@ static bool check (TokenType type);
 static bool match (TokenType type);
 static Token consume (TokenType type, char *format, ...);
 
+#define expect(ttype, str) \
+	consume(TT_##ttype, "expected "#str)
+
 typedef struct {
 	Token *tokens;
 	int current;
@@ -97,9 +100,9 @@ static AstDeclaration *getDeclaration (void)
 
 static AstDeclaration *getDeclarationFunction (void)
 {
-	Token keyword = consume(TT_Fn, "expected 'fn'");
-	Token identifier = consume(TT_Identifier, "expected identifier");
-	consume(TT_LParen, "expected '('");
+	Token keyword = expect(Fn, 'fn');
+	Token identifier = expect(Identifier, identifier);
+	expect(LParen, '(');
 	AstParameter *parameters = NULL;
 	if (!check(TT_RParen)) {
 		do {
@@ -109,7 +112,7 @@ static AstDeclaration *getDeclarationFunction (void)
 		} while (match(TT_Comma));
 	}
 	for (; parameters != NULL && parameters->previous != NULL; parameters = parameters->previous);
-	consume(TT_RParen, "expected ')'");
+	expect(RParen, ')');
 	DataType *returnType = getType();
 	return ast_initDeclarationFunction(keyword, identifier, getStatementBlock(), returnType, parameters);
 }
@@ -134,22 +137,22 @@ static AstStatement *getStatement (void)
 
 static AstStatement *getStatementBlock (void)
 {
-	consume(TT_LBrace, "expected '{'");
+	expect(LBrace, '{');
 	AstStatement *statements = NULL;
 	while (!check(TT_RBrace)) {
 		AstStatement *statement = getStatement();
 		dll_insert(statements, statement);
 		statements = statement;
 	}
-	consume(TT_RBrace, "expected '}'");
+	expect(RBrace, '}');
 	for (; statements != NULL && statements->previous != NULL; statements = statements->previous);
 	return ast_initStatementBlock(statements);
 }
 
 static AstStatement *getStatementBreakL (void)
 {
-	Token keyword = consume(TT_Break, "expected 'break'");
-	consume(TT_Semicolon, "expected ';'");
+	Token keyword = expect(Break, 'break');
+	expect(Semicolon, ';');
 	return ast_initStatementBreakL(keyword);
 }
 
@@ -158,12 +161,12 @@ static AstStatement *getStatementCaseL (void)
 	Token keyword;
 	AstExpression *expression = NULL;
 	if (check(TT_Case)) {
-		keyword = consume(TT_Case, "expected 'case'");
+		keyword = expect(Case, 'case');
 		expression = getExpression();
 	} else {
-		keyword = consume(TT_Default, "expected 'default'");
+		keyword = expect(Default, 'default');
 	}
-	consume(TT_Colon, "expected ':'");
+	expect(Colon, ':');
 	AstStatement *statements = NULL;
 	while (!(check(TT_Case) || check(TT_Default) || check(TT_RBrace))) {
 		AstStatement *statement = getStatement();
@@ -176,34 +179,34 @@ static AstStatement *getStatementCaseL (void)
 
 static AstStatement *getStatementContinueL (void)
 {
-	Token keyword = consume(TT_Continue, "expected 'continue'");
-	consume(TT_Semicolon, "expected ';'");
+	Token keyword = expect(Continue, 'continue');
+	expect(Semicolon, ';');
 	return ast_initStatementContinueL(keyword);
 }
 
 static AstStatement *getStatementDoWhile (void)
 {
-	consume(TT_Do, "expected 'do'");
+	expect(Do, 'do');
 	AstStatement *statement = getStatement();
-	Token keyword = consume(TT_While, "expected 'while'");
-	consume(TT_LParen, "expected '('");
+	Token keyword = expect(While, 'while');
+	expect(LParen, '(');
 	AstExpression *condition = getExpression();
-	consume(TT_RParen, "expected ')'");
-	consume(TT_Semicolon, "expected ';'");
+	expect(RParen, ')');
+	expect(Semicolon, ';');
 	return ast_initStatementDoWhile(statement, condition, keyword);
 }
 
 static AstStatement *getStatementExpr (void)
 {
 	AstStatement *statement = ast_initStatementExpr(getExpression());
-	consume(TT_Semicolon, "expected ';'");
+	expect(Semicolon, ';');
 	return statement;
 }
 
 static AstStatement *getStatementForI (void)
 {
-	Token keyword = consume(TT_For, "expected 'for'");
-	consume(TT_LParen, "expected '('");
+	Token keyword = expect(For, 'for');
+	expect(LParen, '(');
 	AstStatement *init = NULL;
 	if (check(TT_Semicolon)) {
 		parser.current++;
@@ -214,12 +217,12 @@ static AstStatement *getStatementForI (void)
 	if (!check(TT_Semicolon)) {
 		condition = getExpression();
 	}
-	consume(TT_Semicolon, "expected ';'");
+	expect(Semicolon, ';');
 	AstExpression *update = NULL;
 	if (!check(TT_RParen)) {
 		update = getExpression();
 	}
-	consume(TT_RParen, "expected ')'");
+	expect(RParen, ')');
 	AstStatement *body = NULL;
 	if (check(TT_Semicolon)) {
 		parser.current++;
@@ -231,10 +234,10 @@ static AstStatement *getStatementForI (void)
 
 static AstStatement *getStatementIfE (void)
 {
-	Token keyword = consume(TT_If, "expected 'if'");
-	consume(TT_LParen, "expected '('");
+	Token keyword = expect(If, 'if');
+	expect(LParen, '(');
 	AstExpression *condition = getExpression();
-	consume(TT_RParen, "expected ')'");
+	expect(RParen, ')');
 	AstStatement *a = getStatement();
 	AstStatement *b = NULL;
 	if (check(TT_Else)) {
@@ -246,22 +249,22 @@ static AstStatement *getStatementIfE (void)
 
 static AstStatement *getStatementReturnE (void)
 {
-	Token keyword = consume(TT_Return, "expected 'return'");
+	Token keyword = expect(Return, 'return');
 	AstExpression *expression = NULL;
 	if (!check(TT_Semicolon)) {
 		expression = getExpression();
 	}
-	consume(TT_Semicolon, "expected ';'");
+	expect(Semicolon, ';');
 	return ast_initStatementReturnE(keyword, expression);
 }
 
 static AstStatement *getStatementSwitchC (void)
 {
-	consume(TT_Switch, "expected 'switch'");
-	consume(TT_LParen, "expected '('");
+	expect(Switch, 'switch');
+	expect(LParen, '(');
 	AstExpression *expression = getExpression();
-	consume(TT_RParen, "expected ')'");
-	consume(TT_LBrace, "expected '{'");
+	expect(RParen, ')');
+	expect(LBrace, '{');
 	AstStatement *statements = NULL;
 	while (!check(TT_RBrace)) {
 		AstStatement *statement = getStatementCaseL();
@@ -269,33 +272,33 @@ static AstStatement *getStatementSwitchC (void)
 		statements = statement;
 	}
 	for (; statements != NULL && statements->previous != NULL; statements = statements->previous);
-	consume(TT_RBrace, "expected '}'");
+	expect(RBrace, '}');
 	AstStatement *body = ast_initStatementBlock(statements);
 	return ast_initStatementSwitchC(expression, body);
 }
 
 static AstStatement *getStatementVar (void)
 {
-	consume(TT_Var, "expected 'var'");
-	Token identifier = consume(TT_Identifier, "expected identifier");
+	expect(Var, 'var');
+	Token identifier = expect(Identifier, identifier);
 	DataType *type = getType();
 	if (check(TT_Equal)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *expression = getExpression();
-		consume(TT_Semicolon, "expected ';'");
+		expect(Semicolon, ';');
 		return ast_initStatementInit(identifier, type, expression, operator);
 	} else {
-		consume(TT_Semicolon, "expected ';'");
+		expect(Semicolon, ';');
 		return ast_initStatementVar(identifier, type);
 	}
 }
 
 static AstStatement *getStatementWhileC (void)
 {
-	Token keyword = consume(TT_While, "expected 'while'");
-	consume(TT_LParen, "expected '('");
+	Token keyword = expect(While, 'while');
+	expect(LParen, '(');
 	AstExpression *condition = getExpression();
-	consume(TT_RParen, "expected ')'");
+	expect(RParen, ')');
 	AstStatement *statement = NULL;
 	if (check(TT_Semicolon)) {
 		parser.current++;
@@ -327,7 +330,7 @@ static AstExpression *getExpressionTernary (void)
 	if (check(TT_Question)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *a = getExpressionCast();
-		consume(TT_Colon, "expected ':'");
+		expect(Colon, ':');
 		AstExpression *b = getExpressionTernary();
 		expression = ast_initExpressionTernary(expression, a, b, operator);
 	}
@@ -489,7 +492,7 @@ static AstExpression *getExpressionCall (void)
 			} while (match(TT_Comma));
 		}
 		for (; arguments != NULL && arguments->previous != NULL; arguments = arguments->previous);
-		Token rparen = consume(TT_RParen, "expected ')'");
+		Token rparen = expect(RParen, ')');
 		return ast_initExpressionCall(e, lparen, rparen, arguments);
 	}
 	return e;
@@ -503,7 +506,7 @@ static AstExpression *getExpressionPrimary (void)
 			return ast_initExpressionNumber(token);
 		case TT_LParen:
 			AstExpression *expression = getExpression();
-			consume(TT_RParen, "expected ')'");
+			expect(RParen, ')');
 			return expression;
 		case TT_True:
 			return ast_initExpressionBoolean(true);
@@ -524,7 +527,7 @@ static AstArgument *getArgument (void)
 
 static AstParameter *getParameter (void)
 {
-	Token identifier = consume(TT_Identifier, "expected identifier");
+	Token identifier = expect(Identifier, identifier);
 	DataType *type = getType();
 	return ast_initParameter(identifier, type);
 }
