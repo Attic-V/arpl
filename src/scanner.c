@@ -29,7 +29,7 @@ Token *scan (char *source)
 	scanner.line = 1;
 
 	for (;;) {
-		if (*scanner.current == '\0') break;
+		if (check('\0')) break;
 
 		scanner.start = scanner.current;
 
