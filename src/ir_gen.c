@@ -374,7 +374,7 @@ static void visitExpressionCall (AstExpression *expression)
 
 	int nargs = 0;
 	AstArgument *a = e->arguments;
-	for (; a != NULL && a->next != NULL; a = a->next) {}
+	dll_wind(a);
 	for (; a != NULL; a = a->previous, nargs++) {
 		visitExpression(a->expression);
 	}

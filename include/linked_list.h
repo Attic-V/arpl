@@ -23,6 +23,9 @@
 		prev = node; \
 	} while (0)
 
+#define dll_wind(node) \
+	for (; node != NULL && node->next != NULL; node = node->next);
+
 #define dll_rewind(node) \
 	for (; node != NULL && node->previous != NULL; node = node->previous)
 
