@@ -17,7 +17,7 @@
 		} \
 	} while (0)
 
-#define dll_push(prev, node) \
+#define dll_shove(prev, node) \
 	do { \
 		dll_insert(prev, node); \
 		prev = node; \

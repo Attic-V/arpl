@@ -73,7 +73,7 @@ static void *arena_allocateRaw (Arena *arena, size_t size)
 {
 	if (size > region_getFree(arena->region)) {
 		Region *region = region_init(arena->regionsize);
-		dll_push(arena->region, region);
+		dll_shove(arena->region, region);
 	}
 	void *ptr = region_allocateRaw(arena->region, size);
 	return ptr;
