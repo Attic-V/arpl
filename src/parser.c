@@ -81,8 +81,7 @@ static AstRoot *getRoot (void)
 	AstDeclaration *declarations = NULL;
 	while (!check(TT_EOF)) {
 		AstDeclaration *declaration = getDeclaration();
-		dll_insert(declarations, declaration);
-		declarations = declaration;
+		dll_push(declarations, declaration);
 	}
 	dll_rewind(declarations);
 	return ast_initRoot(declarations);
@@ -107,8 +106,7 @@ static AstDeclaration *getDeclarationFunction (void)
 	if (!check(TT_RParen)) {
 		do {
 			AstParameter *parameter = getParameter();
-			dll_insert(parameters, parameter);
-			parameters = parameter;
+			dll_push(parameters, parameter);
 		} while (match(TT_Comma));
 	}
 	dll_rewind(parameters);
@@ -141,8 +139,7 @@ static AstStatement *getStatementBlock (void)
 	AstStatement *statements = NULL;
 	while (!check(TT_RBrace)) {
 		AstStatement *statement = getStatement();
-		dll_insert(statements, statement);
-		statements = statement;
+		dll_push(statements, statement);
 	}
 	expect(RBrace, '}');
 	dll_rewind(statements);
@@ -170,8 +167,7 @@ static AstStatement *getStatementCaseL (void)
 	AstStatement *statements = NULL;
 	while (!(check(TT_Case) || check(TT_Default) || check(TT_RBrace))) {
 		AstStatement *statement = getStatement();
-		dll_insert(statements, statement);
-		statements = statement;
+		dll_push(statements, statement);
 	}
 	dll_rewind(statements);
 	return ast_initStatementCaseL(expression, statements, keyword);
@@ -268,8 +264,7 @@ static AstStatement *getStatementSwitchC (void)
 	AstStatement *statements = NULL;
 	while (!check(TT_RBrace)) {
 		AstStatement *statement = getStatementCaseL();
-		dll_insert(statements, statement);
-		statements = statement;
+		dll_push(statements, statement);
 	}
 	dll_rewind(statements);
 	expect(RBrace, '}');
@@ -487,8 +482,7 @@ static AstExpression *getExpressionCall (void)
 		if (!check(TT_RParen)) {
 			do {
 				AstArgument *argument = getArgument();
-				dll_insert(arguments, argument);
-				arguments = argument;
+				dll_push(arguments, argument);
 			} while (match(TT_Comma));
 		}
 		dll_rewind(arguments);

@@ -490,6 +490,5 @@ static void visitExpressionVar (AstExpression *expression)
 
 static void addInstruction (Ir *instruction)
 {
-	dll_insert(gen.current, instruction);
-	gen.current = instruction;
+	dll_push(gen.current, instruction);
 }

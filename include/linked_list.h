@@ -17,6 +17,12 @@
 		} \
 	} while (0)
 
+#define dll_push(prev, node) \
+	do { \
+		dll_insert(prev, node); \
+		prev = node; \
+	} while (0)
+
 #define dll_rewind(node) \
 	for (; node != NULL && node->previous != NULL; node = node->previous)
 

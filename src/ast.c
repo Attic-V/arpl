@@ -266,8 +266,7 @@ static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token
 	function->body = body;
 	DataType *params = NULL;
 	for (AstParameter *parameter = parameters; parameter != NULL; parameter = parameter->next) {
-		dll_insert(params, parameter->type);
-		params = parameter->type;
+		dll_push(params, parameter->type);
 	}
 	for (; params != NULL && params->previous != NULL; params = params->previous);
 	function->dataType = dataType_initFunction(returnType, params);
