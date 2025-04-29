@@ -5,7 +5,7 @@
 
 #include "token.h"
 
-void error (Token location, char *format, ...);
-void verror (Token location, char *format, va_list args);
+void err (Token location, char *format, ...);
+void verr (Token location, char *format, va_list args);
 
 #endif

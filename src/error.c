@@ -1,16 +1,18 @@
+#include <stdarg.h>
 #include <stdio.h>
 
 #include "error.h"
+#include "token.h"
 
-void error (Token location, char *format, ...)
+void err (Token location, char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
-	verror(location, format, args);
+	verr(location, format, args);
 	va_end(args);
 }
 
-void verror (Token location, char *format, va_list args)
+void verr (Token location, char *format, va_list args)
 {
 	if (location.type != TT_EOF) {
 		fprintf(stderr, "%d: ", location.line);

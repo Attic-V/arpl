@@ -94,7 +94,7 @@ static AstDeclaration *getDeclaration (void)
 		case TT_Fn: return getDeclarationFunction();
 		default:
 	}
-	error(parser.tokens[parser.current], "expected start of declaration");
+	err(parser.tokens[parser.current], "expected start of declaration");
 	exit(1);
 }
 
@@ -516,7 +516,7 @@ static AstExpression *getExpressionPrimary (void)
 			return ast_initExpressionVar(token);
 		default:
 	}
-	error(token, "expected expression");
+	err(token, "expected expression");
 	exit(1);
 }
 
@@ -585,7 +585,7 @@ static DataType *getType (void)
 		type->mutability = mutability;
 		return type;
 	}
-	error(parser.tokens[parser.current], "expected type");
+	err(parser.tokens[parser.current], "expected type");
 	exit(1);
 }
 
@@ -609,7 +609,7 @@ static Token consume (TokenType type, char *format, ...)
 	if (token.type != type) {
 		va_list args;
 		va_start(args, format);
-		verror(token, format, args);
+		verr(token, format, args);
 		va_end(args);
 		exit(1);
 	}

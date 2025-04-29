@@ -141,7 +141,7 @@ static void visitRoot (AstRoot *node)
 		.line = 0,
 	})) {
 		analyzer.hadError = true;
-		error((Token){
+		err((Token){
 			.type = TT_EOF,
 		}, "missing main");
 	}
@@ -162,7 +162,7 @@ static void visitDeclarationFunction (AstDeclarationFunction *node)
 		symbol->physicalIndex = analyzer.currentPhysicalIndex;
 		analyzer.currentPhysicalIndex += dataType_getSize(symbol->type);
 	} else {
-		error(node->identifier, "identifier already exists in scope");
+		err(node->identifier, "identifier already exists in scope");
 	}
 	analyzer.functionReturnType = node->dataType->as.function->returnType;
 	analyzer.currentScope = node->scope = scope_init();
@@ -222,7 +222,7 @@ static void visitStatementBreakL (AstStatementBreakL *node)
 {
 	if (!analyzer.canBreak) {
 		analyzer.hadError = true;
-		error(node->keyword, "cannot be used here");
+		err(node->keyword, "cannot be used here");
 	}
 }
 
@@ -231,7 +231,7 @@ static void visitStatementCaseL (AstStatementCaseL *node)
 	if (node->e != NULL) {
 		visitExpression(node->e);
 		if (!dataType_equal(node->e->dataType, analyzer.caseExpressionType)) {
-			error(node->keyword, "case expression type must match type of expression in switch");
+			err(node->keyword, "case expression type must match type of expression in switch");
 		}
 		node->e->modifiable = false;
 	}
@@ -244,7 +244,7 @@ static void visitStatementContinueL (AstStatementContinueL *node)
 {
 	if (!analyzer.canContinue) {
 		analyzer.hadError = true;
-		error(node->keyword, "cannot be used here");
+		err(node->keyword, "cannot be used here");
 	}
 }
 
@@ -255,7 +255,7 @@ static void visitStatementDoWhile (AstStatementDoWhile *node)
 	visitStatement(node->a);
 	visitExpression(node->condition);
 	if (!dataType_isBoolean(node->condition->dataType)) {
-		error(node->keyword, "condition must be a boolean");
+		err(node->keyword, "condition must be a boolean");
 	}
 }
 
@@ -275,7 +275,7 @@ static void visitStatementForI (AstStatementForI *node)
 	if (node->condition != NULL) {
 		visitExpression(node->condition);
 		if (!dataType_isBoolean(node->condition->dataType)) {
-			error(node->keyword, "condition must be a boolean");
+			err(node->keyword, "condition must be a boolean");
 		}
 	}
 	if (node->update != NULL) {
@@ -290,7 +290,7 @@ static void visitStatementIfE (AstStatementIfE *node)
 {
 	visitExpression(node->condition);
 	if (!dataType_isBoolean(node->condition->dataType)) {
-		error(node->keyword, "condition must be a boolean");
+		err(node->keyword, "condition must be a boolean");
 	}
 	visitStatement(node->a);
 	if (node->b != NULL) {
@@ -322,7 +322,7 @@ static void visitStatementReturnE (AstStatementReturnE *node)
 		if (!dataType_equal(node->expression->dataType, analyzer.functionReturnType)) {
 			if (!coerce(node->expression, analyzer.functionReturnType)) {
 				analyzer.hadError = true;
-				error(node->keyword, "type of expression in return does not match function return type");
+				err(node->keyword, "type of expression in return does not match function return type");
 			}
 		}
 	}
@@ -344,7 +344,7 @@ static void visitStatementVar (AstStatementVar *node)
 		symbol->physicalIndex = analyzer.currentPhysicalIndex;
 		analyzer.currentPhysicalIndex += dataType_getSize(symbol->type);
 	} else {
-		error(node->identifier, "variable has already been declared in scope");
+		err(node->identifier, "variable has already been declared in scope");
 	}
 }
 
@@ -354,7 +354,7 @@ static void visitStatementWhileC (AstStatementWhileC *node)
 	analyzer.canBreak = true;
 	visitExpression(node->condition);
 	if (!dataType_isBoolean(node->condition->dataType)) {
-		error(node->keyword, "condition must be a boolean");
+		err(node->keyword, "condition must be a boolean");
 	}
 	if (node->a != NULL) {
 		visitStatement(node->a);
@@ -447,7 +447,7 @@ static void visitExpression (AstExpression *node)
 		case AstExpression_Var:
 			Symbol *symbol = telescope_get(analyzer.currentScope, node->as.var->identifier);
 			if (symbol == NULL) {
-				error(node->as.var->identifier, "undeclared identifier");
+				err(node->as.var->identifier, "undeclared identifier");
 				exit(1);
 				break;
 			}
@@ -464,18 +464,18 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 	visitExpression(node->b);
 	if (!dataType_mutable(node->a->dataType)) {
 		analyzer.hadError = true;
-		error(node->operator, "left operand is immutable");
+		err(node->operator, "left operand is immutable");
 	} else if (!dataType_equal(node->a->dataType, node->b->dataType)) {
 		if (!coerce(node->b, node->a->dataType)) {
 			if (analyzer.inInitStatement && node->a->dataType->mutability != node->b->dataType->mutability) {
 			} else {
 				analyzer.hadError = true;
-				error(node->operator, "operands must have the same type");
+				err(node->operator, "operands must have the same type");
 			}
 		}
 	}
 	if (!node->a->modifiable) {
-		error(node->operator, "assignee must be modifiable");
+		err(node->operator, "assignee must be modifiable");
 		analyzer.hadError = true;
 	}
 	node->b->modifiable = false;
@@ -496,13 +496,13 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 		case TT_Minus:
 		case TT_Star:
 			if (!dataType_isInt(node->a->dataType) || !dataType_isInt(node->b->dataType)) {
-				error(node->operator, "operands must be numbers");
+				err(node->operator, "operands must be numbers");
 			}
 			break;
 		case TT_And_And:
 		case TT_Pipe_Pipe:
 			if (!dataType_isBoolean(node->a->dataType) || !dataType_isBoolean(node->b->dataType)) {
-				error(node->operator, "operands must be booleans");
+				err(node->operator, "operands must be booleans");
 			}
 			break;
 		case TT_Bang_Equal:
@@ -512,7 +512,7 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 	}
 	if (!dataType_equal(node->a->dataType, node->b->dataType)) {
 		if (!coerce(node->a, node->b->dataType) && !coerce(node->b, node->a->dataType)) {
-			error(node->operator, "operands must have the same type");
+			err(node->operator, "operands must have the same type");
 		}
 	}
 	node->a->modifiable = false;
@@ -526,11 +526,11 @@ static void visitExpressionCall (AstExpressionCall *node)
 {
 	visitExpression(node->e);
 	if (!dataType_isFunction(node->e->dataType)) {
-		error(node->lparen, "cannot call non-function");
+		err(node->lparen, "cannot call non-function");
 		exit(1);
 	}
 	if (node->e->type != AstExpression_Var) {
-		error(node->lparen, "cannot perform call here");
+		err(node->lparen, "cannot perform call here");
 		analyzer.hadError = true;
 		return;
 	}
@@ -541,13 +541,13 @@ static void visitExpressionCall (AstExpressionCall *node)
 		visitExpression(argument->expression);
 		if (!dataType_equal(argument->expression->dataType, parameter)) {
 			if (!coerce(argument->expression, parameter)) {
-				error(node->lparen, "call does not match function signature");
+				err(node->lparen, "call does not match function signature");
 				analyzer.hadError = true;
 			}
 		}
 	}
 	if (argument != NULL || parameter != NULL) {
-		error(node->lparen, "call does not match function signature");
+		err(node->lparen, "call does not match function signature");
 		analyzer.hadError = true;
 	}
 }
@@ -557,7 +557,7 @@ static void visitExpressionCast (AstExpressionCast *node)
 	visitExpression(node->e);
 	if (!dataType_castable(node->e->dataType, node->to)) {
 		analyzer.hadError = true;
-		error(node->operator, "invalid cast");
+		err(node->operator, "invalid cast");
 	}
 	node->e->modifiable = false;
 }
@@ -572,15 +572,15 @@ static void visitExpressionPostfix (AstExpressionPostfix *node)
 		case TT_Minus_Minus:
 		case TT_Plus_Plus:
 			if (!dataType_isInt(node->e->dataType)) {
-				error(node->operator, "operand must be a number");
+				err(node->operator, "operand must be a number");
 			}
 			if (!node->e->modifiable) {
-				error(node->e->as.var->identifier, "expression must be modifiable");
+				err(node->e->as.var->identifier, "expression must be modifiable");
 				analyzer.hadError = true;
 			}
 			if (!dataType_mutable(node->e->dataType)) {
 				analyzer.hadError = true;
-				error(node->operator, "operand is immutable");
+				err(node->operator, "operand is immutable");
 			}
 			break;
 		default:
@@ -593,38 +593,38 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 	switch (node->operator.type) {
 		case TT_Bang:
 			if (!dataType_isBoolean(node->e->dataType)) {
-				error(node->operator, "operand must be a boolean");
+				err(node->operator, "operand must be a boolean");
 			}
 			break;
 		case TT_Minus:
 		case TT_Tilde:
 			if (!dataType_isInt(node->e->dataType)) {
-				error(node->operator, "operand must be a number");
+				err(node->operator, "operand must be a number");
 			}
 			break;
 		case TT_Minus_Minus:
 		case TT_Plus_Plus:
 			if (!dataType_isInt(node->e->dataType)) {
-				error(node->operator, "operand must be a number");
+				err(node->operator, "operand must be a number");
 			}
 			if (!node->e->modifiable) {
-				error(node->e->as.var->identifier, "expression must be modifiable");
+				err(node->e->as.var->identifier, "expression must be modifiable");
 				analyzer.hadError = true;
 			}
 			if (!dataType_mutable(node->e->dataType)) {
 				analyzer.hadError = true;
-				error(node->operator, "operand is immutable");
+				err(node->operator, "operand is immutable");
 			}
 			break;
 		case TT_And:
 			if (!node->e->modifiable) {
 				analyzer.hadError = true;
-				error(node->operator, "operand must be modifiable");
+				err(node->operator, "operand must be modifiable");
 			}
 			break;
 		case TT_Star:
 			if (!dataType_isPointer(node->e->dataType)) {
-				error(node->operator, "operand must be a pointer");
+				err(node->operator, "operand must be a pointer");
 				exit(1);
 			}
 			break;
@@ -641,11 +641,11 @@ static void visitExpressionTernary (AstExpressionTernary *node)
 	visitExpression(a);
 	visitExpression(b);
 	if (!dataType_isBoolean(c->dataType)) {
-		error(node->operator, "condition must be a boolean");
+		err(node->operator, "condition must be a boolean");
 	}
 	if (!dataType_equal(a->dataType, b->dataType)) {
 		if (!coerce(node->a, node->b->dataType) && !coerce(node->b, node->a->dataType)) {
-			error(node->operator, "operands must have the same type");
+			err(node->operator, "operands must have the same type");
 		}
 	}
 	c->modifiable = false;
