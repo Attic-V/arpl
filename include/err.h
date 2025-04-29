@@ -1,5 +1,5 @@
-#ifndef error_h
-#define error_h
+#ifndef err_h
+#define err_h
 
 #include <stdarg.h>
 

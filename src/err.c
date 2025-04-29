@@ -1,7 +1,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include "error.h"
+#include "err.h"
 #include "token.h"
 
 void err (Token location, char *format, ...)

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "error.h"
+#include "err.h"
 #include "linked_list.h"
 #include "memory.h"
 #include "semantic.h"
