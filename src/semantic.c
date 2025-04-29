@@ -101,6 +101,25 @@ typedef struct {
 
 static Analyzer analyzer;
 
+typedef struct {
+	bool canContinue;
+	bool canBreak;
+} FlowmodifierSnapshot;
+
+static FlowmodifierSnapshot getFlowmodifierSnapshot (void)
+{
+	return (FlowmodifierSnapshot){
+		.canContinue = analyzer.canContinue,
+		.canBreak = analyzer.canBreak,
+	};
+}
+
+static void restoreFlowmodifiers (FlowmodifierSnapshot snapshot)
+{
+	analyzer.canContinue = snapshot.canContinue;
+	analyzer.canBreak = snapshot.canBreak;
+}
+
 void analyze (Ast *ast)
 {
 	analyzer.previousScope = NULL;
@@ -126,15 +145,13 @@ static void visitRoot (AstRoot *node)
 {
 	analyzer.currentScope = node->scope = scope_init();
 	node->scope->parent = analyzer.previousScope;
-	bool canContinue = analyzer.canContinue;
-	bool canBreak = analyzer.canBreak;
+	FlowmodifierSnapshot snapshot = getFlowmodifierSnapshot();
 	DataType *caseExpressionType = analyzer.caseExpressionType;
 	for (AstDeclaration *decl = node->declarations; decl != NULL; decl = decl->next) {
 		analyzer.previousScope = node->scope;
 		visitDeclaration(decl);
 		analyzer.currentScope = node->scope;
-		analyzer.canContinue = canContinue;
-		analyzer.canBreak = canBreak;
+		restoreFlowmodifiers(snapshot);
 		analyzer.caseExpressionType = caseExpressionType;
 	}
 	if (node->scope->parent != NULL) {
@@ -205,15 +222,13 @@ static void visitStatementBlock (AstStatementBlock *node)
 {
 	analyzer.currentScope = node->scope = scope_init();
 	node->scope->parent = analyzer.previousScope;
-	bool canContinue = analyzer.canContinue;
-	bool canBreak = analyzer.canBreak;
+	FlowmodifierSnapshot snapshot = getFlowmodifierSnapshot();
 	DataType *caseExpressionType = analyzer.caseExpressionType;
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
 		analyzer.previousScope = node->scope;
 		visitStatement(stmt);
 		analyzer.currentScope = node->scope;
-		analyzer.canContinue = canContinue;
-		analyzer.canBreak = canBreak;
+		restoreFlowmodifiers(snapshot);
 		analyzer.caseExpressionType = caseExpressionType;
 	}
 	if (node->scope->parent != NULL) {
