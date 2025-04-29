@@ -17,4 +17,7 @@
 		} \
 	} while (0)
 
+#define dll_rewind(node) \
+	for (; node != NULL && node->previous != NULL; node = node->previous)
+
 #endif

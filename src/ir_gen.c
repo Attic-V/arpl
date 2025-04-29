@@ -69,8 +69,8 @@ Ir *gen_ir (Ast *ast)
 
 	visitAst(ast);
 
-	Ir *ir;
-	for (ir = gen.current; ir != NULL && ir->previous != NULL; ir = ir->previous);
+	Ir *ir = gen.current;
+	dll_rewind(ir);
 	return ir;
 }
 

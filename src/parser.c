@@ -84,7 +84,7 @@ static AstRoot *getRoot (void)
 		dll_insert(declarations, declaration);
 		declarations = declaration;
 	}
-	for (; declarations != NULL && declarations->previous != NULL; declarations = declarations->previous);
+	dll_rewind(declarations);
 	return ast_initRoot(declarations);
 }
 
@@ -111,7 +111,7 @@ static AstDeclaration *getDeclarationFunction (void)
 			parameters = parameter;
 		} while (match(TT_Comma));
 	}
-	for (; parameters != NULL && parameters->previous != NULL; parameters = parameters->previous);
+	dll_rewind(parameters);
 	expect(RParen, ')');
 	DataType *returnType = getType();
 	return ast_initDeclarationFunction(keyword, identifier, getStatementBlock(), returnType, parameters);
@@ -145,7 +145,7 @@ static AstStatement *getStatementBlock (void)
 		statements = statement;
 	}
 	expect(RBrace, '}');
-	for (; statements != NULL && statements->previous != NULL; statements = statements->previous);
+	dll_rewind(statements);
 	return ast_initStatementBlock(statements);
 }
 
@@ -173,7 +173,7 @@ static AstStatement *getStatementCaseL (void)
 		dll_insert(statements, statement);
 		statements = statement;
 	}
-	for (; statements != NULL && statements->previous != NULL; statements = statements->previous);
+	dll_rewind(statements);
 	return ast_initStatementCaseL(expression, statements, keyword);
 }
 
@@ -271,7 +271,7 @@ static AstStatement *getStatementSwitchC (void)
 		dll_insert(statements, statement);
 		statements = statement;
 	}
-	for (; statements != NULL && statements->previous != NULL; statements = statements->previous);
+	dll_rewind(statements);
 	expect(RBrace, '}');
 	AstStatement *body = ast_initStatementBlock(statements);
 	return ast_initStatementSwitchC(expression, body);
@@ -491,7 +491,7 @@ static AstExpression *getExpressionCall (void)
 				arguments = argument;
 			} while (match(TT_Comma));
 		}
-		for (; arguments != NULL && arguments->previous != NULL; arguments = arguments->previous);
+		dll_rewind(arguments);
 		Token rparen = expect(RParen, ')');
 		return ast_initExpressionCall(e, lparen, rparen, arguments);
 	}
