@@ -7,14 +7,6 @@
 #include "memory.h"
 #include "table.h"
 
-#define pushLabels \
-	int currentContinue = gen.continueLabel; \
-	int currentBreak = gen.breakLabel;
-
-#define popLabels \
-	gen.continueLabel = currentContinue; \
-	gen.breakLabel = currentBreak;
-
 static void visitAst (Ast *ast);
 static void visitRoot (AstRoot *root);
 
@@ -62,6 +54,25 @@ typedef struct {
 
 static IrGenerator gen;
 
+typedef struct {
+	int continueLabel;
+	int breakLabel;
+} LabelSnapshot;
+
+static LabelSnapshot getLabelSnapshot (void)
+{
+	return (LabelSnapshot){
+		.continueLabel = gen.continueLabel,
+		.breakLabel = gen.breakLabel,
+	};
+}
+
+static void restoreLabels (LabelSnapshot snapshot)
+{
+	gen.continueLabel = snapshot.continueLabel;
+	gen.breakLabel = snapshot.breakLabel;
+}
+
 Ir *gen_ir (Ast *ast)
 {
 	gen.current = NULL;
@@ -81,12 +92,12 @@ static void visitAst (Ast *ast)
 
 static void visitRoot (AstRoot *root)
 {
-	pushLabels
+	LabelSnapshot snapshot = getLabelSnapshot();
 	gen.scope = root->scope;
 	for (AstDeclaration *decl = root->declarations; decl != NULL; decl = decl->next) {
 		visitDeclaration(decl);
 		gen.scope = root->scope;
-		popLabels
+		restoreLabels(snapshot);
 	}
 }
 
@@ -134,12 +145,12 @@ static void visitStatement (AstStatement *statement)
 
 static void visitStatementBlock (AstStatementBlock *statement)
 {
-	pushLabels
+	LabelSnapshot snapshot = getLabelSnapshot();
 	gen.scope = statement->scope;
 	for (AstStatement *stmt = statement->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
 		gen.scope = statement->scope;
-		popLabels
+		restoreLabels(snapshot);
 	}
 }
 
@@ -158,10 +169,10 @@ static void visitStatementCaseL (AstStatementCaseL *statement)
 		addInstruction(ir_initJmpFalse(l0));
 	}
 	addInstruction(ir_initLabel(gen.nextCaseBodyLabel));
-	pushLabels
+	LabelSnapshot snapshot = getLabelSnapshot();
 	for (AstStatement *s = statement->body; s != NULL; s = s->next) {
 		visitStatement(s);
-		popLabels
+		restoreLabels(snapshot);
 	}
 	gen.nextCaseBodyLabel = gen.label++;
 	addInstruction(ir_initJmp(gen.nextCaseBodyLabel));
