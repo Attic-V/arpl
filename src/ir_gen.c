@@ -54,22 +54,18 @@ typedef struct {
 
 static IrGenerator gen;
 
-typedef struct {
-	int continueLabel;
-	int breakLabel;
-} LabelSnapshot;
-
-static LabelSnapshot getLabelSnapshot (void)
+static IrGenerator getSnapshot (void)
 {
-	return (LabelSnapshot){
-		.continueLabel = gen.continueLabel,
-		.breakLabel = gen.breakLabel,
-	};
+	return gen;
 }
 
-static void restoreLabels (LabelSnapshot snapshot)
+static void restoreSnapshot_continueLabel (IrGenerator snapshot)
 {
 	gen.continueLabel = snapshot.continueLabel;
+}
+
+static void restoreSnapshot_breakLabel (IrGenerator snapshot)
+{
 	gen.breakLabel = snapshot.breakLabel;
 }
 
@@ -92,12 +88,13 @@ static void visitAst (Ast *ast)
 
 static void visitRoot (AstRoot *root)
 {
-	LabelSnapshot snapshot = getLabelSnapshot();
+	IrGenerator snapshot = getSnapshot();
 	gen.scope = root->scope;
 	for (AstDeclaration *decl = root->declarations; decl != NULL; decl = decl->next) {
 		visitDeclaration(decl);
 		gen.scope = root->scope;
-		restoreLabels(snapshot);
+		restoreSnapshot_continueLabel(snapshot);
+		restoreSnapshot_breakLabel(snapshot);
 	}
 }
 
@@ -145,12 +142,13 @@ static void visitStatement (AstStatement *statement)
 
 static void visitStatementBlock (AstStatementBlock *statement)
 {
-	LabelSnapshot snapshot = getLabelSnapshot();
+	IrGenerator snapshot = getSnapshot();
 	gen.scope = statement->scope;
 	for (AstStatement *stmt = statement->children; stmt != NULL; stmt = stmt->next) {
 		visitStatement(stmt);
 		gen.scope = statement->scope;
-		restoreLabels(snapshot);
+		restoreSnapshot_continueLabel(snapshot);
+		restoreSnapshot_breakLabel(snapshot);
 	}
 }
 
@@ -169,10 +167,11 @@ static void visitStatementCaseL (AstStatementCaseL *statement)
 		addInstruction(ir_initJmpFalse(l0));
 	}
 	addInstruction(ir_initLabel(gen.nextCaseBodyLabel));
-	LabelSnapshot snapshot = getLabelSnapshot();
+	IrGenerator snapshot = getSnapshot();
 	for (AstStatement *s = statement->body; s != NULL; s = s->next) {
 		visitStatement(s);
-		restoreLabels(snapshot);
+		restoreSnapshot_continueLabel(snapshot);
+		restoreSnapshot_breakLabel(snapshot);
 	}
 	gen.nextCaseBodyLabel = gen.label++;
 	addInstruction(ir_initJmp(gen.nextCaseBodyLabel));

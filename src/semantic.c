@@ -101,23 +101,24 @@ typedef struct {
 
 static Analyzer analyzer;
 
-typedef struct {
-	bool canContinue;
-	bool canBreak;
-} FlowmodifierSnapshot;
-
-static FlowmodifierSnapshot getFlowmodifierSnapshot (void)
+static Analyzer getSnapshot (void)
 {
-	return (FlowmodifierSnapshot){
-		.canContinue = analyzer.canContinue,
-		.canBreak = analyzer.canBreak,
-	};
+	return analyzer;
 }
 
-static void restoreFlowmodifiers (FlowmodifierSnapshot snapshot)
+static void restoreSnapshot_canContinue (Analyzer snapshot)
 {
 	analyzer.canContinue = snapshot.canContinue;
+}
+
+static void restoreSnapshot_canBreak (Analyzer snapshot)
+{
 	analyzer.canBreak = snapshot.canBreak;
+}
+
+static void restoreSnapshot_caseExpressionType (Analyzer snapshot)
+{
+	analyzer.caseExpressionType = snapshot.caseExpressionType;
 }
 
 void analyze (Ast *ast)
@@ -145,14 +146,14 @@ static void visitRoot (AstRoot *node)
 {
 	analyzer.currentScope = node->scope = scope_init();
 	node->scope->parent = analyzer.previousScope;
-	FlowmodifierSnapshot snapshot = getFlowmodifierSnapshot();
-	DataType *caseExpressionType = analyzer.caseExpressionType;
+	Analyzer snapshot = getSnapshot();
 	for (AstDeclaration *decl = node->declarations; decl != NULL; decl = decl->next) {
 		analyzer.previousScope = node->scope;
 		visitDeclaration(decl);
 		analyzer.currentScope = node->scope;
-		restoreFlowmodifiers(snapshot);
-		analyzer.caseExpressionType = caseExpressionType;
+		restoreSnapshot_canContinue(snapshot);
+		restoreSnapshot_canBreak(snapshot);
+		restoreSnapshot_caseExpressionType(snapshot);
 	}
 	if (node->scope->parent != NULL) {
 		node->scope->parent->physicalSize += node->scope->physicalSize;
@@ -222,14 +223,14 @@ static void visitStatementBlock (AstStatementBlock *node)
 {
 	analyzer.currentScope = node->scope = scope_init();
 	node->scope->parent = analyzer.previousScope;
-	FlowmodifierSnapshot snapshot = getFlowmodifierSnapshot();
-	DataType *caseExpressionType = analyzer.caseExpressionType;
+	Analyzer snapshot = getSnapshot();
 	for (AstStatement *stmt = node->children; stmt != NULL; stmt = stmt->next) {
 		analyzer.previousScope = node->scope;
 		visitStatement(stmt);
 		analyzer.currentScope = node->scope;
-		restoreFlowmodifiers(snapshot);
-		analyzer.caseExpressionType = caseExpressionType;
+		restoreSnapshot_canContinue(snapshot);
+		restoreSnapshot_canBreak(snapshot);
+		restoreSnapshot_caseExpressionType(snapshot);
 	}
 	if (node->scope->parent != NULL) {
 		node->scope->parent->physicalSize += node->scope->physicalSize;
