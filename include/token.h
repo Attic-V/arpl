@@ -41,7 +41,6 @@ typedef enum {
 	TT_Minus_Equal,
 	TT_Minus_Greater,
 	TT_Minus_Minus,
-	TT_Mut,
 	TT_Number,
 	TT_Pipe,
 	TT_Pipe_Pipe,

@@ -22,7 +22,6 @@ static DataType *dataType_init (DataTypeType type)
 {
 	DataType *t = mem_alloc(sizeof(*t));
 	t->type = type;
-	t->mutability = M_Flex;
 	dll_init(t);
 	return t;
 }
@@ -250,9 +249,6 @@ bool dataType_castable (DataType *from, DataType *to)
 
 bool dataType_equal (DataType *a, DataType *b)
 {
-	if (a->mutability != b->mutability && a->mutability != M_Flex && b->mutability != M_Flex) {
-		return false;
-	}
 	if (a->type != b->type) {
 		return false;
 	}
@@ -304,9 +300,4 @@ DataType *dataType_smallestInt (size_t value)
 DataType *dataType_larger (DataType *a, DataType *b)
 {
 	return dataType_getSize(a) > dataType_getSize(b) ? a : b;
-}
-
-bool dataType_mutable (DataType *t)
-{
-	return t->mutability == M_Mutable;
 }

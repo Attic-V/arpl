@@ -480,9 +480,7 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 {
 	visitExpression(node->a);
 	visitExpression(node->b);
-	if (!dataType_mutable(node->a->dataType)) {
-		e(node->operator, "left operand is immutable");
-	} else if (!dataType_equal(node->a->dataType, node->b->dataType)) {
+	if (!dataType_equal(node->a->dataType, node->b->dataType)) {
 		if (!coerce(node->b, node->a->dataType)) {
 			e(node->operator, "operands must have the same type");
 		}
@@ -585,9 +583,6 @@ static void visitExpressionPostfix (AstExpressionPostfix *node)
 			if (!node->e->modifiable) {
 				e(node->e->as.var->identifier, "expression must be modifiable");
 			}
-			if (!dataType_mutable(node->e->dataType)) {
-				e(node->operator, "operand is immutable");
-			}
 			break;
 		default:
 	}
@@ -615,9 +610,6 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 			}
 			if (!node->e->modifiable) {
 				e(node->e->as.var->identifier, "expression must be modifiable");
-			}
-			if (!dataType_mutable(node->e->dataType)) {
-				e(node->operator, "operand is immutable");
 			}
 			break;
 		case TT_And:

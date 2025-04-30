@@ -528,55 +528,44 @@ static AstParameter *getParameter (void)
 
 static DataType *getType (void)
 {
-	Mutability mutability = match(TT_Mut) ? M_Mutable : M_Immutable;
 	if (match(TT_U16)) {
 		DataType *type = dataType_initU16();
-		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_U32)) {
 		DataType *type = dataType_initU32();
-		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_U64)) {
 		DataType *type = dataType_initU64();
-		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_U8)) {
 		DataType *type = dataType_initU8();
-		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_I16)) {
 		DataType *type = dataType_initI16();
-		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_I32)) {
 		DataType *type = dataType_initI32();
-		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_I64)) {
 		DataType *type = dataType_initI64();
-		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_I8)) {
 		DataType *type = dataType_initI8();
-		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_Bool)) {
 		DataType *type = dataType_initBoolean();
-		type->mutability = mutability;
 		return type;
 	}
 	if (match(TT_Star)) {
 		DataType *type = dataType_initPointer(getType());
-		type->mutability = mutability;
 		return type;
 	}
 	err(parser.tokens[parser.current], "expected type");
