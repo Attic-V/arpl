@@ -96,7 +96,6 @@ typedef struct {
 	bool canBreak;
 	DataType *caseExpressionType;
 	DataType *functionReturnType;
-	bool inInitStatement;
 } Analyzer;
 
 static Analyzer analyzer;
@@ -128,7 +127,6 @@ void analyze (Ast *ast)
 	analyzer.hadError = false;
 	analyzer.canContinue = false;
 	analyzer.canBreak = false;
-	analyzer.inInitStatement = false;
 
 	visitAst(ast);
 
@@ -317,18 +315,22 @@ static void visitStatementIfE (AstStatementIfE *node)
 
 static void visitStatementInit (AstStatementInit *node)
 {
-	analyzer.inInitStatement = true;
-	AstStatement *statementVar = ast_initStatementVar(node->identifier, node->type);
-	AstExpression *expressionVar = ast_initExpressionVar(node->identifier);
-	AstExpression *expressionAssign = ast_initExpressionAssign(expressionVar, node->expression, node->operator);
+	Symbol *symbol = symbol_init(node->identifier, node->type);
+	if (scope_add(analyzer.currentScope, symbol)) {
+		symbol->physicalIndex = analyzer.currentPhysicalIndex;
+		analyzer.currentPhysicalIndex += dataType_getSize(symbol->type);
+	} else {
+		e(node->identifier, "variable has already been declared in scope");
+	}
 
-	visitStatement(statementVar);
-	Symbol *symbol = scope_get(analyzer.currentScope, node->identifier);
-	Mutability mutability = symbol->type->mutability;
-	symbol->type->mutability = M_Mutable;
-	visitExpression(expressionAssign);
-	symbol->type->mutability = mutability;
-	analyzer.inInitStatement = false;
+	visitExpression(node->expression);
+
+	if (!dataType_equal(symbol->type, node->expression->dataType)) {
+		if (!coerce(node->expression, symbol->type)) {
+			e(node->operator, "operands must have the same type");
+		}
+	}
+	node->expression->modifiable = false;
 }
 
 static void visitStatementReturnE (AstStatementReturnE *node)
@@ -482,10 +484,7 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 		e(node->operator, "left operand is immutable");
 	} else if (!dataType_equal(node->a->dataType, node->b->dataType)) {
 		if (!coerce(node->b, node->a->dataType)) {
-			if (analyzer.inInitStatement && node->a->dataType->mutability != node->b->dataType->mutability) {
-			} else {
-				e(node->operator, "operands must have the same type");
-			}
+			e(node->operator, "operands must have the same type");
 		}
 	}
 	if (!node->a->modifiable) {
