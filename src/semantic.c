@@ -598,12 +598,14 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 			if (!dataType_isBoolean(node->e->dataType)) {
 				e(node->operator, "operand must be a boolean");
 			}
+			node->e->modifiable = false;
 			break;
 		case TT_Minus:
 		case TT_Tilde:
 			if (!dataType_isInt(node->e->dataType)) {
 				e(node->operator, "operand must be a number");
 			}
+			node->e->modifiable = false;
 			break;
 		case TT_Minus_Minus:
 		case TT_Plus_Plus:
