@@ -374,7 +374,7 @@ static void transformCall (Ir *ir)
 	(void)instruction;
 	pop(r8);
 	emit("\tcall    %s", reg[r8][QWORD]);
-	emit("\tpush    rax");
+	push(rax);
 }
 
 static void transformCast (Ir *ir)
