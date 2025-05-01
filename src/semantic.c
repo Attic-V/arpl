@@ -294,6 +294,7 @@ static void visitStatementForI (AstStatementForI *node)
 		if (!dataType_isBoolean(node->condition->dataType)) {
 			e(node->keyword, "condition must be a boolean");
 		}
+		node->condition->modifiable = false;
 	}
 	if (node->update != NULL) {
 		visitExpression(node->update);
@@ -379,6 +380,7 @@ static void visitStatementWhileC (AstStatementWhileC *node)
 	if (node->a != NULL) {
 		visitStatement(node->a);
 	}
+	node->condition->modifiable = false;
 }
 
 static void visitExpression (AstExpression *node)
