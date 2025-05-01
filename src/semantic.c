@@ -192,7 +192,9 @@ static void visitDeclarationFunction (AstDeclarationFunction *node)
 		visitStatement(paraminit);
 		analyzer.currentScope = node->scope;
 	}
+	analyzer.previousScope = node->scope;
 	visitStatement(node->body);
+	analyzer.currentScope = node->scope;
 	if (node->scope->parent != NULL) {
 		node->scope->parent->physicalSize += node->scope->physicalSize;
 	}
