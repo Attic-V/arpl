@@ -528,45 +528,18 @@ static AstParameter *getParameter (void)
 
 static DataType *getType (void)
 {
-	if (match(TT_U16)) {
-		DataType *type = dataType_initU16();
-		return type;
-	}
-	if (match(TT_U32)) {
-		DataType *type = dataType_initU32();
-		return type;
-	}
-	if (match(TT_U64)) {
-		DataType *type = dataType_initU64();
-		return type;
-	}
-	if (match(TT_U8)) {
-		DataType *type = dataType_initU8();
-		return type;
-	}
-	if (match(TT_I16)) {
-		DataType *type = dataType_initI16();
-		return type;
-	}
-	if (match(TT_I32)) {
-		DataType *type = dataType_initI32();
-		return type;
-	}
-	if (match(TT_I64)) {
-		DataType *type = dataType_initI64();
-		return type;
-	}
-	if (match(TT_I8)) {
-		DataType *type = dataType_initI8();
-		return type;
-	}
-	if (match(TT_Bool)) {
-		DataType *type = dataType_initBoolean();
-		return type;
-	}
-	if (match(TT_Star)) {
-		DataType *type = dataType_initPointer(getType());
-		return type;
+	switch (parser.tokens[parser.current++].type) {
+		case TT_U16: return dataType_initU16();
+		case TT_U32: return dataType_initU32();
+		case TT_U64: return dataType_initU64();
+		case TT_U8: return dataType_initU8();
+		case TT_I16: return dataType_initI16();
+		case TT_I32: return dataType_initI32();
+		case TT_I64: return dataType_initI64();
+		case TT_I8: return dataType_initI8();
+		case TT_Bool: return dataType_initBoolean();
+		case TT_Star: return dataType_initPointer(getType());
+		default:
 	}
 	err(parser.tokens[parser.current], "expected type");
 	exit(1);
