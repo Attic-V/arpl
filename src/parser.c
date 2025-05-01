@@ -528,7 +528,8 @@ static AstParameter *getParameter (void)
 
 static DataType *getType (void)
 {
-	switch (parser.tokens[parser.current++].type) {
+	Token token = parser.tokens[parser.current++];
+	switch (token.type) {
 		case TT_U16: return dataType_initU16();
 		case TT_U32: return dataType_initU32();
 		case TT_U64: return dataType_initU64();
@@ -541,7 +542,7 @@ static DataType *getType (void)
 		case TT_Star: return dataType_initPointer(getType());
 		default:
 	}
-	err(parser.tokens[parser.current], "expected type");
+	err(token, "expected type");
 	exit(1);
 }
 
