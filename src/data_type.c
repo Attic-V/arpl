@@ -290,6 +290,7 @@ bool dataType_equal (DataType *a, DataType *b)
 		case DataType_I64: return true;
 		case DataType_I8: return true;
 		case DataType_Pointer: return dataType_equal(a->as.pointer->to, b->as.pointer->to);
+		case DataType_Struct: return token_equal(a->as.struct_->identifier, b->as.struct_->identifier);
 		case DataType_U16: return true;
 		case DataType_U32: return true;
 		case DataType_U64: return true;
