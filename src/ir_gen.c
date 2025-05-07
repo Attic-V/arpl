@@ -325,13 +325,25 @@ static void visitExpressionAccess (AstExpression *expression)
 {
 	AstExpressionAccess *e = expression->as.access;
 	visitExpression(e->e);
-	Symbol *st = telescope_get(gen.scope, e->e->dataType->as.struct_->identifier);
+	Symbol *st = NULL;
+	switch (e->op.type) {
+		case TT_Dot:
+			st = telescope_get(gen.scope, e->e->dataType->as.struct_->identifier);
+			break;
+		case TT_Dot_Dot:
+			st = telescope_get(gen.scope, e->e->dataType->as.pointer->to->as.struct_->identifier);
+			break;
+		default:
+	}
 	DataTypeStruct *t = st->type->as.struct_;
 	DataTypeMember *mtype = NULL;
 	for (DataTypeMember *m = t->members; m != NULL; m = m->next) {
 		if (!token_equal(e->mToken, m->identifier)) continue;
 		mtype = m;
 		break;
+	}
+	if (e->op.type == TT_Dot_Dot) {
+		addInstruction(ir_initDeref(dataType_getSize(e->e->dataType)));
 	}
 	addInstruction(ir_initAccess(mtype->index));
 	if (!expression->modifiable) {

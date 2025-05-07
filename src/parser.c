@@ -505,7 +505,7 @@ static AstExpression *getExpressionCallOrAccess (void)
 		Token rparen = expect(RParen, ')');
 		e = ast_initExpressionCall(e, lparen, rparen, arguments);
 	}
-	while (match(TT_Dot)) {
+	while (match(TT_Dot) || match(TT_Dot_Dot)) {
 		Token operator = parser.tokens[parser.current - 1];
 		Token mToken = expect(Identifier, member);
 		e = ast_initExpressionAccess(e, operator, mToken);

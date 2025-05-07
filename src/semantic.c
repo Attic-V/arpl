@@ -526,14 +526,30 @@ static void visitExpression (AstExpression *node)
 static void visitExpressionAccess (AstExpressionAccess *node)
 {
 	visitExpression(node->e);
-	if (!dataType_isStruct(node->e->dataType)) {
-		e(node->op, "operand must be of type struct");
-		exit(1);
+	Symbol *s = NULL;
+	switch (node->op.type) {
+		case TT_Dot:
+			if (!dataType_isStruct(node->e->dataType)) {
+				e(node->op, "operand must be of type struct");
+				exit(1);
+			}
+			if (!node->e->modifiable) {
+				e(node->op, "operand must be modifiable");
+			}
+			s = telescope_get(analyzer.currentScope, node->e->dataType->as.struct_->identifier);
+			break;
+		case TT_Dot_Dot:
+			if (!dataType_isPointer(node->e->dataType) || !dataType_isStruct(node->e->dataType->as.pointer->to)) {
+				e(node->op, "operand must be a pointer to a struct");
+				exit(1);
+			}
+			if (!node->e->modifiable) {
+				e(node->op, "operand must be modifiable");
+			}
+			s = telescope_get(analyzer.currentScope, node->e->dataType->as.pointer->to->as.struct_->identifier);
+			break;
+		default:
 	}
-	if (!node->e->modifiable) {
-		e(node->op, "operand must be modifiable");
-	}
-	Symbol *s = telescope_get(analyzer.currentScope, node->e->dataType->as.struct_->identifier);
 	node->mDataType = NULL;
 	for (DataTypeMember *member = s->type->as.struct_->members; member != NULL; member = member->next) {
 		if (token_equal(node->mToken, member->identifier)) {

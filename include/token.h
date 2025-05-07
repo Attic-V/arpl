@@ -19,6 +19,7 @@ typedef enum {
 	TT_Default,
 	TT_Do,
 	TT_Dot,
+	TT_Dot_Dot,
 	TT_Else,
 	TT_EOF,
 	TT_Equal,
