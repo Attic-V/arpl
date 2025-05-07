@@ -12,6 +12,7 @@ static void visitRoot (AstRoot *root);
 
 static void visitDeclaration (AstDeclaration *declaration);
 static void visitDeclarationFunction (AstDeclarationFunction *declaration);
+static void visitDeclarationStructD (AstDeclarationStructD *declaration);
 
 static void visitStatement (AstStatement *statement);
 static void visitStatementBlock (AstStatementBlock *statement);
@@ -29,6 +30,7 @@ static void visitStatementVar (AstStatementVar *statement);
 static void visitStatementWhileC (AstStatementWhileC *statement);
 
 static void visitExpression (AstExpression *expression);
+static void visitExpressionAccess (AstExpression *expression);
 static void visitExpressionAssign (AstExpression *expression);
 static void visitExpressionBinary (AstExpression *expression);
 static void visitExpressionBoolean (AstExpression *expression);
@@ -102,6 +104,7 @@ static void visitDeclaration (AstDeclaration *declaration)
 {
 	switch (declaration->type) {
 		case AstDeclaration_Function: visitDeclarationFunction(declaration->as.function); break;
+		case AstDeclaration_StructD: visitDeclarationStructD(declaration->as.structD); break;
 	}
 }
 
@@ -120,6 +123,9 @@ static void visitDeclarationFunction (AstDeclarationFunction *declaration)
 	visitStatement(declaration->body);
 	addInstruction(ir_initFunctionEnd());
 }
+
+static void visitDeclarationStructD (AstDeclarationStructD *declaration)
+{ }
 
 static void visitStatement (AstStatement *statement)
 {
@@ -301,6 +307,7 @@ static void visitStatementWhileC (AstStatementWhileC *statement)
 static void visitExpression (AstExpression *expression)
 {
 	switch (expression->type) {
+		case AstExpression_Access: visitExpressionAccess(expression); break;
 		case AstExpression_Assign: visitExpressionAssign(expression); break;
 		case AstExpression_Binary: visitExpressionBinary(expression); break;
 		case AstExpression_Boolean: visitExpressionBoolean(expression); break;
@@ -311,6 +318,24 @@ static void visitExpression (AstExpression *expression)
 		case AstExpression_Prefix: visitExpressionPrefix(expression); break;
 		case AstExpression_Ternary: visitExpressionTernary(expression); break;
 		case AstExpression_Var: visitExpressionVar(expression); break;
+	}
+}
+
+static void visitExpressionAccess (AstExpression *expression)
+{
+	AstExpressionAccess *e = expression->as.access;
+	visitExpression(e->e);
+	Symbol *st = telescope_get(gen.scope, e->e->dataType->as.struct_->identifier);
+	DataTypeStruct *t = st->type->as.struct_;
+	DataTypeMember *mtype = NULL;
+	for (DataTypeMember *m = t->members; m != NULL; m = m->next) {
+		if (!token_equal(e->mToken, m->identifier)) continue;
+		mtype = m;
+		break;
+	}
+	addInstruction(ir_initAccess(mtype->index));
+	if (!expression->modifiable) {
+		addInstruction(ir_initDeref(dataType_getSize(mtype->dataType)));
 	}
 }
 

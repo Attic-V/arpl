@@ -4,6 +4,7 @@
 
 static Ir *ir_init (IrType type);
 
+static IrAccess *irAccess_init (size_t index);
 static IrAdd *irAdd_init (size_t size);
 static IrAnd *irAnd_init (size_t size);
 static IrAssign *irAssign_init (size_t size);
@@ -47,6 +48,13 @@ static Ir *ir_init (IrType type)
 	Ir *ir = mem_alloc(sizeof(*ir));
 	ir->type = type;
 	dll_init(ir);
+	return ir;
+}
+
+Ir *ir_initAccess (size_t index)
+{
+	Ir *ir = ir_init(Ir_Access);
+	ir->as.access = irAccess_init(index);
 	return ir;
 }
 
@@ -307,6 +315,13 @@ Ir *ir_initXor (size_t size)
 	Ir *ir = ir_init(Ir_Xor);
 	ir->as.xor = irXor_init(size);
 	return ir;
+}
+
+static IrAccess *irAccess_init (size_t index)
+{
+	IrAccess *access = mem_alloc(sizeof(*access));
+	access->index = index;
+	return access;
 }
 
 static IrAdd *irAdd_init (size_t size)

@@ -7,6 +7,7 @@ static AstStatement *ast_initStatement (AstStatementType type);
 static AstExpression *ast_initExpression (AstExpressionType type);
 
 static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType, AstParameter *parameters);
+static AstDeclarationStructD *astDeclaration_initStructD (Token keyword, Token identifier, AstParameter *members);
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementBreakL *astStatement_initBreakL (Token keyword);
@@ -22,6 +23,7 @@ static AstStatementSwitchC *astStatement_initSwitchC (AstExpression *e, AstState
 static AstStatementVar *astStatement_initVar (Token identifier, DataType *type);
 static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a, Token keyword);
 
+static AstExpressionAccess *astExpression_initAccess (AstExpression *e, Token op, Token mToken);
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen, AstArgument *arguments);
@@ -76,6 +78,13 @@ AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, As
 {
 	AstDeclaration *declaration = ast_initDeclaration(AstDeclaration_Function);
 	declaration->as.function = astDeclaration_initFunction(keyword, identifier, body, returnType, parameters);
+	return declaration;
+}
+
+AstDeclaration *ast_initDeclarationStructD (Token keyword, Token identifier, AstParameter *members)
+{
+	AstDeclaration *declaration = ast_initDeclaration(AstDeclaration_StructD);
+	declaration->as.structD = astDeclaration_initStructD(keyword, identifier, members);
 	return declaration;
 }
 
@@ -169,6 +178,13 @@ AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement *a
 	statement->type = AstStatement_WhileC;
 	statement->as.whileC = astStatement_initWhileC(condition, a, keyword);
 	return statement;
+}
+
+AstExpression *ast_initExpressionAccess (AstExpression *e, Token op, Token mToken)
+{
+	AstExpression *expression = ast_initExpression(AstExpression_Access);
+	expression->as.access = astExpression_initAccess(e, op, mToken);
+	return expression;
 }
 
 AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator)
@@ -272,6 +288,24 @@ static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token
 	function->dataType = dataType_initFunction(returnType, params);
 	function->parameters = parameters;
 	return function;
+}
+
+static AstDeclarationStructD *astDeclaration_initStructD (Token keyword, Token identifier, AstParameter *members)
+{
+	int idx = 0;
+	AstDeclarationStructD *structD = mem_alloc(sizeof(*structD));
+	structD->keyword = keyword;
+	structD->identifier = identifier;
+	structD->members = members;
+	DataTypeMember *mems = NULL;
+	for (AstParameter *member = members; member != NULL; member = member->next) {
+		DataTypeMember *m = dataType_initMember(member->identifier, member->type, idx);
+		idx += dataType_getSize(member->type);
+		dll_shove(mems, m);
+	}
+	dll_rewind(mems);
+	structD->dataType = dataType_initStruct(identifier, mems);
+	return structD;
 }
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children)
@@ -382,6 +416,15 @@ static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, As
 	whileC->a = a;
 	whileC->keyword = keyword;
 	return whileC;
+}
+
+static AstExpressionAccess *astExpression_initAccess (AstExpression *e, Token op, Token mToken)
+{
+	AstExpressionAccess *access = mem_alloc(sizeof(*access));
+	access->e = e;
+	access->op = op;
+	access->mToken = mToken;
+	return access;
 }
 
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator)

@@ -31,6 +31,21 @@ typedef struct {
 	DataType *to;
 } DataTypePointer;
 
+typedef struct DataTypeMember DataTypeMember;
+
+typedef struct {
+	Token identifier;
+	DataTypeMember *members;
+} DataTypeStruct;
+
+struct DataTypeMember {
+	Token identifier;
+	DataType *dataType;
+	DataTypeMember *next;
+	DataTypeMember *previous;
+	size_t index;
+};
+
 typedef struct {
 } DataTypeU16;
 
@@ -51,6 +66,7 @@ typedef enum {
 	DataType_I64,
 	DataType_I8,
 	DataType_Pointer,
+	DataType_Struct,
 	DataType_U16,
 	DataType_U32,
 	DataType_U64,
@@ -69,6 +85,7 @@ struct DataType {
 		DataTypeI64 *i64;
 		DataTypeI8 *i8;
 		DataTypePointer *pointer;
+		DataTypeStruct *struct_;
 		DataTypeU16 *u16;
 		DataTypeU32 *u32;
 		DataTypeU64 *u64;
@@ -85,10 +102,13 @@ DataType *dataType_initI32 (void);
 DataType *dataType_initI64 (void);
 DataType *dataType_initI8 (void);
 DataType *dataType_initPointer (DataType *to);
+DataType *dataType_initStruct (Token identifier, DataTypeMember *members);
 DataType *dataType_initU16 (void);
 DataType *dataType_initU32 (void);
 DataType *dataType_initU64 (void);
 DataType *dataType_initU8 (void);
+
+DataTypeMember *dataType_initMember (Token identifier, DataType *dataType, size_t index);
 
 DataType *dataType_smallestInt (size_t value);
 
@@ -99,6 +119,7 @@ bool dataType_isI32 (DataType *t);
 bool dataType_isI64 (DataType *t);
 bool dataType_isI8 (DataType *t);
 bool dataType_isPointer (DataType *t);
+bool dataType_isStruct (DataType *t);
 bool dataType_isU16 (DataType *t);
 bool dataType_isU32 (DataType *t);
 bool dataType_isU64 (DataType *t);

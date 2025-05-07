@@ -12,6 +12,7 @@
 static void emit (char *format, ...);
 
 static void transform (Ir *r);
+static void transformAccess (Ir *ir);
 static void transformAdd (Ir *ir);
 static void transformAnd (Ir *ir);
 static void transformAssign (Ir *ir);
@@ -292,6 +293,7 @@ static void transform (Ir *r)
 {
 	#define transformer(type) [Ir_##type] = transform##type
 	static void (*transformers[])(Ir *ir) = {
+		transformer(Access),
 		transformer(Add),
 		transformer(And),
 		transformer(Assign),
@@ -336,6 +338,15 @@ static void transform (Ir *r)
 	}
 	transformers[r->type](r);
 	#undef transformer
+}
+
+static void transformAccess (Ir *ir)
+{
+	IrAccess *instruction = ir->as.access;
+	(void)instruction;
+	pop(r8);
+	emit("\tadd     %s, %d", reg[r8][QWORD], instruction->index);
+	push(r8);
 }
 
 static void transformAdd (Ir *ir)

@@ -11,6 +11,13 @@
 typedef struct AstExpression AstExpression;
 
 typedef struct {
+	AstExpression *e;
+	Token op;
+	Token mToken;
+	DataType *mDataType;
+} AstExpressionAccess;
+
+typedef struct {
 	AstExpression *a;
 	AstExpression *b;
 	Token operator;
@@ -73,6 +80,7 @@ typedef struct {
 } AstExpressionVar;
 
 typedef enum {
+	AstExpression_Access,
 	AstExpression_Assign,
 	AstExpression_Binary,
 	AstExpression_Boolean,
@@ -88,6 +96,7 @@ typedef enum {
 struct AstExpression {
 	AstExpressionType type;
 	union {
+		AstExpressionAccess *access;
 		AstExpressionAssign *assign;
 		AstExpressionBinary *binary;
 		AstExpressionBoolean *boolean;
@@ -234,14 +243,24 @@ typedef struct {
 	Scope *scope;
 } AstDeclarationFunction;
 
+typedef struct {
+	Token keyword;
+	Token identifier;
+	AstParameter *members;
+	DataType *dataType;
+	Scope *scope;
+} AstDeclarationStructD;
+
 typedef enum {
 	AstDeclaration_Function,
+	AstDeclaration_StructD,
 } AstDeclarationType;
 
 struct AstDeclaration {
 	AstDeclarationType type;
 	union {
 		AstDeclarationFunction *function;
+		AstDeclarationStructD *structD;
 	} as;
 	AstDeclaration *next;
 	AstDeclaration *previous;
@@ -260,6 +279,7 @@ Ast *ast_init (AstRoot *root);
 AstRoot *ast_initRoot (AstDeclaration *declarations);
 
 AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType, AstParameter *parameters);
+AstDeclaration *ast_initDeclarationStructD (Token keyword, Token identifier, AstParameter *members);
 
 AstStatement *ast_initStatementBlock (AstStatement *children);
 AstStatement *ast_initStatementBreakL (Token keyword);
@@ -275,6 +295,7 @@ AstStatement *ast_initStatementSwitchC (AstExpression *e, AstStatement *body);
 AstStatement *ast_initStatementVar (Token identifier, DataType *type);
 AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement* a, Token keyword);
 
+AstExpression *ast_initExpressionAccess (AstExpression *e, Token op, Token mToken);
 AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator);
 AstExpression *ast_initExpressionBoolean (bool value);

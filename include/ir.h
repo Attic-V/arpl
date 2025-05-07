@@ -7,6 +7,10 @@
 #include "token.h"
 
 typedef struct {
+	size_t index;
+} IrAccess;
+
+typedef struct {
 	size_t size;
 } IrAdd;
 
@@ -152,6 +156,7 @@ typedef struct {
 } IrXor;
 
 typedef enum {
+	Ir_Access,
 	Ir_Add,
 	Ir_And,
 	Ir_Assign,
@@ -196,6 +201,7 @@ typedef struct Ir Ir;
 struct Ir {
 	IrType type;
 	union {
+		IrAccess *access;
 		IrAdd *add;
 		IrAnd *and;
 		IrAssign *assign;
@@ -238,6 +244,7 @@ struct Ir {
 	Ir *previous;
 };
 
+Ir *ir_initAccess (size_t index);
 Ir *ir_initAdd (size_t size);
 Ir *ir_initAnd (size_t size);
 Ir *ir_initAssign (size_t size);

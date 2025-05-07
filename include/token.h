@@ -1,6 +1,7 @@
 #ifndef token_h
 #define token_h
 
+#include <stdbool.h>
 #include <stddef.h>
 
 typedef enum {
@@ -17,6 +18,7 @@ typedef enum {
 	TT_Continue,
 	TT_Default,
 	TT_Do,
+	TT_Dot,
 	TT_Else,
 	TT_EOF,
 	TT_Equal,
@@ -55,6 +57,7 @@ typedef enum {
 	TT_Semicolon,
 	TT_Star,
 	TT_Star_Equal,
+	TT_Struct,
 	TT_Switch,
 	TT_Tilde,
 	TT_True,
@@ -72,5 +75,7 @@ typedef struct {
 	int length;
 	TokenType type;
 } Token;
+
+bool token_equal (Token a, Token b);
 
 #endif

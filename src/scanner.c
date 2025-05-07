@@ -47,6 +47,7 @@ Token *scan (char *source)
 			case '^': addToken(TT_Caret); continue;
 			case ':': addToken(TT_Colon); continue;
 			case ',': addToken(TT_Comma); continue;
+			case '.': addToken(TT_Dot); continue;
 			case '=': addToken(match('=') ? TT_Equal_Equal : TT_Equal); continue;
 			case '>':
 				if (check('>')) {
@@ -123,6 +124,7 @@ Token *scan (char *source)
 			keyword(i8, I8)
 			keyword(if, If)
 			keyword(return, Return)
+			keyword(struct, Struct)
 			keyword(switch, Switch)
 			keyword(true, True)
 			keyword(u16, U16)

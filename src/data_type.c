@@ -13,6 +13,7 @@ static DataTypeI32 *dataTypeI32_init (void);
 static DataTypeI64 *dataTypeI64_init (void);
 static DataTypeI8 *dataTypeI8_init (void);
 static DataTypePointer *dataTypePointer_init (DataType *to);
+static DataTypeStruct *dataTypeStruct_init (Token identifier, DataTypeMember *members);
 static DataTypeU16 *dataTypeU16_init (void);
 static DataTypeU32 *dataTypeU32_init (void);
 static DataTypeU64 *dataTypeU64_init (void);
@@ -24,6 +25,16 @@ static DataType *dataType_init (DataTypeType type)
 	t->type = type;
 	dll_init(t);
 	return t;
+}
+
+DataTypeMember *dataType_initMember (Token identifier, DataType *dataType, size_t index)
+{
+	DataTypeMember *member = mem_alloc(sizeof(*member));
+	member->identifier = identifier;
+	member->dataType = dataType;
+	member->index = index;
+	dll_init(member);
+	return member;
 }
 
 DataType *dataType_initBoolean (void)
@@ -120,6 +131,21 @@ static DataTypePointer *dataTypePointer_init (DataType *to)
 	return t;
 }
 
+DataType *dataType_initStruct (Token identifier, DataTypeMember *members)
+{
+	DataType *t = dataType_init(DataType_Struct);
+	t->as.struct_ = dataTypeStruct_init(identifier, members);
+	return t;
+}
+
+static DataTypeStruct *dataTypeStruct_init (Token identifier, DataTypeMember *members)
+{
+	DataTypeStruct *t = mem_alloc(sizeof(*t));
+	t->identifier = identifier;
+	t->members = members;
+	return t;
+}
+
 DataType *dataType_initU16 (void)
 {
 	DataType *t = dataType_init(DataType_U16);
@@ -207,6 +233,11 @@ bool dataType_isPointer (DataType *t)
 	return t->type == DataType_Pointer;
 }
 
+bool dataType_isStruct (DataType *t)
+{
+	return t->type == DataType_Struct;
+}
+
 bool dataType_isU16 (DataType *t)
 {
 	return t->type == DataType_U16;
@@ -281,6 +312,12 @@ size_t dataType_getSize (DataType *t)
 		case DataType_U32: return DWORD;
 		case DataType_U64: return QWORD;
 		case DataType_U8: return BYTE;
+		case DataType_Struct:
+			size_t s = 0;
+			for (DataTypeMember *m = t->as.struct_->members; m != NULL; m = m->next) {
+				s += dataType_getSize(m->dataType);
+			}
+			return s;
 		default:
 	}
 	return 0;

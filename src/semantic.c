@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "err.h"
 #include "linked_list.h"
@@ -11,6 +12,7 @@ static void visitRoot (AstRoot *node);
 
 static void visitDeclaration (AstDeclaration *node);
 static void visitDeclarationFunction (AstDeclarationFunction *node);
+static void visitDeclarationStructD (AstDeclarationStructD *node);
 
 static void visitStatement (AstStatement *node);
 static void visitStatementBlock (AstStatementBlock *node);
@@ -28,6 +30,7 @@ static void visitStatementVar (AstStatementVar *node);
 static void visitStatementWhileC (AstStatementWhileC *node);
 
 static void visitExpression (AstExpression *node);
+static void visitExpressionAccess (AstExpressionAccess *node);
 static void visitExpressionAssign (AstExpressionAssign *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
 static void visitExpressionCall (AstExpressionCall *node);
@@ -170,6 +173,7 @@ static void visitDeclaration (AstDeclaration *node)
 {
 	switch (node->type) {
 		case AstDeclaration_Function: visitDeclarationFunction(node->as.function); break;
+		case AstDeclaration_StructD: visitDeclarationStructD(node->as.structD); break;
 	}
 }
 
@@ -195,6 +199,29 @@ static void visitDeclarationFunction (AstDeclarationFunction *node)
 	analyzer.previousScope = node->scope;
 	visitStatement(node->body);
 	analyzer.currentScope = node->scope;
+	if (node->scope->parent != NULL) {
+		node->scope->parent->physicalSize += node->scope->physicalSize;
+	}
+}
+
+static void visitDeclarationStructD (AstDeclarationStructD *node)
+{
+	Symbol *symbol = symbol_init(node->identifier, node->dataType);
+	if (scope_add(analyzer.currentScope, symbol)) {
+		symbol->physicalIndex = analyzer.currentPhysicalIndex;
+		analyzer.currentPhysicalIndex += dataType_getSize(symbol->type);
+	} else {
+		e(node->identifier, "identifier has already been defined in scope");
+	}
+	analyzer.currentScope = node->scope = scope_init();
+	analyzer.currentPhysicalIndex = 0;
+	node->scope->parent = analyzer.previousScope;
+	for (AstParameter *member = node->members; member != NULL; member = member->next) {
+		analyzer.previousScope = node->scope;
+		AstStatement *memberinit = ast_initStatementVar(member->identifier, member->type);
+		visitStatement(memberinit);
+		analyzer.currentScope = node->scope;
+	}
 	if (node->scope->parent != NULL) {
 		node->scope->parent->physicalSize += node->scope->physicalSize;
 	}
@@ -361,6 +388,14 @@ static void visitStatementSwitchC (AstStatementSwitchC *node)
 static void visitStatementVar (AstStatementVar *node)
 {
 	Symbol *symbol = symbol_init(node->identifier, node->type);
+	if (dataType_isStruct(symbol->type)) {
+		Symbol *s = telescope_get(analyzer.currentScope, symbol->type->as.struct_->identifier);
+		if (s == NULL) {
+			e(symbol->type->as.struct_->identifier, "unrecognized type");
+			exit(1);
+		}
+		symbol->type->as.struct_->members = s->type->as.struct_->members;
+	}
 	if (scope_add(analyzer.currentScope, symbol)) {
 		symbol->physicalIndex = analyzer.currentPhysicalIndex;
 		analyzer.currentPhysicalIndex += dataType_getSize(symbol->type);
@@ -386,6 +421,11 @@ static void visitStatementWhileC (AstStatementWhileC *node)
 static void visitExpression (AstExpression *node)
 {
 	switch (node->type) {
+		case AstExpression_Access:
+			visitExpressionAccess(node->as.access);
+			node->dataType = node->as.access->mDataType;
+			node->modifiable = true;
+			break;
 		case AstExpression_Assign:
 			visitExpressionAssign(node->as.assign);
 			node->dataType = node->as.assign->a->dataType;
@@ -477,6 +517,30 @@ static void visitExpression (AstExpression *node)
 			visitExpressionVar(node->as.var);
 			node->modifiable = true;
 			break;
+	}
+}
+
+static void visitExpressionAccess (AstExpressionAccess *node)
+{
+	visitExpression(node->e);
+	if (!dataType_isStruct(node->e->dataType)) {
+		e(node->op, "operand must be of type struct");
+		exit(1);
+	}
+	if (!node->e->modifiable) {
+		e(node->op, "operand must be modifiable");
+	}
+	Symbol *s = telescope_get(analyzer.currentScope, node->e->dataType->as.struct_->identifier);
+	node->mDataType = NULL;
+	for (DataTypeMember *member = s->type->as.struct_->members; member != NULL; member = member->next) {
+		if (token_equal(node->mToken, member->identifier)) {
+			node->mDataType = member->dataType;
+			break;
+		}
+	}
+	if (node->mDataType == NULL) {
+		e(node->mToken, "unrecognized member");
+		exit(1);
 	}
 }
 
