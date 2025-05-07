@@ -192,6 +192,9 @@ static void visitDeclarationFunction (AstDeclarationFunction *node)
 	node->scope->parent = analyzer.previousScope;
 	for (AstParameter *parameter = node->parameters; parameter != NULL; parameter = parameter->next) {
 		analyzer.previousScope = node->scope;
+		if (dataType_isStruct(parameter->type)) {
+			e(parameter->identifier, "cannot pass structs. please use a pointer to a struct instead");
+		}
 		AstStatement *paraminit = ast_initStatementVar(parameter->identifier, parameter->type);
 		visitStatement(paraminit);
 		analyzer.currentScope = node->scope;
