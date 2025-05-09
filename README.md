@@ -1,7 +1,7 @@
 # arpl - a random programming language
 compiler for a small toy language that I built
 
-I have not documented anything very much nor did I organize anything very well as this is my first time doing something like this and was merely to probe the field.
+I have not documented anything very much nor do I plan on it as this is my first time doing something like this and my goal was merely to probe the field.
 
 ## build
 ```
