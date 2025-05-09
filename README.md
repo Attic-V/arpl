@@ -1,5 +1,7 @@
 # arpl - a random programming language
-compiler
+compiler for a small toy language that I built
+
+I have not documented anything very much nor did I organize anything very well as this is my first time doing something like this and was merely to probe the field.
 
 ## build
 ```
@@ -26,10 +28,9 @@ the executable will be in bin
 * i64
 * bool
 * pointer
+* user defined structs
 
 ### misc
-All datatypes are immutable by default. To make a datatype mutable, add the `mut` keyword before it.
-
 Use `->` to perform type casting. For example: `n -> i32` is an expression that casts `n` to an `i32`.
 
 ## examples
@@ -44,5 +45,14 @@ fn add (a i32, b i32) i32
 fn main () i32
 {
     return add(2, 3);
+}
+```
+
+### structs
+```arpl
+struct SomeStruct {
+    a u8
+    b i32
+    c bool
 }
 ```
