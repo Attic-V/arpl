@@ -199,6 +199,9 @@ static void visitDeclarationFunction (AstDeclarationFunction *node)
 		visitStatement(paraminit);
 		analyzer.currentScope = node->scope;
 	}
+	if (dataType_isStruct(node->dataType->as.function->returnType)) {
+		e(node->identifier, "cannot return a struct");
+	}
 	analyzer.previousScope = node->scope;
 	visitStatement(node->body);
 	analyzer.currentScope = node->scope;
