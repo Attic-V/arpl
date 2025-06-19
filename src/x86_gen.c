@@ -6,50 +6,56 @@
 #include "memory.h"
 #include "x86_gen.h"
 
+#define TRANSFORMERS \
+	X(Access) \
+	X(Add) \
+	X(And) \
+	X(Assign) \
+	X(Call) \
+	X(Cast) \
+	X(Copy) \
+	X(Dec) \
+	X(Deref) \
+	X(Equ) \
+	X(FnRef) \
+	X(FunctionEnd) \
+	X(FunctionStart) \
+	X(Inc) \
+	X(Jmp) \
+	X(JmpFalse) \
+	X(JmpTrue) \
+	X(Label) \
+	X(Less) \
+	X(LessEqu) \
+	X(Mul) \
+	X(Neg) \
+	X(Not) \
+	X(NotEqu) \
+	X(Or) \
+	X(Parameter) \
+	X(Pop) \
+	X(Push) \
+	X(Ref) \
+	X(Reserve) \
+	X(Restore) \
+	X(Ret) \
+	X(Sar) \
+	X(Shl) \
+	X(Store) \
+	X(Sub) \
+	X(Val) \
+	X(Xor)
+
 #define push(register) emit("\tpush    " #register)
 #define pop(register) emit("\tpop     " #register)
 
 static void emit (char *format, ...);
 
 static void transform (Ir *r);
-static void transformAccess (Ir *ir);
-static void transformAdd (Ir *ir);
-static void transformAnd (Ir *ir);
-static void transformAssign (Ir *ir);
-static void transformCall (Ir *ir);
-static void transformCast (Ir *ir);
-static void transformCopy (Ir *ir);
-static void transformDec (Ir *ir);
-static void transformDeref (Ir *ir);
-static void transformEqu (Ir *ir);
-static void transformFnRef (Ir *ir);
-static void transformFunctionEnd (Ir *ir);
-static void transformFunctionStart (Ir *ir);
-static void transformInc (Ir *ir);
-static void transformJmp (Ir *ir);
-static void transformJmpFalse (Ir *ir);
-static void transformJmpTrue (Ir *ir);
-static void transformLabel (Ir *ir);
-static void transformLess (Ir *ir);
-static void transformLessEqu (Ir *ir);
-static void transformMul (Ir *ir);
-static void transformNeg (Ir *ir);
-static void transformNot (Ir *ir);
-static void transformNotEqu (Ir *ir);
-static void transformOr (Ir *ir);
-static void transformParameter (Ir *ir);
-static void transformPop (Ir *ir);
-static void transformPush (Ir *ir);
-static void transformRef (Ir *ir);
-static void transformReserve (Ir *ir);
-static void transformRestore (Ir *ir);
-static void transformRet (Ir *ir);
-static void transformSar (Ir *ir);
-static void transformShl (Ir *ir);
-static void transformStore (Ir *ir);
-static void transformSub (Ir *ir);
-static void transformVal (Ir *ir);
-static void transformXor (Ir *ir);
+
+#define X(name) static void transform##name (Ir *ir);
+TRANSFORMERS
+#undef X
 
 typedef enum {
 	r8,
@@ -291,53 +297,17 @@ void gen_x86 (Ir *ir)
 
 static void transform (Ir *r)
 {
-	#define transformer(type) [Ir_##type] = transform##type
+
+	#define X(type) [Ir_##type] = transform##type,
 	static void (*transformers[])(Ir *ir) = {
-		transformer(Access),
-		transformer(Add),
-		transformer(And),
-		transformer(Assign),
-		transformer(Call),
-		transformer(Cast),
-		transformer(Copy),
-		transformer(Dec),
-		transformer(Deref),
-		transformer(Equ),
-		transformer(FnRef),
-		transformer(FunctionEnd),
-		transformer(FunctionStart),
-		transformer(Inc),
-		transformer(Jmp),
-		transformer(JmpFalse),
-		transformer(JmpTrue),
-		transformer(Label),
-		transformer(Less),
-		transformer(LessEqu),
-		transformer(Mul),
-		transformer(Neg),
-		transformer(Not),
-		transformer(NotEqu),
-		transformer(Or),
-		transformer(Parameter),
-		transformer(Pop),
-		transformer(Push),
-		transformer(Ref),
-		transformer(Reserve),
-		transformer(Restore),
-		transformer(Ret),
-		transformer(Sar),
-		transformer(Shl),
-		transformer(Store),
-		transformer(Sub),
-		transformer(Val),
-		transformer(Xor),
+		TRANSFORMERS
 	};
+	#undef X
 	if (transformers[r->type] == NULL) {
 		fprintf(stderr, "deverr: x86gen: undefined transformer. ir type: %d\n", r->type);
 		exit(1);
 	}
 	transformers[r->type](r);
-	#undef transformer
 }
 
 static void transformAccess (Ir *ir)
