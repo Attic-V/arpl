@@ -46,9 +46,11 @@ Arena *arena_init (size_t size)
 
 void arena_free (Arena *arena)
 {
-	for (Region *region = arena->region; region != NULL; region = region->previous) {
-		free(region->memory);
-		free(region);
+	for (Region *region = arena->region; region != NULL; ) {
+		Region *temp = region;
+		region = region->previous;
+		free(temp->memory);
+		free(temp);
 	}
 	free(arena);
 }
