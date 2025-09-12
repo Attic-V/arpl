@@ -1,30 +1,36 @@
-SRC_DIR := src
-OBJ_DIR := build
-BIN_DIR := bin
-
-EXE := $(BIN_DIR)/arpl
-SRC := $(wildcard $(SRC_DIR)/*.c)
-OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-
-CPPFLAGS := -Iinclude -MMD -MP
-CFLAGS   := -std=c99 -Wall -Werror -Wextra -pedantic
-LDFLAGS  := -Llib
-LDLIBS   := -lm
-
 .PHONY: all clean
 
-all: $(EXE)
+TARGET := arpl
 
-$(EXE): $(OBJ) | $(BIN_DIR)
-	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+BUILD_DIR := build
+OBJ_DIR := $(BUILD_DIR)/obj
+DEP_DIR := $(BUILD_DIR)/dep
+SRC_DIR := src
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+SRC := $(wildcard $(SRC_DIR)/*.c)
+OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+DEP := $(SRC:$(SRC_DIR)/%.c=$(DEP_DIR)/%.d)
 
-$(BIN_DIR) $(OBJ_DIR):
+CC := gcc
+
+CFLAGS := -std=c99 -Wall -Werror -Wextra -pedantic
+CPPFLAGS := -MMD -MP -Iinclude
+
+all: $(BUILD_DIR)/$(TARGET)
+
+$(BUILD_DIR)/$(TARGET): $(OBJ) | $(BUILD_DIR)
+	@ echo "linking objects"
+	@ $(CC) $^ -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR) $(DEP_DIR)
+	@ echo "compiling $*.c"
+	@ $(CC) $(CPPFLAGS) $(CFLAGS) -MF $(DEP_DIR)/$*.d -c -o $@ $<
+
+$(BUILD_DIR) $(OBJ_DIR) $(DEP_DIR):
 	mkdir -p $@
 
 clean:
-	@ $(RM) -rv $(BIN_DIR) $(OBJ_DIR)
+	@ $(RM) -rv $(BUILD_DIR)
 
--include $(OBJ:.o=.d)
+-include $(DEP)
+
