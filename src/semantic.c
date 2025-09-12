@@ -620,7 +620,9 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 }
 
 static void visitExpressionBoolean (AstExpressionBoolean *node)
-{ }
+{
+	(void)node;
+}
 
 static void visitExpressionCall (AstExpressionCall *node)
 {
@@ -659,7 +661,9 @@ static void visitExpressionCast (AstExpressionCast *node)
 }
 
 static void visitExpressionNumber (AstExpressionNumber *node)
-{ }
+{
+	(void)node;
+}
 
 static void visitExpressionPostfix (AstExpressionPostfix *node)
 {
@@ -741,7 +745,9 @@ static void visitExpressionTernary (AstExpressionTernary *node)
 }
 
 static void visitExpressionVar (AstExpressionVar *node)
-{ }
+{
+	(void)node;
+}
 
 static bool canCoerce (DataType *from, DataType *to)
 {

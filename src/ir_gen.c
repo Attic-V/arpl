@@ -125,7 +125,9 @@ static void visitDeclarationFunction (AstDeclarationFunction *declaration)
 }
 
 static void visitDeclarationStructD (AstDeclarationStructD *declaration)
-{ }
+{
+	(void)declaration;
+}
 
 static void visitStatement (AstStatement *statement)
 {
@@ -160,6 +162,8 @@ static void visitStatementBlock (AstStatementBlock *statement)
 
 static void visitStatementBreakL (AstStatementBreakL *statement)
 {
+	(void)statement;
+
 	addInstruction(ir_initJmp(gen.breakLabel));
 }
 
@@ -186,6 +190,8 @@ static void visitStatementCaseL (AstStatementCaseL *statement)
 
 static void visitStatementContinueL (AstStatementContinueL *statement)
 {
+	(void)statement;
+
 	addInstruction(ir_initJmp(gen.continueLabel));
 }
 
@@ -286,7 +292,9 @@ static void visitStatementSwitchC (AstStatementSwitchC *statement)
 }
 
 static void visitStatementVar (AstStatementVar *statement)
-{ }
+{
+	(void)statement;
+}
 
 static void visitStatementWhileC (AstStatementWhileC *statement)
 {

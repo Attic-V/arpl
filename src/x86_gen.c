@@ -82,6 +82,8 @@ static void Cast_interpret (DataType *from, DataType *to)
 
 static void Cast_narrow (DataType *from, DataType *to)
 {
+	(void)from;
+
 	pop(r8);
 	emit("\tmov     %s, %s", reg[r8][dataType_getSize(to)], reg[r8][dataType_getSize(to)]);
 	push(r8);
