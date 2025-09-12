@@ -8,6 +8,7 @@
 typedef struct DataType DataType;
 
 typedef struct {
+	char _unused;
 } DataTypeBoolean;
 
 typedef struct {
@@ -16,15 +17,19 @@ typedef struct {
 } DataTypeFunction;
 
 typedef struct {
+	char _unused;
 } DataTypeI16;
 
 typedef struct {
+	char _unused;
 } DataTypeI32;
 
 typedef struct {
+	char _unused;
 } DataTypeI64;
 
 typedef struct {
+	char _unused;
 } DataTypeI8;
 
 typedef struct {
@@ -47,15 +52,19 @@ struct DataTypeMember {
 };
 
 typedef struct {
+	char _unused;
 } DataTypeU16;
 
 typedef struct {
+	char _unused;
 } DataTypeU32;
 
 typedef struct {
+	char _unused;
 } DataTypeU64;
 
 typedef struct {
+	char _unused;
 } DataTypeU8;
 
 typedef enum {

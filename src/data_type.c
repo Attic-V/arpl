@@ -295,9 +295,8 @@ bool dataType_equal (DataType *a, DataType *b)
 		case DataType_U32: return true;
 		case DataType_U64: return true;
 		case DataType_U8: return true;
-		default:
+		default: return false;
 	}
-	return false;
 }
 
 size_t dataType_getSize (DataType *t)
@@ -313,15 +312,15 @@ size_t dataType_getSize (DataType *t)
 		case DataType_U32: return DWORD;
 		case DataType_U64: return QWORD;
 		case DataType_U8: return BYTE;
-		case DataType_Struct:
+		case DataType_Struct: {
 			size_t s = 0;
 			for (DataTypeMember *m = t->as.struct_->members; m != NULL; m = m->next) {
 				s += dataType_getSize(m->dataType);
 			}
 			return s;
-		default:
+		}
+		default: return 0;
 	}
-	return 0;
 }
 
 DataType *dataType_smallestInt (size_t value)

@@ -23,6 +23,7 @@ typedef struct {
 } IrAssign;
 
 typedef struct {
+	char _unused;
 } IrCall;
 
 typedef struct {
@@ -31,6 +32,7 @@ typedef struct {
 } IrCast;
 
 typedef struct {
+	char _unused;
 } IrCopy;
 
 typedef struct {
@@ -50,6 +52,7 @@ typedef struct {
 } IrFnRef;
 
 typedef struct {
+	char _unused;
 } IrFunctionEnd;
 
 typedef struct {
@@ -111,6 +114,7 @@ typedef struct {
 } IrParameter;
 
 typedef struct {
+	char _unused;
 } IrPop;
 
 typedef struct {
@@ -126,9 +130,11 @@ typedef struct {
 } IrReserve;
 
 typedef struct {
+	char _unused;
 } IrRestore;
 
 typedef struct {
+	char _unused;
 } IrRet;
 
 typedef struct {
@@ -140,6 +146,7 @@ typedef struct {
 } IrShl;
 
 typedef struct {
+	char _unused;
 } IrStore;
 
 typedef struct {

@@ -105,18 +105,18 @@ static void *region_allocateSegment (Region *region, size_t size)
 
 static void *region_allocateRaw (Region *region, size_t size)
 {
-	region->previousMem = region->memory + region->offset;
+	region->previousMem = (char *)region->memory + region->offset;
 	if (region->offset + size > region->size) {
 		return NULL;
 	}
-	void *ptr = region->memory + region->offset;
+	void *ptr = (char *)region->memory + region->offset;
 	region->offset += size;
 	return ptr;
 }
 
 static void *region_reallocate (Region *region, void *ptr, size_t size)
 {
-	size_t oldsize = *(size_t *)(ptr - sizeof(oldsize));
+	size_t oldsize = *(size_t *)((char *)ptr - sizeof(oldsize));
 	if (size < oldsize) {
 		return ptr;
 	}

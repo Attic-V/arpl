@@ -93,7 +93,7 @@ static AstDeclaration *getDeclaration (void)
 	switch (parser.tokens[parser.current].type) {
 		case TT_Fn: return getDeclarationFunction();
 		case TT_Struct: return getDeclarationStructD();
-		default:
+		default:;
 	}
 	err(parser.tokens[parser.current], "expected start of declaration");
 	exit(1);
@@ -144,9 +144,8 @@ static AstStatement *getStatement (void)
 		case TT_Switch: return getStatementSwitchC();
 		case TT_Var: return getStatementVar();
 		case TT_While: return getStatementWhileC();
-		default:
+		default: return getStatementExpr();
 	}
-	return getStatementExpr();
 }
 
 static AstStatement *getStatementBlock (void)
@@ -519,17 +518,18 @@ static AstExpression *getExpressionPrimary (void)
 	switch (token.type) {
 		case TT_Number:
 			return ast_initExpressionNumber(token);
-		case TT_LParen:
+		case TT_LParen: {
 			AstExpression *expression = getExpression();
 			expect(RParen, ')');
 			return expression;
+		}
 		case TT_True:
 			return ast_initExpressionBoolean(true);
 		case TT_False:
 			return ast_initExpressionBoolean(false);
 		case TT_Identifier:
 			return ast_initExpressionVar(token);
-		default:
+		default:;
 	}
 	err(token, "expected expression");
 	exit(1);
@@ -562,7 +562,7 @@ static DataType *getType (void)
 		case TT_Bool: return dataType_initBoolean();
 		case TT_Star: return dataType_initPointer(getType());
 		case TT_Struct: return dataType_initStruct(expect(Identifier, identifier), NULL);
-		default:
+		default:;
 	}
 	err(token, "expected type");
 	exit(1);

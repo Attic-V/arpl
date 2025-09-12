@@ -341,7 +341,7 @@ static void visitExpressionAccess (AstExpression *expression)
 		case TT_Dot_Dot:
 			st = telescope_get(gen.scope, e->e->dataType->as.pointer->to->as.struct_->identifier);
 			break;
-		default:
+		default:;
 	}
 	DataTypeStruct *t = st->type->as.struct_;
 	DataTypeMember *mtype = NULL;
@@ -386,7 +386,7 @@ static void visitExpressionAssign (AstExpression *expression)
 			visitExpression(e->b);
 			addInstruction(ir_initMul(size));
 			break;
-		default:
+		default:;
 	}
 	addInstruction(ir_initAssign(size));
 	addInstruction(ir_initDeref(size));
@@ -413,7 +413,7 @@ static void visitExpressionBinary (AstExpression *expression)
 		case TT_Plus: addInstruction(ir_initAdd(size)); break;
 		case TT_Minus: addInstruction(ir_initSub(size)); break;
 		case TT_Star: addInstruction(ir_initMul(size)); break;
-		default:
+		default:;
 	}
 }
 
@@ -469,7 +469,7 @@ static void visitExpressionPostfix (AstExpression *expression)
 	switch (e->operator.type) {
 		case TT_Plus_Plus: addInstruction(ir_initInc(size)); break;
 		case TT_Minus_Minus: addInstruction(ir_initDec(size)); break;
-		default:
+		default:;
 	}
 	addInstruction(ir_initPop());
 }
@@ -509,7 +509,7 @@ static void visitExpressionPrefix (AstExpression *expression)
 		case TT_Tilde:
 			addInstruction(ir_initNot(size));
 			break;
-		default:
+		default:;
 	}
 }
 

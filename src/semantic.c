@@ -456,7 +456,7 @@ static void visitExpression (AstExpression *node)
 				case TT_Pipe_Pipe:
 					node->dataType = dataType_initBoolean();
 					break;
-				default:
+				default:;
 			}
 			break;
 		case AstExpression_Boolean:
@@ -484,7 +484,7 @@ static void visitExpression (AstExpression *node)
 				case TT_Plus_Plus:
 					node->dataType = node->as.postfix->e->dataType;
 					break;
-				default:
+				default:;
 			}
 			break;
 		case AstExpression_Prefix:
@@ -505,14 +505,14 @@ static void visitExpression (AstExpression *node)
 					node->dataType = node->as.prefix->e->dataType->as.pointer->to;
 					node->modifiable = true;
 					break;
-				default:
+				default:;
 			}
 			break;
 		case AstExpression_Ternary:
 			visitExpressionTernary(node->as.ternary);
 			node->dataType = node->as.ternary->a->dataType;
 			break;
-		case AstExpression_Var:
+		case AstExpression_Var: {
 			Symbol *symbol = telescope_get(analyzer.currentScope, node->as.var->identifier);
 			if (symbol == NULL) {
 				e(node->as.var->identifier, "undeclared identifier");
@@ -523,6 +523,7 @@ static void visitExpression (AstExpression *node)
 			visitExpressionVar(node->as.var);
 			node->modifiable = true;
 			break;
+		}
 	}
 }
 
@@ -551,7 +552,7 @@ static void visitExpressionAccess (AstExpressionAccess *node)
 			}
 			s = telescope_get(analyzer.currentScope, node->e->dataType->as.pointer->to->as.struct_->identifier);
 			break;
-		default:
+		default:;
 	}
 	node->mDataType = NULL;
 	for (DataTypeMember *member = s->type->as.struct_->members; member != NULL; member = member->next) {
@@ -608,7 +609,7 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 		case TT_Bang_Equal:
 		case TT_Equal_Equal:
 			break;
-		default:
+		default:;
 	}
 	if (!dataType_equal(node->a->dataType, node->b->dataType)) {
 		if (!coerce(node->a, node->b->dataType) && !coerce(node->b, node->a->dataType)) {
@@ -678,7 +679,7 @@ static void visitExpressionPostfix (AstExpressionPostfix *node)
 				e(node->e->as.var->identifier, "expression must be modifiable");
 			}
 			break;
-		default:
+		default:;
 	}
 }
 
@@ -719,7 +720,7 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 				exit(1);
 			}
 			break;
-		default:
+		default:;
 	}
 }
 
