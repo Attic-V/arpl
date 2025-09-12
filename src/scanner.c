@@ -43,7 +43,7 @@ Token *scan (char *source)
 				continue;
 
 			case '&': addToken(match('&') ? TT_And_And : TT_And); continue;
-			case '!':	addToken(match('=') ? TT_Bang_Equal : TT_Bang); continue;
+			case '!': addToken(match('=') ? TT_Bang_Equal : TT_Bang); continue;
 			case '^': addToken(TT_Caret); continue;
 			case ':': addToken(TT_Colon); continue;
 			case ',': addToken(TT_Comma); continue;
