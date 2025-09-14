@@ -42,13 +42,31 @@ Token *scan (char *source)
 			case ' ':
 				continue;
 
-			case '&': addToken(match('&') ? TT_And_And : TT_And); continue;
-			case '!': addToken(match('=') ? TT_Bang_Equal : TT_Bang); continue;
-			case '^': addToken(TT_Caret); continue;
-			case ':': addToken(TT_Colon); continue;
-			case ',': addToken(TT_Comma); continue;
-			case '.': addToken(match('.') ? TT_Dot_Dot : TT_Dot); continue;
-			case '=': addToken(match('=') ? TT_Equal_Equal : TT_Equal); continue;
+			case '^': addToken(     TT_Caret       ); continue;
+			case ':': addToken(     TT_Colon       ); continue;
+			case ',': addToken(     TT_Comma       ); continue;
+			case '{': addToken(     TT_LBrace      ); continue;
+			case '[': addToken(     TT_LBracket    ); continue;
+			case '(': addToken(     TT_LParen      ); continue;
+			case '?': addToken(     TT_Question    ); continue;
+			case '}': addToken(     TT_RBrace      ); continue;
+			case ']': addToken(     TT_RBracket    ); continue;
+			case ')': addToken(     TT_RParen      ); continue;
+			case ';': addToken(     TT_Semicolon   ); continue;
+			case '~': addToken(     TT_Tilde       ); continue;
+
+			case '&': addToken(     match('&') ? TT_And_And           : TT_And         ); continue;
+			case '!': addToken(     match('=') ? TT_Bang_Equal        : TT_Bang        ); continue;
+			case '.': addToken(     match('.') ? TT_Dot_Dot           : TT_Dot         ); continue;
+			case '=': addToken(     match('=') ? TT_Equal_Equal       : TT_Equal       ); continue;
+			case '|': addToken(     match('|') ? TT_Pipe_Pipe         : TT_Pipe        ); continue;
+			case '*': addToken(     match('=') ? TT_Star_Equal        : TT_Star        ); continue;
+
+			case '<': addToken(     match('<') ? TT_Less_Less         : match('=') ? TT_Less_Equal        : TT_Less        ); continue;
+			case '+': addToken(     match('=') ? TT_Plus_Equal        : match('+') ? TT_Plus_Plus         : TT_Plus        ); continue;
+
+			case '-': addToken(     match('>') ? TT_Minus_Greater     : match('-') ? TT_Minus_Minus       : match('=') ? TT_Minus_Equal       : TT_Minus       ); continue;
+
 			case '>':
 				if (check('>')) {
 					scanner.current++;
@@ -56,20 +74,6 @@ Token *scan (char *source)
 					continue;
 				}
 				break;
-			case '{': addToken(TT_LBrace); continue;
-			case '[': addToken(TT_LBracket); continue;
-			case '<': addToken(match('<') ? TT_Less_Less : match('=') ? TT_Less_Equal : TT_Less); continue;
-			case '(': addToken(TT_LParen); continue;
-			case '-': addToken(match('>') ? TT_Minus_Greater : match('-') ? TT_Minus_Minus : match('=') ? TT_Minus_Equal : TT_Minus); continue;
-			case '|': addToken(match('|') ? TT_Pipe_Pipe : TT_Pipe); continue;
-			case '+': addToken(match('=') ? TT_Plus_Equal : match('+') ? TT_Plus_Plus : TT_Plus); continue;
-			case '?': addToken(TT_Question); continue;
-			case '}': addToken(TT_RBrace); continue;
-			case ']': addToken(TT_RBracket); continue;
-			case ')': addToken(TT_RParen); continue;
-			case ';': addToken(TT_Semicolon); continue;
-			case '*': addToken(match('=') ? TT_Star_Equal : TT_Star); continue;
-			case '~': addToken(TT_Tilde); continue;
 			case '/':
 				if (match('/')) {
 					while (!check('\0') && !match('\n')) {
