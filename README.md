@@ -7,7 +7,6 @@ I have not documented anything very much nor do I plan on it as this is my first
 ```
 make
 ```
-the executable will be in bin
 
 ## features
 
