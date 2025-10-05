@@ -13,7 +13,7 @@ DEP := $(SRC:$(SRC_DIR)/%.c=$(DEP_DIR)/%.d)
 
 CC := gcc
 
-CFLAGS := -std=c99 -Wall -Werror -Wextra -pedantic
+CFLAGS := -std=c23 -Wall -Werror -Wextra -pedantic
 CPPFLAGS := -MMD -MP -Iinclude
 
 all: $(BUILD_DIR)/$(TARGET)
