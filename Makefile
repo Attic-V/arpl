@@ -27,7 +27,8 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR) $(DEP_DIR)
 	@ $(CC) $(CPPFLAGS) $(CFLAGS) -MF $(DEP_DIR)/$*.d -c -o $@ $<
 
 $(BUILD_DIR) $(OBJ_DIR) $(DEP_DIR):
-	mkdir -p $@
+	@ echo "creating $@"
+	@ mkdir -p $@
 
 clean:
 	@ $(RM) -rv $(BUILD_DIR)
