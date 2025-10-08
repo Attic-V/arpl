@@ -1,9 +1,9 @@
 # arpl - a random programming language
-compiler for a small toy language that I built
 
-I have not documented anything very much nor do I plan on it as this is my first time doing something like this and my goal was merely to probe the field.
+messy compiler for a small toy language that I built
 
 ## build
+
 ```
 make
 ```
@@ -11,12 +11,14 @@ make
 ## features
 
 ### semantics
+
 * scoping
 * type checking
 * type casting
 * type coercion
 
 ### datatypes
+
 * u8
 * u16
 * u32
@@ -30,11 +32,13 @@ make
 * user defined structs
 
 ### misc
+
 Use `->` to perform type casting. For example: `n -> i32` is an expression that casts `n` to an `i32`.
 
 ## examples
 
 ### functions
+
 ```arpl
 fn add (a i32, b i32) i32
 {
@@ -48,6 +52,7 @@ fn main () i32
 ```
 
 ### structs
+
 ```arpl
 struct SomeStruct {
     a u8
@@ -55,3 +60,4 @@ struct SomeStruct {
     c bool
 }
 ```
+
