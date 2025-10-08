@@ -19,12 +19,14 @@ char *readFile (char *path)
 	char *buffer = (char *)mem_alloc(size + 1);
 	if (buffer == NULL) {
 		fprintf(stderr, "memory allocation failed\n");
+		fclose(file);
 		exit(1);
 	}
 
 	size_t bytesRead = fread(buffer, sizeof(char), size, file);
 	if (bytesRead < size) {
 		fprintf(stderr, "could not read file\n");
+		fclose(file);
 		exit(1);
 	}
 
