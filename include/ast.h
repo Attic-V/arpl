@@ -124,12 +124,6 @@ typedef struct {
 } AstStatementBreakL;
 
 typedef struct {
-	AstExpression *e;
-	AstStatement *body;
-	Token keyword;
-} AstStatementCaseL;
-
-typedef struct {
 	Token keyword;
 } AstStatementContinueL;
 
@@ -171,11 +165,6 @@ typedef struct {
 } AstStatementReturnE;
 
 typedef struct {
-	AstExpression *e;
-	AstStatement *body;
-} AstStatementSwitchC;
-
-typedef struct {
 	Token identifier;
 	DataType *type;
 } AstStatementVar;
@@ -189,7 +178,6 @@ typedef struct {
 typedef enum {
 	AstStatement_Block,
 	AstStatement_BreakL,
-	AstStatement_CaseL,
 	AstStatement_ContinueL,
 	AstStatement_DoWhile,
 	AstStatement_Expr,
@@ -197,7 +185,6 @@ typedef enum {
 	AstStatement_IfE,
 	AstStatement_Init,
 	AstStatement_ReturnE,
-	AstStatement_SwitchC,
 	AstStatement_Var,
 	AstStatement_WhileC,
 } AstStatementType;
@@ -207,7 +194,6 @@ struct AstStatement {
 	union {
 		AstStatementBlock *block;
 		AstStatementBreakL *breakL;
-		AstStatementCaseL *caseL;
 		AstStatementContinueL *continueL;
 		AstStatementDoWhile *doWhile;
 		AstStatementExpr *expr;
@@ -215,7 +201,6 @@ struct AstStatement {
 		AstStatementIfE *ifE;
 		AstStatementInit *init;
 		AstStatementReturnE *returnE;
-		AstStatementSwitchC *switchC;
 		AstStatementVar *var;
 		AstStatementWhileC *whileC;
 	} as;
@@ -291,7 +276,6 @@ AstStatement *ast_initStatementForI (AstStatement *init, AstExpression* conditio
 AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyord);
 AstStatement *ast_initStatementInit (Token identifier, DataType *type, AstExpression *expression, Token operator);
 AstStatement *ast_initStatementReturnE (Token keyword, AstExpression *expression);
-AstStatement *ast_initStatementSwitchC (AstExpression *e, AstStatement *body);
 AstStatement *ast_initStatementVar (Token identifier, DataType *type);
 AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement* a, Token keyword);
 
@@ -311,3 +295,4 @@ AstArgument *ast_initArgument (AstExpression *expression);
 AstParameter *ast_initParameter (Token identifier, DataType *type);
 
 #endif
+

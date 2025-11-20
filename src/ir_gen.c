@@ -17,7 +17,6 @@ static void visitDeclarationStructD (AstDeclarationStructD *declaration);
 static void visitStatement (AstStatement *statement);
 static void visitStatementBlock (AstStatementBlock *statement);
 static void visitStatementBreakL (AstStatementBreakL *statement);
-static void visitStatementCaseL (AstStatementCaseL *statement);
 static void visitStatementContinueL (AstStatementContinueL *statement);
 static void visitStatementDoWhile (AstStatementDoWhile *statement);
 static void visitStatementExpr (AstStatementExpr *statement);
@@ -25,7 +24,6 @@ static void visitStatementForI (AstStatementForI *statement);
 static void visitStatementIfE (AstStatementIfE *statement);
 static void visitStatementInit (AstStatementInit *statement);
 static void visitStatementReturnE (AstStatementReturnE *statement);
-static void visitStatementSwitchC (AstStatementSwitchC *statement);
 static void visitStatementVar (AstStatementVar *statement);
 static void visitStatementWhileC (AstStatementWhileC *statement);
 
@@ -134,7 +132,6 @@ static void visitStatement (AstStatement *statement)
 	switch (statement->type) {
 		case AstStatement_Block: visitStatementBlock(statement->as.block); break;
 		case AstStatement_BreakL: visitStatementBreakL(statement->as.breakL); break;
-		case AstStatement_CaseL: visitStatementCaseL(statement->as.caseL); break;
 		case AstStatement_ContinueL: visitStatementContinueL(statement->as.continueL); break;
 		case AstStatement_DoWhile: visitStatementDoWhile(statement->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(statement->as.expr); break;
@@ -142,7 +139,6 @@ static void visitStatement (AstStatement *statement)
 		case AstStatement_IfE: visitStatementIfE(statement->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(statement->as.init); break;
 		case AstStatement_ReturnE: visitStatementReturnE(statement->as.returnE); break;
-		case AstStatement_SwitchC: visitStatementSwitchC(statement->as.switchC); break;
 		case AstStatement_Var: visitStatementVar(statement->as.var); break;
 		case AstStatement_WhileC: visitStatementWhileC(statement->as.whileC); break;
 	}
@@ -165,27 +161,6 @@ static void visitStatementBreakL (AstStatementBreakL *statement)
 	(void)statement;
 
 	addInstruction(ir_initJmp(gen.breakLabel));
-}
-
-static void visitStatementCaseL (AstStatementCaseL *statement)
-{
-	int l0 = gen.label++;
-	if (statement->e != NULL) {
-		addInstruction(ir_initCopy());
-		visitExpression(statement->e);
-		addInstruction(ir_initEqu(dataType_getSize(statement->e->dataType)));
-		addInstruction(ir_initJmpFalse(l0));
-	}
-	addInstruction(ir_initLabel(gen.nextCaseBodyLabel));
-	IrGenerator snapshot = getSnapshot();
-	for (AstStatement *s = statement->body; s != NULL; s = s->next) {
-		visitStatement(s);
-		restoreSnapshot_continueLabel(snapshot);
-		restoreSnapshot_breakLabel(snapshot);
-	}
-	gen.nextCaseBodyLabel = gen.label++;
-	addInstruction(ir_initJmp(gen.nextCaseBodyLabel));
-	addInstruction(ir_initLabel(l0));
 }
 
 static void visitStatementContinueL (AstStatementContinueL *statement)
@@ -277,18 +252,6 @@ static void visitStatementReturnE (AstStatementReturnE *statement)
 		visitExpression(statement->expression);
 	}
 	addInstruction(ir_initRet());
-}
-
-static void visitStatementSwitchC (AstStatementSwitchC *statement)
-{
-	int l0 = gen.label++;
-	gen.breakLabel = l0;
-	gen.nextCaseBodyLabel = gen.label++;
-	visitExpression(statement->e);
-	visitStatement(statement->body);
-	addInstruction(ir_initLabel(gen.nextCaseBodyLabel));
-	addInstruction(ir_initLabel(l0));
-	addInstruction(ir_initPop());
 }
 
 static void visitStatementVar (AstStatementVar *statement)

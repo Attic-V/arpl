@@ -1,6 +1,6 @@
 # arpl - a random programming language
 
-messy compiler for a small toy language that I built
+compiler for a small toy language that I built
 
 ## build
 

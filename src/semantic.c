@@ -17,7 +17,6 @@ static void visitDeclarationStructD (AstDeclarationStructD *node);
 static void visitStatement (AstStatement *node);
 static void visitStatementBlock (AstStatementBlock *node);
 static void visitStatementBreakL (AstStatementBreakL *node);
-static void visitStatementCaseL (AstStatementCaseL *node);
 static void visitStatementContinueL (AstStatementContinueL *node);
 static void visitStatementDoWhile (AstStatementDoWhile *node);
 static void visitStatementExpr (AstStatementExpr *node);
@@ -25,7 +24,6 @@ static void visitStatementForI (AstStatementForI *node);
 static void visitStatementIfE (AstStatementIfE *node);
 static void visitStatementInit (AstStatementInit *node);
 static void visitStatementReturnE (AstStatementReturnE *node);
-static void visitStatementSwitchC (AstStatementSwitchC *node);
 static void visitStatementVar (AstStatementVar *node);
 static void visitStatementWhileC (AstStatementWhileC *node);
 
@@ -202,7 +200,6 @@ static void visitStatement (AstStatement *node)
 	switch (node->type) {
 		case AstStatement_Block: visitStatementBlock(node->as.block); break;
 		case AstStatement_BreakL: visitStatementBreakL(node->as.breakL); break;
-		case AstStatement_CaseL: visitStatementCaseL(node->as.caseL); break;
 		case AstStatement_ContinueL: visitStatementContinueL(node->as.continueL); break;
 		case AstStatement_DoWhile: visitStatementDoWhile(node->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
@@ -210,7 +207,6 @@ static void visitStatement (AstStatement *node)
 		case AstStatement_IfE: visitStatementIfE(node->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(node->as.init); break;
 		case AstStatement_ReturnE: visitStatementReturnE(node->as.returnE); break;
-		case AstStatement_SwitchC: visitStatementSwitchC(node->as.switchC); break;
 		case AstStatement_Var: visitStatementVar(node->as.var); break;
 		case AstStatement_WhileC: visitStatementWhileC(node->as.whileC); break;
 	}
@@ -238,20 +234,6 @@ static void visitStatementBreakL (AstStatementBreakL *node)
 {
 	if (!analyzer.canBreak) {
 		e(node->keyword, "cannot be used here");
-	}
-}
-
-static void visitStatementCaseL (AstStatementCaseL *node)
-{
-	if (node->e != NULL) {
-		visitExpression(node->e);
-		if (!dataType_equal(node->e->dataType, analyzer.caseExpressionType)) {
-			e(node->keyword, "case expression type must match type of expression in switch");
-		}
-		node->e->modifiable = false;
-	}
-	for (AstStatement *s = node->body; s != NULL; s = s->next) {
-		visitStatement(s);
 	}
 }
 
@@ -344,15 +326,6 @@ static void visitStatementReturnE (AstStatementReturnE *node)
 			}
 		}
 	}
-}
-
-static void visitStatementSwitchC (AstStatementSwitchC *node)
-{
-	visitExpression(node->e);
-	analyzer.caseExpressionType = node->e->dataType;
-	analyzer.canBreak = true;
-	visitStatement(node->body);
-	node->e->modifiable = false;
 }
 
 static void visitStatementVar (AstStatementVar *node)

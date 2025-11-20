@@ -17,14 +17,12 @@ static AstDeclaration *getDeclarationStructD (void);
 static AstStatement *getStatement (void);
 static AstStatement *getStatementBlock (void);
 static AstStatement *getStatementBreakL (void);
-static AstStatement *getStatementCaseL (void);
 static AstStatement *getStatementContinueL (void);
 static AstStatement *getStatementDoWhile (void);
 static AstStatement *getStatementExpr (void);
 static AstStatement *getStatementForI (void);
 static AstStatement *getStatementIfE (void);
 static AstStatement *getStatementReturnE (void);
-static AstStatement *getStatementSwitchC (void);
 static AstStatement *getStatementVar (void);
 static AstStatement *getStatementWhileC (void);
 
@@ -141,7 +139,6 @@ static AstStatement *getStatement (void)
 		case TT_If: return getStatementIfE();
 		case TT_LBrace: return getStatementBlock();
 		case TT_Return: return getStatementReturnE();
-		case TT_Switch: return getStatementSwitchC();
 		case TT_Var: return getStatementVar();
 		case TT_While: return getStatementWhileC();
 		default: return getStatementExpr();
@@ -166,26 +163,6 @@ static AstStatement *getStatementBreakL (void)
 	Token keyword = expect(Break, 'break');
 	expect(Semicolon, ';');
 	return ast_initStatementBreakL(keyword);
-}
-
-static AstStatement *getStatementCaseL (void)
-{
-	Token keyword;
-	AstExpression *expression = NULL;
-	if (check(TT_Case)) {
-		keyword = expect(Case, 'case');
-		expression = getExpression();
-	} else {
-		keyword = expect(Default, 'default');
-	}
-	expect(Colon, ':');
-	AstStatement *statements = NULL;
-	while (!(check(TT_Case) || check(TT_Default) || check(TT_RBrace))) {
-		AstStatement *statement = getStatement();
-		dll_shove(statements, statement);
-	}
-	dll_rewind(statements);
-	return ast_initStatementCaseL(expression, statements, keyword);
 }
 
 static AstStatement *getStatementContinueL (void)
@@ -267,24 +244,6 @@ static AstStatement *getStatementReturnE (void)
 	}
 	expect(Semicolon, ';');
 	return ast_initStatementReturnE(keyword, expression);
-}
-
-static AstStatement *getStatementSwitchC (void)
-{
-	expect(Switch, 'switch');
-	expect(LParen, '(');
-	AstExpression *expression = getExpression();
-	expect(RParen, ')');
-	expect(LBrace, '{');
-	AstStatement *statements = NULL;
-	while (!check(TT_RBrace)) {
-		AstStatement *statement = getStatementCaseL();
-		dll_shove(statements, statement);
-	}
-	dll_rewind(statements);
-	expect(RBrace, '}');
-	AstStatement *body = ast_initStatementBlock(statements);
-	return ast_initStatementSwitchC(expression, body);
 }
 
 static AstStatement *getStatementVar (void)

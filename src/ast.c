@@ -11,7 +11,6 @@ static AstDeclarationStructD *astDeclaration_initStructD (Token keyword, Token i
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementBreakL *astStatement_initBreakL (Token keyword);
-static AstStatementCaseL *astStatement_initCaseL (AstExpression *e, AstStatement *body, Token keyword);
 static AstStatementContinueL *astStatement_initContinueL (Token keyword);
 static AstStatementDoWhile *astStatement_initDoWhile (AstStatement *a, AstExpression *condition, Token operator);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
@@ -19,7 +18,6 @@ static AstStatementForI *astStatement_initForI (AstStatement *init, AstExpressio
 static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword);
 static AstStatementInit *astStatement_initInit (Token identifier, DataType *type, AstExpression *expression, Token operator);
 static AstStatementReturnE *astStatement_initReturnE (Token keyword, AstExpression *expression);
-static AstStatementSwitchC *astStatement_initSwitchC (AstExpression *e, AstStatement *body);
 static AstStatementVar *astStatement_initVar (Token identifier, DataType *type);
 static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a, Token keyword);
 
@@ -102,13 +100,6 @@ AstStatement *ast_initStatementBreakL (Token keyword)
 	return statement;
 }
 
-AstStatement *ast_initStatementCaseL (AstExpression *e, AstStatement *body, Token keyword)
-{
-	AstStatement *statement = ast_initStatement(AstStatement_CaseL);
-	statement->as.caseL = astStatement_initCaseL(e, body, keyword);
-	return statement;
-}
-
 AstStatement *ast_initStatementContinueL (Token keyword)
 {
 	AstStatement *statement = ast_initStatement(AstStatement_ContinueL);
@@ -155,13 +146,6 @@ AstStatement *ast_initStatementReturnE (Token keyword, AstExpression *expression
 {
 	AstStatement *statement = ast_initStatement(AstStatement_ReturnE);
 	statement->as.returnE = astStatement_initReturnE(keyword, expression);
-	return statement;
-}
-
-AstStatement *ast_initStatementSwitchC (AstExpression *e, AstStatement *body)
-{
-	AstStatement *statement = ast_initStatement(AstStatement_SwitchC);
-	statement->as.switchC = astStatement_initSwitchC(e, body);
 	return statement;
 }
 
@@ -322,15 +306,6 @@ static AstStatementBreakL *astStatement_initBreakL (Token keyword)
 	return breakL;
 }
 
-static AstStatementCaseL *astStatement_initCaseL (AstExpression *e, AstStatement *body, Token keyword)
-{
-	AstStatementCaseL *caseL = mem_alloc(sizeof(*caseL));
-	caseL->e = e;
-	caseL->body = body;
-	caseL->keyword = keyword;
-	return caseL;
-}
-
 static AstStatementContinueL *astStatement_initContinueL (Token keyword)
 {
 	AstStatementContinueL *continueL = mem_alloc(sizeof(*continueL));
@@ -391,14 +366,6 @@ static AstStatementReturnE *astStatement_initReturnE (Token keyword, AstExpressi
 	returnE->keyword = keyword;
 	returnE->expression = expression;
 	return returnE;
-}
-
-static AstStatementSwitchC *astStatement_initSwitchC (AstExpression *e, AstStatement *body)
-{
-	AstStatementSwitchC *switchC = mem_alloc(sizeof(*switchC));
-	switchC->e = e;
-	switchC->body = body;
-	return switchC;
 }
 
 static AstStatementVar *astStatement_initVar (Token identifier, DataType *type)

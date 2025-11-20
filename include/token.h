@@ -12,7 +12,6 @@ typedef enum {
 	TT_Bool,
 	TT_Break,
 	TT_Caret,
-	TT_Case,
 	TT_Colon,
 	TT_Comma,
 	TT_Continue,
@@ -28,9 +27,6 @@ typedef enum {
 	TT_Fn,
 	TT_For,
 	TT_Greater_Greater,
-	TT_I16,
-	TT_I32,
-	TT_I64,
 	TT_I8,
 	TT_Identifier,
 	TT_If,
@@ -59,13 +55,8 @@ typedef enum {
 	TT_Star,
 	TT_Star_Equal,
 	TT_Struct,
-	TT_Switch,
 	TT_Tilde,
 	TT_True,
-	TT_U8,
-	TT_U16,
-	TT_U32,
-	TT_U64,
 	TT_Var,
 	TT_While,
 } TokenType;
@@ -80,3 +71,4 @@ typedef struct {
 bool token_equal (Token a, Token b);
 
 #endif
+
