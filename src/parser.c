@@ -17,12 +17,10 @@ static AstStatement *getStatement (void);
 static AstStatement *getStatementBlock (void);
 static AstStatement *getStatementBreakL (void);
 static AstStatement *getStatementContinueL (void);
-static AstStatement *getStatementDoWhile (void);
 static AstStatement *getStatementExpr (void);
 static AstStatement *getStatementIfE (void);
 static AstStatement *getStatementReturnE (void);
 static AstStatement *getStatementVar (void);
-static AstStatement *getStatementWhileC (void);
 
 static AstExpression *getExpression (void);
 static AstExpression *getExpressionAndBitwise (void);
@@ -117,12 +115,10 @@ static AstStatement *getStatement (void)
 	switch (parser.tokens[parser.current].type) {
 		case TT_Break: return getStatementBreakL();
 		case TT_Continue: return getStatementContinueL();
-		case TT_Do: return getStatementDoWhile();
 		case TT_If: return getStatementIfE();
 		case TT_LBrace: return getStatementBlock();
 		case TT_Return: return getStatementReturnE();
 		case TT_Var: return getStatementVar();
-		case TT_While: return getStatementWhileC();
 		default: return getStatementExpr();
 	}
 }
@@ -152,18 +148,6 @@ static AstStatement *getStatementContinueL (void)
 	Token keyword = expect(Continue, 'continue');
 	expect(Semicolon, ';');
 	return ast_initStatementContinueL(keyword);
-}
-
-static AstStatement *getStatementDoWhile (void)
-{
-	expect(Do, 'do');
-	AstStatement *statement = getStatement();
-	Token keyword = expect(While, 'while');
-	expect(LParen, '(');
-	AstExpression *condition = getExpression();
-	expect(RParen, ')');
-	expect(Semicolon, ';');
-	return ast_initStatementDoWhile(statement, condition, keyword);
 }
 
 static AstStatement *getStatementExpr (void)
@@ -213,21 +197,6 @@ static AstStatement *getStatementVar (void)
 		expect(Semicolon, ';');
 		return ast_initStatementVar(identifier, type);
 	}
-}
-
-static AstStatement *getStatementWhileC (void)
-{
-	Token keyword = expect(While, 'while');
-	expect(LParen, '(');
-	AstExpression *condition = getExpression();
-	expect(RParen, ')');
-	AstStatement *statement = NULL;
-	if (check(TT_Semicolon)) {
-		parser.current++;
-	} else {
-		statement = getStatement();
-	}
-	return ast_initStatementWhileC(condition, statement, keyword);
 }
 
 static AstExpression *getExpression (void)

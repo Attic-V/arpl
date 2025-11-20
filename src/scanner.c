@@ -116,7 +116,6 @@ Token *scan (char *source)
 			keyword(break, Break)
 			keyword(continue, Continue)
 			keyword(default, Default)
-			keyword(do, Do)
 			keyword(else, Else)
 			keyword(false, False)
 			keyword(fn, Fn)
@@ -125,7 +124,6 @@ Token *scan (char *source)
 			keyword(return, Return)
 			keyword(true, True)
 			keyword(var, Var)
-			keyword(while, While)
 			#undef keyword
 			continue;
 		}

@@ -16,7 +16,6 @@ typedef enum {
 	TT_Comma,
 	TT_Continue,
 	TT_Default,
-	TT_Do,
 	TT_Dot,
 	TT_Dot_Dot,
 	TT_Else,
@@ -56,7 +55,6 @@ typedef enum {
 	TT_Tilde,
 	TT_True,
 	TT_Var,
-	TT_While,
 } TokenType;
 
 typedef struct {
