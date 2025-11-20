@@ -138,14 +138,6 @@ typedef struct {
 } AstStatementExpr;
 
 typedef struct {
-	AstStatement *init;
-	AstExpression *condition;
-	AstExpression *update;
-	AstStatement *body;
-	Token keyword;
-} AstStatementForI;
-
-typedef struct {
 	AstExpression *condition;
 	AstStatement *a;
 	AstStatement *b;
@@ -181,7 +173,6 @@ typedef enum {
 	AstStatement_ContinueL,
 	AstStatement_DoWhile,
 	AstStatement_Expr,
-	AstStatement_ForI,
 	AstStatement_IfE,
 	AstStatement_Init,
 	AstStatement_ReturnE,
@@ -197,7 +188,6 @@ struct AstStatement {
 		AstStatementContinueL *continueL;
 		AstStatementDoWhile *doWhile;
 		AstStatementExpr *expr;
-		AstStatementForI *forI;
 		AstStatementIfE *ifE;
 		AstStatementInit *init;
 		AstStatementReturnE *returnE;

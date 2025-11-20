@@ -20,7 +20,6 @@ static void visitStatementBreakL (AstStatementBreakL *node);
 static void visitStatementContinueL (AstStatementContinueL *node);
 static void visitStatementDoWhile (AstStatementDoWhile *node);
 static void visitStatementExpr (AstStatementExpr *node);
-static void visitStatementForI (AstStatementForI *node);
 static void visitStatementIfE (AstStatementIfE *node);
 static void visitStatementInit (AstStatementInit *node);
 static void visitStatementReturnE (AstStatementReturnE *node);
@@ -203,7 +202,6 @@ static void visitStatement (AstStatement *node)
 		case AstStatement_ContinueL: visitStatementContinueL(node->as.continueL); break;
 		case AstStatement_DoWhile: visitStatementDoWhile(node->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
-		case AstStatement_ForI: visitStatementForI(node->as.forI); break;
 		case AstStatement_IfE: visitStatementIfE(node->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(node->as.init); break;
 		case AstStatement_ReturnE: visitStatementReturnE(node->as.returnE); break;
@@ -259,28 +257,6 @@ static void visitStatementExpr (AstStatementExpr *node)
 {
 	visitExpression(node->expression);
 	node->expression->modifiable = false;
-}
-
-static void visitStatementForI (AstStatementForI *node)
-{
-	if (node->init != NULL) {
-		visitStatement(node->init);
-	}
-	analyzer.canContinue = true;
-	analyzer.canBreak = true;
-	if (node->condition != NULL) {
-		visitExpression(node->condition);
-		if (!dataType_isBoolean(node->condition->dataType)) {
-			e(node->keyword, "condition must be a boolean");
-		}
-		node->condition->modifiable = false;
-	}
-	if (node->update != NULL) {
-		visitExpression(node->update);
-	}
-	if (node->body != NULL) {
-		visitStatement(node->body);
-	}
 }
 
 static void visitStatementIfE (AstStatementIfE *node)
