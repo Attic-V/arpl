@@ -19,33 +19,22 @@ make
 
 ### datatypes
 
-* u8
-* u16
-* u32
-* u64
 * i8
-* i16
-* i32
-* i64
 * bool
 * pointer
 * user defined structs
-
-### misc
-
-Use `->` to perform type casting. For example: `n -> i32` is an expression that casts `n` to an `i32`.
 
 ## examples
 
 ### functions
 
 ```arpl
-fn add (a i32, b i32) i32
+fn add (a i8, b i8) i8
 {
     return a + b;
 }
 
-fn main () i32
+fn main () i8
 {
     return add(2, 3);
 }
@@ -55,8 +44,8 @@ fn main () i32
 
 ```arpl
 struct SomeStruct {
-    a u8
-    b i32
+    a i8
+    b i8
     c bool
 }
 ```

@@ -46,43 +46,7 @@ static bool canCoerce (DataType *from, DataType *to);
 static Token getCoercionToken (void);
 static bool coerce (AstExpression* e, DataType *target);
 
-static bool coercionMatrix[DataTypeType_Count][DataTypeType_Count] = {
-	[DataType_U8][DataType_U16] = 1,
-	[DataType_U8][DataType_U32] = 1,
-	[DataType_U8][DataType_U64] = 1,
-	[DataType_U16][DataType_U32] = 1,
-	[DataType_U16][DataType_U64] = 1,
-	[DataType_U32][DataType_U64] = 1,
-
-	[DataType_I8][DataType_I16] = 1,
-	[DataType_I8][DataType_I32] = 1,
-	[DataType_I8][DataType_I64] = 1,
-	[DataType_I16][DataType_I32] = 1,
-	[DataType_I16][DataType_I64] = 1,
-	[DataType_I32][DataType_I64] = 1,
-
-	[DataType_U8][DataType_I8] = 1,
-	[DataType_U8][DataType_I16] = 1,
-	[DataType_U8][DataType_I32] = 1,
-	[DataType_U8][DataType_I64] = 1,
-	[DataType_U16][DataType_I16] = 1,
-	[DataType_U16][DataType_I32] = 1,
-	[DataType_U16][DataType_I64] = 1,
-	[DataType_U32][DataType_I32] = 1,
-	[DataType_U32][DataType_I64] = 1,
-	[DataType_U64][DataType_I64] = 1,
-
-	[DataType_I8][DataType_U8] = 1,
-	[DataType_I8][DataType_U16] = 1,
-	[DataType_I8][DataType_U32] = 1,
-	[DataType_I8][DataType_U64] = 1,
-	[DataType_I16][DataType_U16] = 1,
-	[DataType_I16][DataType_U32] = 1,
-	[DataType_I16][DataType_U64] = 1,
-	[DataType_I32][DataType_U32] = 1,
-	[DataType_I32][DataType_U64] = 1,
-	[DataType_I64][DataType_U64] = 1,
-};
+static bool coercionMatrix[DataTypeType_Count][DataTypeType_Count] = { };
 
 #define e(token, message) \
 	do { \
