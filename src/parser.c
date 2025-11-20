@@ -12,7 +12,6 @@ static AstRoot *getRoot (void);
 
 static AstDeclaration *getDeclaration (void);
 static AstDeclaration *getDeclarationFunction (void);
-static AstDeclaration *getDeclarationStructD (void);
 
 static AstStatement *getStatement (void);
 static AstStatement *getStatementBlock (void);
@@ -90,7 +89,6 @@ static AstDeclaration *getDeclaration (void)
 {
 	switch (parser.tokens[parser.current].type) {
 		case TT_Fn: return getDeclarationFunction();
-		case TT_Struct: return getDeclarationStructD();
 		default:;
 	}
 	err(parser.tokens[parser.current], "expected start of declaration");
@@ -113,20 +111,6 @@ static AstDeclaration *getDeclarationFunction (void)
 	expect(RParen, ')');
 	DataType *returnType = getType();
 	return ast_initDeclarationFunction(keyword, identifier, getStatementBlock(), returnType, parameters);
-}
-
-static AstDeclaration *getDeclarationStructD (void)
-{
-	Token keyword = expect(Struct, 'struct');
-	Token identifier = expect(Identifier, identifier);
-	expect(LBrace, '{');
-	AstParameter *members = NULL;
-	while (!match(TT_RBrace)) {
-		AstParameter *member = getParameter();
-		dll_shove(members, member);
-	}
-	dll_rewind(members);
-	return ast_initDeclarationStructD(keyword, identifier, members);
 }
 
 static AstStatement *getStatement (void)
@@ -513,7 +497,6 @@ static DataType *getType (void)
 		case TT_I8: return dataType_initI8();
 		case TT_Bool: return dataType_initBoolean();
 		case TT_Star: return dataType_initPointer(getType());
-		case TT_Struct: return dataType_initStruct(expect(Identifier, identifier), NULL);
 		default:;
 	}
 	err(token, "expected type");

@@ -54,7 +54,6 @@ typedef enum {
 	TT_Semicolon,
 	TT_Star,
 	TT_Star_Equal,
-	TT_Struct,
 	TT_Tilde,
 	TT_True,
 	TT_Var,
