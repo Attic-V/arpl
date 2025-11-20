@@ -15,8 +15,6 @@ static AstDeclaration *getDeclarationFunction (void);
 
 static AstStatement *getStatement (void);
 static AstStatement *getStatementBlock (void);
-static AstStatement *getStatementBreakL (void);
-static AstStatement *getStatementContinueL (void);
 static AstStatement *getStatementExpr (void);
 static AstStatement *getStatementIfE (void);
 static AstStatement *getStatementReturnE (void);
@@ -113,8 +111,6 @@ static AstDeclaration *getDeclarationFunction (void)
 static AstStatement *getStatement (void)
 {
 	switch (parser.tokens[parser.current].type) {
-		case TT_Break: return getStatementBreakL();
-		case TT_Continue: return getStatementContinueL();
 		case TT_If: return getStatementIfE();
 		case TT_LBrace: return getStatementBlock();
 		case TT_Return: return getStatementReturnE();
@@ -134,20 +130,6 @@ static AstStatement *getStatementBlock (void)
 	expect(RBrace, '}');
 	dll_rewind(statements);
 	return ast_initStatementBlock(statements);
-}
-
-static AstStatement *getStatementBreakL (void)
-{
-	Token keyword = expect(Break, 'break');
-	expect(Semicolon, ';');
-	return ast_initStatementBreakL(keyword);
-}
-
-static AstStatement *getStatementContinueL (void)
-{
-	Token keyword = expect(Continue, 'continue');
-	expect(Semicolon, ';');
-	return ast_initStatementContinueL(keyword);
 }
 
 static AstStatement *getStatementExpr (void)

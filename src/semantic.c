@@ -16,15 +16,11 @@ static void visitDeclarationStructD (AstDeclarationStructD *node);
 
 static void visitStatement (AstStatement *node);
 static void visitStatementBlock (AstStatementBlock *node);
-static void visitStatementBreakL (AstStatementBreakL *node);
-static void visitStatementContinueL (AstStatementContinueL *node);
-static void visitStatementDoWhile (AstStatementDoWhile *node);
 static void visitStatementExpr (AstStatementExpr *node);
 static void visitStatementIfE (AstStatementIfE *node);
 static void visitStatementInit (AstStatementInit *node);
 static void visitStatementReturnE (AstStatementReturnE *node);
 static void visitStatementVar (AstStatementVar *node);
-static void visitStatementWhileC (AstStatementWhileC *node);
 
 static void visitExpression (AstExpression *node);
 static void visitExpressionAccess (AstExpressionAccess *node);
@@ -56,8 +52,6 @@ typedef struct {
 	Scope *currentScope;
 	size_t currentPhysicalIndex;
 	bool hadError;
-	bool canContinue;
-	bool canBreak;
 	DataType *caseExpressionType;
 	DataType *functionReturnType;
 } Analyzer;
@@ -67,16 +61,6 @@ static Analyzer analyzer;
 static Analyzer getSnapshot (void)
 {
 	return analyzer;
-}
-
-static void restoreSnapshot_canContinue (Analyzer snapshot)
-{
-	analyzer.canContinue = snapshot.canContinue;
-}
-
-static void restoreSnapshot_canBreak (Analyzer snapshot)
-{
-	analyzer.canBreak = snapshot.canBreak;
 }
 
 static void restoreSnapshot_caseExpressionType (Analyzer snapshot)
@@ -89,8 +73,6 @@ void analyze (Ast *ast)
 	analyzer.previousScope = NULL;
 	analyzer.currentScope = NULL;
 	analyzer.hadError = false;
-	analyzer.canContinue = false;
-	analyzer.canBreak = false;
 
 	visitAst(ast);
 
@@ -113,8 +95,6 @@ static void visitRoot (AstRoot *node)
 		analyzer.previousScope = node->scope;
 		visitDeclaration(decl);
 		analyzer.currentScope = node->scope;
-		restoreSnapshot_canContinue(snapshot);
-		restoreSnapshot_canBreak(snapshot);
 		restoreSnapshot_caseExpressionType(snapshot);
 	}
 	if (node->scope->parent != NULL) {
@@ -198,15 +178,11 @@ static void visitStatement (AstStatement *node)
 {
 	switch (node->type) {
 		case AstStatement_Block: visitStatementBlock(node->as.block); break;
-		case AstStatement_BreakL: visitStatementBreakL(node->as.breakL); break;
-		case AstStatement_ContinueL: visitStatementContinueL(node->as.continueL); break;
-		case AstStatement_DoWhile: visitStatementDoWhile(node->as.doWhile); break;
 		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
 		case AstStatement_IfE: visitStatementIfE(node->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(node->as.init); break;
 		case AstStatement_ReturnE: visitStatementReturnE(node->as.returnE); break;
 		case AstStatement_Var: visitStatementVar(node->as.var); break;
-		case AstStatement_WhileC: visitStatementWhileC(node->as.whileC); break;
 	}
 }
 
@@ -219,37 +195,10 @@ static void visitStatementBlock (AstStatementBlock *node)
 		analyzer.previousScope = node->scope;
 		visitStatement(stmt);
 		analyzer.currentScope = node->scope;
-		restoreSnapshot_canContinue(snapshot);
-		restoreSnapshot_canBreak(snapshot);
 		restoreSnapshot_caseExpressionType(snapshot);
 	}
 	if (node->scope->parent != NULL) {
 		node->scope->parent->physicalSize += node->scope->physicalSize;
-	}
-}
-
-static void visitStatementBreakL (AstStatementBreakL *node)
-{
-	if (!analyzer.canBreak) {
-		e(node->keyword, "cannot be used here");
-	}
-}
-
-static void visitStatementContinueL (AstStatementContinueL *node)
-{
-	if (!analyzer.canContinue) {
-		e(node->keyword, "cannot be used here");
-	}
-}
-
-static void visitStatementDoWhile (AstStatementDoWhile *node)
-{
-	analyzer.canContinue = true;
-	analyzer.canBreak = true;
-	visitStatement(node->a);
-	visitExpression(node->condition);
-	if (!dataType_isBoolean(node->condition->dataType)) {
-		e(node->keyword, "condition must be a boolean");
 	}
 }
 
@@ -321,20 +270,6 @@ static void visitStatementVar (AstStatementVar *node)
 	} else {
 		e(node->identifier, "variable has already been declared in scope");
 	}
-}
-
-static void visitStatementWhileC (AstStatementWhileC *node)
-{
-	analyzer.canContinue = true;
-	analyzer.canBreak = true;
-	visitExpression(node->condition);
-	if (!dataType_isBoolean(node->condition->dataType)) {
-		e(node->keyword, "condition must be a boolean");
-	}
-	if (node->a != NULL) {
-		visitStatement(node->a);
-	}
-	node->condition->modifiable = false;
 }
 
 static void visitExpression (AstExpression *node)

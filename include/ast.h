@@ -120,20 +120,6 @@ typedef struct {
 } AstStatementBlock;
 
 typedef struct {
-	Token keyword;
-} AstStatementBreakL;
-
-typedef struct {
-	Token keyword;
-} AstStatementContinueL;
-
-typedef struct {
-	AstStatement *a;
-	AstExpression *condition;
-	Token keyword;
-} AstStatementDoWhile;
-
-typedef struct {
 	AstExpression *expression;
 } AstStatementExpr;
 
@@ -161,38 +147,24 @@ typedef struct {
 	DataType *type;
 } AstStatementVar;
 
-typedef struct {
-	AstExpression *condition;
-	AstStatement *a;
-	Token keyword;
-} AstStatementWhileC;
-
 typedef enum {
 	AstStatement_Block,
-	AstStatement_BreakL,
-	AstStatement_ContinueL,
-	AstStatement_DoWhile,
 	AstStatement_Expr,
 	AstStatement_IfE,
 	AstStatement_Init,
 	AstStatement_ReturnE,
 	AstStatement_Var,
-	AstStatement_WhileC,
 } AstStatementType;
 
 struct AstStatement {
 	AstStatementType type;
 	union {
 		AstStatementBlock *block;
-		AstStatementBreakL *breakL;
-		AstStatementContinueL *continueL;
-		AstStatementDoWhile *doWhile;
 		AstStatementExpr *expr;
 		AstStatementIfE *ifE;
 		AstStatementInit *init;
 		AstStatementReturnE *returnE;
 		AstStatementVar *var;
-		AstStatementWhileC *whileC;
 	} as;
 	AstStatement* next;
 	AstStatement* previous;

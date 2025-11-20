@@ -10,15 +10,11 @@ static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token
 static AstDeclarationStructD *astDeclaration_initStructD (Token keyword, Token identifier, AstParameter *members);
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
-static AstStatementBreakL *astStatement_initBreakL (Token keyword);
-static AstStatementContinueL *astStatement_initContinueL (Token keyword);
-static AstStatementDoWhile *astStatement_initDoWhile (AstStatement *a, AstExpression *condition, Token operator);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
 static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword);
 static AstStatementInit *astStatement_initInit (Token identifier, DataType *type, AstExpression *expression, Token operator);
 static AstStatementReturnE *astStatement_initReturnE (Token keyword, AstExpression *expression);
 static AstStatementVar *astStatement_initVar (Token identifier, DataType *type);
-static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a, Token keyword);
 
 static AstExpressionAccess *astExpression_initAccess (AstExpression *e, Token op, Token mToken);
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
@@ -92,27 +88,6 @@ AstStatement *ast_initStatementBlock (AstStatement *children)
 	return statement;
 }
 
-AstStatement *ast_initStatementBreakL (Token keyword)
-{
-	AstStatement *statement = ast_initStatement(AstStatement_BreakL);
-	statement->as.breakL = astStatement_initBreakL(keyword);
-	return statement;
-}
-
-AstStatement *ast_initStatementContinueL (Token keyword)
-{
-	AstStatement *statement = ast_initStatement(AstStatement_ContinueL);
-	statement->as.continueL = astStatement_initContinueL(keyword);
-	return statement;
-}
-
-AstStatement *ast_initStatementDoWhile (AstStatement *a, AstExpression *condition, Token keyword)
-{
-	AstStatement *statement = ast_initStatement(AstStatement_DoWhile);
-	statement->as.doWhile = astStatement_initDoWhile(a, condition, keyword);
-	return statement;
-}
-
 AstStatement *ast_initStatementExpr (AstExpression *expression)
 {
 	AstStatement *statement = ast_initStatement(AstStatement_Expr);
@@ -145,14 +120,6 @@ AstStatement *ast_initStatementVar (Token identifier, DataType *type)
 {
 	AstStatement *statement = ast_initStatement(AstStatement_Var);
 	statement->as.var = astStatement_initVar(identifier, type);
-	return statement;
-}
-
-AstStatement *ast_initStatementWhileC (AstExpression *condition, AstStatement *a, Token keyword)
-{
-	AstStatement *statement = mem_alloc(sizeof(*statement));
-	statement->type = AstStatement_WhileC;
-	statement->as.whileC = astStatement_initWhileC(condition, a, keyword);
 	return statement;
 }
 
@@ -291,29 +258,6 @@ static AstStatementBlock *astStatement_initBlock (AstStatement *children)
 	return block;
 }
 
-static AstStatementBreakL *astStatement_initBreakL (Token keyword)
-{
-	AstStatementBreakL *breakL = mem_alloc(sizeof(*breakL));
-	breakL->keyword = keyword;
-	return breakL;
-}
-
-static AstStatementContinueL *astStatement_initContinueL (Token keyword)
-{
-	AstStatementContinueL *continueL = mem_alloc(sizeof(*continueL));
-	continueL->keyword = keyword;
-	return continueL;
-}
-
-static AstStatementDoWhile *astStatement_initDoWhile (AstStatement *a, AstExpression *condition, Token keyword)
-{
-	AstStatementDoWhile *doWhile = mem_alloc(sizeof(*doWhile));
-	doWhile->a = a;
-	doWhile->condition = condition;
-	doWhile->keyword = keyword;
-	return doWhile;
-}
-
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression)
 {
 	AstStatementExpr *expr = mem_alloc(sizeof(*expr));
@@ -355,15 +299,6 @@ static AstStatementVar *astStatement_initVar (Token identifier, DataType *type)
 	var->identifier = identifier;
 	var->type = type;
 	return var;
-}
-
-static AstStatementWhileC *astStatement_initWhileC (AstExpression *condition, AstStatement *a, Token keyword)
-{
-	AstStatementWhileC *whileC = mem_alloc(sizeof(*whileC));
-	whileC->condition = condition;
-	whileC->a = a;
-	whileC->keyword = keyword;
-	return whileC;
 }
 
 static AstExpressionAccess *astExpression_initAccess (AstExpression *e, Token op, Token mToken)

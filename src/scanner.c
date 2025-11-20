@@ -113,8 +113,6 @@ Token *scan (char *source)
 
 			#define keyword(lexeme, tokentype) if (!strcmp(buffer, #lexeme)) { token->type = TT_##tokentype; continue; }
 			keyword(bool, Bool)
-			keyword(break, Break)
-			keyword(continue, Continue)
 			keyword(default, Default)
 			keyword(else, Else)
 			keyword(false, False)
