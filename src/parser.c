@@ -29,7 +29,6 @@ static AstExpression *getExpressionPrimary (void);
 static AstExpression *getExpressionProduct (void);
 static AstExpression *getExpressionShift (void);
 static AstExpression *getExpressionSum (void);
-static AstExpression *getExpressionUnaryPostfix (void);
 static AstExpression *getExpressionUnaryPrefix (void);
 static AstExpression *getExpressionXor (void);
 
@@ -243,28 +242,18 @@ static AstExpression *getExpressionSum (void)
 
 static AstExpression *getExpressionProduct (void)
 {
-	AstExpression *expression = getExpressionUnaryPostfix();
+	AstExpression *expression = getExpressionUnaryPrefix();
 	while (check(TT_Star)) {
 		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionUnaryPostfix();
+		AstExpression *right = getExpressionUnaryPrefix();
 		expression = ast_initExpressionBinary(expression, right, operator);
 	}
 	return expression;
 }
 
-static AstExpression *getExpressionUnaryPostfix (void)
-{
-	AstExpression *left = getExpressionUnaryPrefix();
-	while (check(TT_Plus_Plus) || check(TT_Minus_Minus)) {
-		Token operator = parser.tokens[parser.current++];
-		left = ast_initExpressionPostfix(operator, left);
-	}
-	return left;
-}
-
 static AstExpression *getExpressionUnaryPrefix (void)
 {
-	if (check(TT_Minus) || check(TT_Tilde) || check(TT_Plus_Plus) || check(TT_Minus_Minus) || check(TT_And) || check(TT_Star)) {
+	if (check(TT_Minus) || check(TT_Tilde) || check(TT_And) || check(TT_Star)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpressionUnaryPrefix();
 		return ast_initExpressionPrefix(operator, right);

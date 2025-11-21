@@ -28,7 +28,6 @@ static void visitExpressionBinary (AstExpressionBinary *node);
 static void visitExpressionCall (AstExpressionCall *node);
 static void visitExpressionCast (AstExpressionCast *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
-static void visitExpressionPostfix (AstExpressionPostfix *node);
 static void visitExpressionPrefix (AstExpressionPrefix *node);
 static void visitExpressionVar (AstExpressionVar *node);
 
@@ -299,20 +298,10 @@ static void visitExpression (AstExpression *node)
 			size_t value = atoi(buffer);
 			node->dataType = dataType_smallestInt(value);
 			break;
-		case AstExpression_Postfix:
-			visitExpressionPostfix(node->as.postfix);
-			switch (node->as.postfix->operator.type) {
-				case TT_Plus_Plus:
-					node->dataType = node->as.postfix->e->dataType;
-					break;
-				default:;
-			}
-			break;
 		case AstExpression_Prefix:
 			visitExpressionPrefix(node->as.prefix);
 			switch (node->as.prefix->operator.type) {
 				case TT_Minus:
-				case TT_Plus_Plus:
 				case TT_Tilde:
 					node->dataType = node->as.prefix->e->dataType;
 					break;
@@ -465,23 +454,6 @@ static void visitExpressionNumber (AstExpressionNumber *node)
 	(void)node;
 }
 
-static void visitExpressionPostfix (AstExpressionPostfix *node)
-{
-	visitExpression(node->e);
-	switch (node->operator.type) {
-		case TT_Minus_Minus:
-		case TT_Plus_Plus:
-			if (!dataType_isInt(node->e->dataType)) {
-				e(node->operator, "operand must be a number");
-			}
-			if (!node->e->modifiable) {
-				e(node->e->as.var->identifier, "expression must be modifiable");
-			}
-			break;
-		default:;
-	}
-}
-
 static void visitExpressionPrefix (AstExpressionPrefix *node)
 {
 	visitExpression(node->e);
@@ -492,15 +464,6 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 				e(node->operator, "operand must be a number");
 			}
 			node->e->modifiable = false;
-			break;
-		case TT_Minus_Minus:
-		case TT_Plus_Plus:
-			if (!dataType_isInt(node->e->dataType)) {
-				e(node->operator, "operand must be a number");
-			}
-			if (!node->e->modifiable) {
-				e(node->e->as.var->identifier, "expression must be modifiable");
-			}
 			break;
 		case TT_And:
 			if (!node->e->modifiable) {

@@ -28,7 +28,6 @@ static void visitExpressionBinary (AstExpression *expression);
 static void visitExpressionCall (AstExpression *expression);
 static void visitExpressionCast (AstExpression *expression);
 static void visitExpressionNumber (AstExpression *expression);
-static void visitExpressionPostfix (AstExpression *expression);
 static void visitExpressionPrefix (AstExpression *expression);
 static void visitExpressionVar (AstExpression *expression);
 
@@ -182,7 +181,6 @@ static void visitExpression (AstExpression *expression)
 		case AstExpression_Call: visitExpressionCall(expression); break;
 		case AstExpression_Cast: visitExpressionCast(expression); break;
 		case AstExpression_Number: visitExpressionNumber(expression); break;
-		case AstExpression_Postfix: visitExpressionPostfix(expression); break;
 		case AstExpression_Prefix: visitExpressionPrefix(expression); break;
 		case AstExpression_Var: visitExpressionVar(expression); break;
 	}
@@ -288,21 +286,6 @@ static void visitExpressionNumber (AstExpression *expression)
 	addInstruction(ir_initPush(atoi(buffer)));
 }
 
-static void visitExpressionPostfix (AstExpression *expression)
-{
-	AstExpressionPostfix *e = expression->as.postfix;
-	size_t size = dataType_getSize(e->e->dataType);
-	visitExpression(e->e);
-	addInstruction(ir_initDeref(size));
-	visitExpression(e->e);
-	switch (e->operator.type) {
-		case TT_Plus_Plus: addInstruction(ir_initInc(size)); break;
-		case TT_Minus_Minus: addInstruction(ir_initDec(size)); break;
-		default:;
-	}
-	addInstruction(ir_initPop());
-}
-
 static void visitExpressionPrefix (AstExpression *expression)
 {
 	AstExpressionPrefix *e = expression->as.prefix;
@@ -313,14 +296,6 @@ static void visitExpressionPrefix (AstExpression *expression)
 			break;
 		case TT_Minus:
 			addInstruction(ir_initNeg(size));
-			break;
-		case TT_Minus_Minus:
-			addInstruction(ir_initDec(size));
-			addInstruction(ir_initDeref(size));
-			break;
-		case TT_Plus_Plus:
-			addInstruction(ir_initInc(size));
-			addInstruction(ir_initDeref(size));
 			break;
 		case TT_Star:
 			if (expression->as.prefix->e->modifiable) {

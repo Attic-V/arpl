@@ -59,9 +59,9 @@ Token *scan (char *source)
 			case '|': addToken(     TT_Pipe        ); continue;
 			case '*': addToken(     TT_Star        ); continue;
 
-			case '+': addToken(     match('+') ? TT_Plus_Plus         : TT_Plus        ); continue;
+			case '+': addToken(     TT_Plus        ); continue;
 
-			case '-': addToken(     match('>') ? TT_Minus_Greater     : match('-') ? TT_Minus_Minus       : TT_Minus       ); continue;
+			case '-': addToken(     match('>') ? TT_Minus_Greater     : TT_Minus       ); continue;
 
 			case '>':
 				if (check('>')) {

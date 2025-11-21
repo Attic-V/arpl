@@ -21,7 +21,6 @@ static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpre
 static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen, AstArgument *arguments);
 static AstExpressionCast *astExpression_initCast (AstExpression *e, Token operator, DataType *to);
 static AstExpressionNumber *astExpression_initNumber (Token value);
-static AstExpressionPostfix *astExpression_initPostfix (Token operator, AstExpression *e);
 static AstExpressionPrefix *astExpression_initPrefix (Token operator, AstExpression *e);
 static AstExpressionVar *astExpression_initVar (Token identifier);
 
@@ -152,13 +151,6 @@ AstExpression *ast_initExpressionNumber (Token value)
 {
 	AstExpression *expression = ast_initExpression(AstExpression_Number);
 	expression->as.number = astExpression_initNumber(value);
-	return expression;
-}
-
-AstExpression *ast_initExpressionPostfix (Token operator, AstExpression *e)
-{
-	AstExpression *expression = ast_initExpression(AstExpression_Postfix);
-	expression->as.postfix = astExpression_initPostfix(operator, e);
 	return expression;
 }
 
@@ -318,14 +310,6 @@ static AstExpressionNumber *astExpression_initNumber (Token value)
 	AstExpressionNumber *number = mem_alloc(sizeof(*number));
 	number->value = value;
 	return number;
-}
-
-static AstExpressionPostfix *astExpression_initPostfix (Token operator, AstExpression *e)
-{
-	AstExpressionPostfix *postfix = mem_alloc(sizeof(*postfix));
-	postfix->operator = operator;
-	postfix->e = e;
-	return postfix;
 }
 
 static AstExpressionPrefix *astExpression_initPrefix (Token operator, AstExpression *e)
