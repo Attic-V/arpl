@@ -57,11 +57,11 @@ Token *scan (char *source)
 			case '.': addToken(     match('.') ? TT_Dot_Dot           : TT_Dot         ); continue;
 			case '=': addToken(     TT_Equal       ); continue;
 			case '|': addToken(     TT_Pipe        ); continue;
-			case '*': addToken(     match('=') ? TT_Star_Equal        : TT_Star        ); continue;
+			case '*': addToken(     TT_Star        ); continue;
 
-			case '+': addToken(     match('=') ? TT_Plus_Equal        : match('+') ? TT_Plus_Plus         : TT_Plus        ); continue;
+			case '+': addToken(     match('+') ? TT_Plus_Plus         : TT_Plus        ); continue;
 
-			case '-': addToken(     match('>') ? TT_Minus_Greater     : match('-') ? TT_Minus_Minus       : match('=') ? TT_Minus_Equal       : TT_Minus       ); continue;
+			case '-': addToken(     match('>') ? TT_Minus_Greater     : match('-') ? TT_Minus_Minus       : TT_Minus       ); continue;
 
 			case '>':
 				if (check('>')) {
