@@ -61,7 +61,7 @@ Token *scan (char *source)
 
 			case '+': addToken(     TT_Plus        ); continue;
 
-			case '-': addToken(     match('>') ? TT_Minus_Greater     : TT_Minus       ); continue;
+			case '-': addToken(     TT_Minus       ); continue;
 
 			case '>':
 				if (check('>')) {

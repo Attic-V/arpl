@@ -45,12 +45,6 @@ typedef struct {
 } AstExpressionCall;
 
 typedef struct {
-	AstExpression *e;
-	Token operator;
-	DataType *to;
-} AstExpressionCast;
-
-typedef struct {
 	Token value;
 } AstExpressionNumber;
 
@@ -68,7 +62,6 @@ typedef enum {
 	AstExpression_Assign,
 	AstExpression_Binary,
 	AstExpression_Call,
-	AstExpression_Cast,
 	AstExpression_Number,
 	AstExpression_Prefix,
 	AstExpression_Var,
@@ -81,7 +74,6 @@ struct AstExpression {
 		AstExpressionAssign *assign;
 		AstExpressionBinary *binary;
 		AstExpressionCall *call;
-		AstExpressionCast *cast;
 		AstExpressionNumber *number;
 		AstExpressionPrefix *prefix;
 		AstExpressionVar *var;

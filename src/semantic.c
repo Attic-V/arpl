@@ -26,16 +26,9 @@ static void visitExpressionAccess (AstExpressionAccess *node);
 static void visitExpressionAssign (AstExpressionAssign *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
 static void visitExpressionCall (AstExpressionCall *node);
-static void visitExpressionCast (AstExpressionCast *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
 static void visitExpressionPrefix (AstExpressionPrefix *node);
 static void visitExpressionVar (AstExpressionVar *node);
-
-static bool canCoerce (DataType *from, DataType *to);
-static Token getCoercionToken (void);
-static bool coerce (AstExpression* e, DataType *target);
-
-static bool coercionMatrix[DataTypeType_Count][DataTypeType_Count] = { };
 
 #define e(token, message) \
 	do { \
@@ -216,9 +209,7 @@ static void visitStatementInit (AstStatementInit *node)
 	visitExpression(node->expression);
 
 	if (!dataType_equal(symbol->type, node->expression->dataType)) {
-		if (!coerce(node->expression, symbol->type)) {
-			e(node->operator, "operands must have the same type");
-		}
+		e(node->operator, "operands must have the same type");
 	}
 	node->expression->modifiable = false;
 }
@@ -229,9 +220,7 @@ static void visitStatementReturnE (AstStatementReturnE *node)
 		visitExpression(node->expression);
 		node->expression->modifiable = false;
 		if (!dataType_equal(node->expression->dataType, analyzer.functionReturnType)) {
-			if (!coerce(node->expression, analyzer.functionReturnType)) {
-				e(node->keyword, "type of expression in return does not match function return type");
-			}
+			e(node->keyword, "type of expression in return does not match function return type");
 		}
 	}
 }
@@ -286,10 +275,6 @@ static void visitExpression (AstExpression *node)
 		case AstExpression_Call:
 			visitExpressionCall(node->as.call);
 			node->dataType = node->as.call->e->dataType->as.function->returnType;
-			break;
-		case AstExpression_Cast:
-			visitExpressionCast(node->as.cast);
-			node->dataType = node->as.cast->to;
 			break;
 		case AstExpression_Number:
 			visitExpressionNumber(node->as.number);
@@ -375,9 +360,7 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 	visitExpression(node->a);
 	visitExpression(node->b);
 	if (!dataType_equal(node->a->dataType, node->b->dataType)) {
-		if (!coerce(node->b, node->a->dataType)) {
-			e(node->operator, "operands must have the same type");
-		}
+		e(node->operator, "operands must have the same type");
 	}
 	if (!node->a->modifiable) {
 		e(node->operator, "assignee must be modifiable");
@@ -405,9 +388,7 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 		default:;
 	}
 	if (!dataType_equal(node->a->dataType, node->b->dataType)) {
-		if (!coerce(node->a, node->b->dataType) && !coerce(node->b, node->a->dataType)) {
-			e(node->operator, "operands must have the same type");
-		}
+		e(node->operator, "operands must have the same type");
 	}
 	node->a->modifiable = false;
 	node->b->modifiable = false;
@@ -430,23 +411,12 @@ static void visitExpressionCall (AstExpressionCall *node)
 	for (; argument != NULL && parameter != NULL; argument = argument->next, parameter = parameter->next) {
 		visitExpression(argument->expression);
 		if (!dataType_equal(argument->expression->dataType, parameter)) {
-			if (!coerce(argument->expression, parameter)) {
-				e(node->lparen, "call does not match function signature");
-			}
+			e(node->lparen, "call does not match function signature");
 		}
 	}
 	if (argument != NULL || parameter != NULL) {
 		e(node->lparen, "call does not match function signature");
 	}
-}
-
-static void visitExpressionCast (AstExpressionCast *node)
-{
-	visitExpression(node->e);
-	if (!dataType_castable(node->e->dataType, node->to)) {
-		e(node->operator, "invalid cast");
-	}
-	node->e->modifiable = false;
 }
 
 static void visitExpressionNumber (AstExpressionNumber *node)
@@ -485,28 +455,3 @@ static void visitExpressionVar (AstExpressionVar *node)
 	(void)node;
 }
 
-static bool canCoerce (DataType *from, DataType *to)
-{
-	return coercionMatrix[from->type][to->type];
-}
-
-static Token getCoercionToken (void)
-{
-	return (Token){
-		.type = TT_Minus_Greater,
-		.lexeme = "->",
-		.length = 2,
-		.line = 0,
-	};
-}
-
-static bool coerce (AstExpression *e, DataType *target)
-{
-	if (!canCoerce(e->dataType, target)) return false;
-	if (!dataType_castable(e->dataType, target)) {
-		fprintf(stderr, "deverr: attempted to use an invalid cast during coercion");
-		exit(1);
-	}
-	e = ast_initExpressionCast(e, getCoercionToken(), target);
-	return true;
-}

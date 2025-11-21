@@ -23,7 +23,6 @@ static AstExpression *getExpression (void);
 static AstExpression *getExpressionAndBitwise (void);
 static AstExpression *getExpressionCallOrAccess (void);
 static AstExpression *getExpressionAssign (void);
-static AstExpression *getExpressionCast (void);
 static AstExpression *getExpressionOrBitwise (void);
 static AstExpression *getExpressionPrimary (void);
 static AstExpression *getExpressionProduct (void);
@@ -165,24 +164,13 @@ static AstExpression *getExpression (void)
 
 static AstExpression *getExpressionAssign (void)
 {
-	AstExpression *expression = getExpressionCast();
+	AstExpression *expression = getExpressionShift();
 	while (check(TT_Equal)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpression();
 		expression = ast_initExpressionAssign(expression, right, operator);
 	}
 	return expression;
-}
-
-static AstExpression *getExpressionCast (void)
-{
-	AstExpression *left = getExpressionShift();
-	while (check(TT_Minus_Greater)) {
-		Token operator = parser.tokens[parser.current++];
-		DataType *to = getType();
-		left = ast_initExpressionCast(left, operator, to);
-	}
-	return left;
 }
 
 static AstExpression *getExpressionShift (void)
