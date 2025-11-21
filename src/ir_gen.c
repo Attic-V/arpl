@@ -22,7 +22,6 @@ static void visitStatementReturnE (AstStatementReturnE *statement);
 static void visitStatementVar (AstStatementVar *statement);
 
 static void visitExpression (AstExpression *expression);
-static void visitExpressionAccess (AstExpression *expression);
 static void visitExpressionAssign (AstExpression *expression);
 static void visitExpressionBinary (AstExpression *expression);
 static void visitExpressionCall (AstExpression *expression);
@@ -174,43 +173,12 @@ static void visitStatementVar (AstStatementVar *statement)
 static void visitExpression (AstExpression *expression)
 {
 	switch (expression->type) {
-		case AstExpression_Access: visitExpressionAccess(expression); break;
 		case AstExpression_Assign: visitExpressionAssign(expression); break;
 		case AstExpression_Binary: visitExpressionBinary(expression); break;
 		case AstExpression_Call: visitExpressionCall(expression); break;
 		case AstExpression_Number: visitExpressionNumber(expression); break;
 		case AstExpression_Prefix: visitExpressionPrefix(expression); break;
 		case AstExpression_Var: visitExpressionVar(expression); break;
-	}
-}
-
-static void visitExpressionAccess (AstExpression *expression)
-{
-	AstExpressionAccess *e = expression->as.access;
-	visitExpression(e->e);
-	Symbol *st = NULL;
-	switch (e->op.type) {
-		case TT_Dot:
-			st = telescope_get(gen.scope, e->e->dataType->as.struct_->identifier);
-			break;
-		case TT_Dot_Dot:
-			st = telescope_get(gen.scope, e->e->dataType->as.pointer->to->as.struct_->identifier);
-			break;
-		default:;
-	}
-	DataTypeStruct *t = st->type->as.struct_;
-	DataTypeMember *mtype = NULL;
-	for (DataTypeMember *m = t->members; m != NULL; m = m->next) {
-		if (!token_equal(e->mToken, m->identifier)) continue;
-		mtype = m;
-		break;
-	}
-	if (e->op.type == TT_Dot_Dot) {
-		addInstruction(ir_initDeref(dataType_getSize(e->e->dataType)));
-	}
-	addInstruction(ir_initAccess(mtype->index));
-	if (!expression->modifiable) {
-		addInstruction(ir_initDeref(dataType_getSize(mtype->dataType)));
 	}
 }
 

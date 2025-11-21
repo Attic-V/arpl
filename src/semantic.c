@@ -22,7 +22,6 @@ static void visitStatementReturnE (AstStatementReturnE *node);
 static void visitStatementVar (AstStatementVar *node);
 
 static void visitExpression (AstExpression *node);
-static void visitExpressionAccess (AstExpressionAccess *node);
 static void visitExpressionAssign (AstExpressionAssign *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
 static void visitExpressionCall (AstExpressionCall *node);
@@ -247,11 +246,6 @@ static void visitStatementVar (AstStatementVar *node)
 static void visitExpression (AstExpression *node)
 {
 	switch (node->type) {
-		case AstExpression_Access:
-			visitExpressionAccess(node->as.access);
-			node->dataType = node->as.access->mDataType;
-			node->modifiable = true;
-			break;
 		case AstExpression_Assign:
 			visitExpressionAssign(node->as.assign);
 			node->dataType = node->as.assign->a->dataType;
@@ -312,46 +306,6 @@ static void visitExpression (AstExpression *node)
 			node->modifiable = true;
 			break;
 		}
-	}
-}
-
-static void visitExpressionAccess (AstExpressionAccess *node)
-{
-	visitExpression(node->e);
-	Symbol *s = NULL;
-	switch (node->op.type) {
-		case TT_Dot:
-			if (!dataType_isStruct(node->e->dataType)) {
-				e(node->op, "operand must be of type struct");
-				exit(1);
-			}
-			if (!node->e->modifiable) {
-				e(node->op, "operand must be modifiable");
-			}
-			s = telescope_get(analyzer.currentScope, node->e->dataType->as.struct_->identifier);
-			break;
-		case TT_Dot_Dot:
-			if (!dataType_isPointer(node->e->dataType) || !dataType_isStruct(node->e->dataType->as.pointer->to)) {
-				e(node->op, "operand must be a pointer to a struct");
-				exit(1);
-			}
-			if (!node->e->modifiable) {
-				e(node->op, "operand must be modifiable");
-			}
-			s = telescope_get(analyzer.currentScope, node->e->dataType->as.pointer->to->as.struct_->identifier);
-			break;
-		default:;
-	}
-	node->mDataType = NULL;
-	for (DataTypeMember *member = s->type->as.struct_->members; member != NULL; member = member->next) {
-		if (token_equal(node->mToken, member->identifier)) {
-			node->mDataType = member->dataType;
-			break;
-		}
-	}
-	if (node->mDataType == NULL) {
-		e(node->mToken, "unrecognized member");
-		exit(1);
 	}
 }
 

@@ -15,7 +15,6 @@ static AstStatementInit *astStatement_initInit (Token identifier, DataType *type
 static AstStatementReturnE *astStatement_initReturnE (Token keyword, AstExpression *expression);
 static AstStatementVar *astStatement_initVar (Token identifier, DataType *type);
 
-static AstExpressionAccess *astExpression_initAccess (AstExpression *e, Token op, Token mToken);
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen, AstArgument *arguments);
@@ -109,13 +108,6 @@ AstStatement *ast_initStatementVar (Token identifier, DataType *type)
 	AstStatement *statement = ast_initStatement(AstStatement_Var);
 	statement->as.var = astStatement_initVar(identifier, type);
 	return statement;
-}
-
-AstExpression *ast_initExpressionAccess (AstExpression *e, Token op, Token mToken)
-{
-	AstExpression *expression = ast_initExpression(AstExpression_Access);
-	expression->as.access = astExpression_initAccess(e, op, mToken);
-	return expression;
 }
 
 AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Token operator)
@@ -249,15 +241,6 @@ static AstStatementVar *astStatement_initVar (Token identifier, DataType *type)
 	var->identifier = identifier;
 	var->type = type;
 	return var;
-}
-
-static AstExpressionAccess *astExpression_initAccess (AstExpression *e, Token op, Token mToken)
-{
-	AstExpressionAccess *access = mem_alloc(sizeof(*access));
-	access->e = e;
-	access->op = op;
-	access->mToken = mToken;
-	return access;
 }
 
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator)
