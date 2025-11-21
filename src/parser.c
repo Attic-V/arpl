@@ -16,7 +16,6 @@ static AstDeclaration *getDeclarationFunction (void);
 static AstStatement *getStatement (void);
 static AstStatement *getStatementBlock (void);
 static AstStatement *getStatementExpr (void);
-static AstStatement *getStatementIfE (void);
 static AstStatement *getStatementReturnE (void);
 static AstStatement *getStatementVar (void);
 
@@ -111,7 +110,6 @@ static AstDeclaration *getDeclarationFunction (void)
 static AstStatement *getStatement (void)
 {
 	switch (parser.tokens[parser.current].type) {
-		case TT_If: return getStatementIfE();
 		case TT_LBrace: return getStatementBlock();
 		case TT_Return: return getStatementReturnE();
 		case TT_Var: return getStatementVar();
@@ -137,21 +135,6 @@ static AstStatement *getStatementExpr (void)
 	AstStatement *statement = ast_initStatementExpr(getExpression());
 	expect(Semicolon, ';');
 	return statement;
-}
-
-static AstStatement *getStatementIfE (void)
-{
-	Token keyword = expect(If, 'if');
-	expect(LParen, '(');
-	AstExpression *condition = getExpression();
-	expect(RParen, ')');
-	AstStatement *a = getStatement();
-	AstStatement *b = NULL;
-	if (check(TT_Else)) {
-		parser.current++;
-		b = getStatement();
-	}
-	return ast_initStatementIfE(condition, a, b, keyword);
 }
 
 static AstStatement *getStatementReturnE (void)

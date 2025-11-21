@@ -124,13 +124,6 @@ typedef struct {
 } AstStatementExpr;
 
 typedef struct {
-	AstExpression *condition;
-	AstStatement *a;
-	AstStatement *b;
-	Token keyword;
-} AstStatementIfE;
-
-typedef struct {
 	Token identifier;
 	DataType *type;
 	AstExpression *expression;
@@ -150,7 +143,6 @@ typedef struct {
 typedef enum {
 	AstStatement_Block,
 	AstStatement_Expr,
-	AstStatement_IfE,
 	AstStatement_Init,
 	AstStatement_ReturnE,
 	AstStatement_Var,
@@ -161,7 +153,6 @@ struct AstStatement {
 	union {
 		AstStatementBlock *block;
 		AstStatementExpr *expr;
-		AstStatementIfE *ifE;
 		AstStatementInit *init;
 		AstStatementReturnE *returnE;
 		AstStatementVar *var;

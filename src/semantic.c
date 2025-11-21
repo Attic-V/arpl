@@ -17,7 +17,6 @@ static void visitDeclarationStructD (AstDeclarationStructD *node);
 static void visitStatement (AstStatement *node);
 static void visitStatementBlock (AstStatementBlock *node);
 static void visitStatementExpr (AstStatementExpr *node);
-static void visitStatementIfE (AstStatementIfE *node);
 static void visitStatementInit (AstStatementInit *node);
 static void visitStatementReturnE (AstStatementReturnE *node);
 static void visitStatementVar (AstStatementVar *node);
@@ -179,7 +178,6 @@ static void visitStatement (AstStatement *node)
 	switch (node->type) {
 		case AstStatement_Block: visitStatementBlock(node->as.block); break;
 		case AstStatement_Expr: visitStatementExpr(node->as.expr); break;
-		case AstStatement_IfE: visitStatementIfE(node->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(node->as.init); break;
 		case AstStatement_ReturnE: visitStatementReturnE(node->as.returnE); break;
 		case AstStatement_Var: visitStatementVar(node->as.var); break;
@@ -206,18 +204,6 @@ static void visitStatementExpr (AstStatementExpr *node)
 {
 	visitExpression(node->expression);
 	node->expression->modifiable = false;
-}
-
-static void visitStatementIfE (AstStatementIfE *node)
-{
-	visitExpression(node->condition);
-	if (!dataType_isBoolean(node->condition->dataType)) {
-		e(node->keyword, "condition must be a boolean");
-	}
-	visitStatement(node->a);
-	if (node->b != NULL) {
-		visitStatement(node->b);
-	}
 }
 
 static void visitStatementInit (AstStatementInit *node)

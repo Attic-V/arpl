@@ -11,7 +11,6 @@ static AstDeclarationStructD *astDeclaration_initStructD (Token keyword, Token i
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
-static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword);
 static AstStatementInit *astStatement_initInit (Token identifier, DataType *type, AstExpression *expression, Token operator);
 static AstStatementReturnE *astStatement_initReturnE (Token keyword, AstExpression *expression);
 static AstStatementVar *astStatement_initVar (Token identifier, DataType *type);
@@ -92,13 +91,6 @@ AstStatement *ast_initStatementExpr (AstExpression *expression)
 {
 	AstStatement *statement = ast_initStatement(AstStatement_Expr);
 	statement->as.expr = astStatement_initExpr(expression);
-	return statement;
-}
-
-AstStatement *ast_initStatementIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword)
-{
-	AstStatement *statement = ast_initStatement(AstStatement_IfE);
-	statement->as.ifE = astStatement_initIfE(condition, a, b, keyword);
 	return statement;
 }
 
@@ -263,16 +255,6 @@ static AstStatementExpr *astStatement_initExpr (AstExpression *expression)
 	AstStatementExpr *expr = mem_alloc(sizeof(*expr));
 	expr->expression = expression;
 	return expr;
-}
-
-static AstStatementIfE *astStatement_initIfE (AstExpression *condition, AstStatement *a, AstStatement *b, Token keyword)
-{
-	AstStatementIfE *ifE = mem_alloc(sizeof(*ifE));
-	ifE->condition = condition;
-	ifE->a = a;
-	ifE->b = b;
-	ifE->keyword = keyword;
-	return ifE;
 }
 
 static AstStatementInit *astStatement_initInit (Token identifier, DataType *type, AstExpression *expression, Token operator)

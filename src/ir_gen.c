@@ -17,7 +17,6 @@ static void visitDeclarationStructD (AstDeclarationStructD *declaration);
 static void visitStatement (AstStatement *statement);
 static void visitStatementBlock (AstStatementBlock *statement);
 static void visitStatementExpr (AstStatementExpr *statement);
-static void visitStatementIfE (AstStatementIfE *statement);
 static void visitStatementInit (AstStatementInit *statement);
 static void visitStatementReturnE (AstStatementReturnE *statement);
 static void visitStatementVar (AstStatementVar *statement);
@@ -127,7 +126,6 @@ static void visitStatement (AstStatement *statement)
 	switch (statement->type) {
 		case AstStatement_Block: visitStatementBlock(statement->as.block); break;
 		case AstStatement_Expr: visitStatementExpr(statement->as.expr); break;
-		case AstStatement_IfE: visitStatementIfE(statement->as.ifE); break;
 		case AstStatement_Init: visitStatementInit(statement->as.init); break;
 		case AstStatement_ReturnE: visitStatementReturnE(statement->as.returnE); break;
 		case AstStatement_Var: visitStatementVar(statement->as.var); break;
@@ -150,23 +148,6 @@ static void visitStatementExpr (AstStatementExpr *statement)
 {
 	visitExpression(statement->expression);
 	addInstruction(ir_initPop());
-}
-
-static void visitStatementIfE (AstStatementIfE *statement)
-{
-	int l0 = gen.label++;
-	int l1 = gen.label++;
-	visitExpression(statement->condition);
-	addInstruction(ir_initJmpFalse(l0));
-	visitStatement(statement->a);
-	if (statement->b != NULL) {
-		addInstruction(ir_initJmp(l1));
-	}
-	addInstruction(ir_initLabel(l0));
-	if (statement->b != NULL) {
-		visitStatement(statement->b);
-		addInstruction(ir_initLabel(l1));
-	}
 }
 
 static void visitStatementInit (AstStatementInit *statement)

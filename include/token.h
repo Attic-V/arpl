@@ -25,7 +25,6 @@ typedef enum {
 	TT_Greater_Greater,
 	TT_I8,
 	TT_Identifier,
-	TT_If,
 	TT_LBrace,
 	TT_LBracket,
 	TT_Less,
