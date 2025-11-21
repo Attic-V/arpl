@@ -51,7 +51,6 @@ Token *scan (char *source)
 			case ')': addToken(     TT_RParen      ); continue;
 			case ';': addToken(     TT_Semicolon   ); continue;
 
-			case '.': addToken(     match('.') ? TT_Dot_Dot           : TT_Dot         ); continue;
 			case '=': addToken(     TT_Equal       ); continue;
 			case '*': addToken(     TT_Star        ); continue;
 
