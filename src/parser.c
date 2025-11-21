@@ -20,16 +20,12 @@ static AstStatement *getStatementReturnE (void);
 static AstStatement *getStatementVar (void);
 
 static AstExpression *getExpression (void);
-static AstExpression *getExpressionAndBitwise (void);
 static AstExpression *getExpressionCallOrAccess (void);
 static AstExpression *getExpressionAssign (void);
-static AstExpression *getExpressionOrBitwise (void);
 static AstExpression *getExpressionPrimary (void);
 static AstExpression *getExpressionProduct (void);
-static AstExpression *getExpressionShift (void);
 static AstExpression *getExpressionSum (void);
 static AstExpression *getExpressionUnaryPrefix (void);
-static AstExpression *getExpressionXor (void);
 
 static AstArgument *getArgument (void);
 static AstParameter *getParameter (void);
@@ -164,55 +160,11 @@ static AstExpression *getExpression (void)
 
 static AstExpression *getExpressionAssign (void)
 {
-	AstExpression *expression = getExpressionShift();
+	AstExpression *expression = getExpressionSum();
 	while (check(TT_Equal)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpression();
 		expression = ast_initExpressionAssign(expression, right, operator);
-	}
-	return expression;
-}
-
-static AstExpression *getExpressionShift (void)
-{
-	AstExpression *expression = getExpressionOrBitwise();
-	while (check(TT_Less_Less) || check(TT_Greater_Greater)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionOrBitwise();
-		expression  = ast_initExpressionBinary(expression, right, operator);
-	}
-	return expression;
-}
-
-static AstExpression *getExpressionOrBitwise (void)
-{
-	AstExpression *expression = getExpressionXor();
-	while (check(TT_Pipe)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionXor();
-		expression = ast_initExpressionBinary(expression, right, operator);
-	}
-	return expression;
-}
-
-static AstExpression *getExpressionXor (void)
-{
-	AstExpression *expression = getExpressionAndBitwise();
-	while (check(TT_Caret)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionAndBitwise();
-		expression = ast_initExpressionBinary(expression, right, operator);
-	}
-	return expression;
-}
-
-static AstExpression *getExpressionAndBitwise (void)
-{
-	AstExpression *expression = getExpressionSum();
-	while (check(TT_And)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionSum();
-		expression = ast_initExpressionBinary(expression, right, operator);
 	}
 	return expression;
 }
@@ -241,7 +193,7 @@ static AstExpression *getExpressionProduct (void)
 
 static AstExpression *getExpressionUnaryPrefix (void)
 {
-	if (check(TT_Minus) || check(TT_Tilde) || check(TT_And) || check(TT_Star)) {
+	if (check(TT_Minus) || check(TT_Star)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpressionUnaryPrefix();
 		return ast_initExpressionPrefix(operator, right);

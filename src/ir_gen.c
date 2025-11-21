@@ -204,11 +204,6 @@ static void visitExpressionBinary (AstExpression *expression)
 	visitExpression(e->b);
 	size_t size = dataType_getSize(e->a->dataType);
 	switch (e->operator.type) {
-		case TT_And: addInstruction(ir_initAnd(size)); break;
-		case TT_Caret: addInstruction(ir_initXor(size)); break;
-		case TT_Greater_Greater: addInstruction(ir_initSar(size)); break;
-		case TT_Less_Less: addInstruction(ir_initShl(size)); break;
-		case TT_Pipe: addInstruction(ir_initOr(size)); break;
 		case TT_Plus: addInstruction(ir_initAdd(size)); break;
 		case TT_Minus: addInstruction(ir_initSub(size)); break;
 		case TT_Star: addInstruction(ir_initMul(size)); break;
@@ -251,8 +246,6 @@ static void visitExpressionPrefix (AstExpression *expression)
 	visitExpression(e->e);
 	size_t size = dataType_getSize(e->e->dataType);
 	switch (e->operator.type) {
-		case TT_And:
-			break;
 		case TT_Minus:
 			addInstruction(ir_initNeg(size));
 			break;
@@ -263,9 +256,6 @@ static void visitExpressionPrefix (AstExpression *expression)
 			if (!expression->modifiable) {
 				addInstruction(ir_initDeref(size));
 			}
-			break;
-		case TT_Tilde:
-			addInstruction(ir_initNot(size));
 			break;
 		default:;
 	}

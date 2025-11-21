@@ -253,11 +253,6 @@ static void visitExpression (AstExpression *node)
 		case AstExpression_Binary:
 			visitExpressionBinary(node->as.binary);
 			switch (node->as.binary->operator.type) {
-				case TT_And:
-				case TT_Caret:
-				case TT_Greater_Greater:
-				case TT_Less_Less:
-				case TT_Pipe:
 				case TT_Plus:
 				case TT_Minus:
 				case TT_Star:
@@ -281,11 +276,7 @@ static void visitExpression (AstExpression *node)
 			visitExpressionPrefix(node->as.prefix);
 			switch (node->as.prefix->operator.type) {
 				case TT_Minus:
-				case TT_Tilde:
 					node->dataType = node->as.prefix->e->dataType;
-					break;
-				case TT_And:
-					node->dataType = dataType_initPointer(node->as.prefix->e->dataType);
 					break;
 				case TT_Star:
 					node->dataType = node->as.prefix->e->dataType->as.pointer->to;
@@ -327,11 +318,6 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 	visitExpression(node->a);
 	visitExpression(node->b);
 	switch (node->operator.type) {
-		case TT_And:
-		case TT_Caret:
-		case TT_Greater_Greater:
-		case TT_Less_Less:
-		case TT_Pipe:
 		case TT_Plus:
 		case TT_Minus:
 		case TT_Star:
@@ -383,16 +369,10 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 	visitExpression(node->e);
 	switch (node->operator.type) {
 		case TT_Minus:
-		case TT_Tilde:
 			if (!dataType_isInt(node->e->dataType)) {
 				e(node->operator, "operand must be a number");
 			}
 			node->e->modifiable = false;
-			break;
-		case TT_And:
-			if (!node->e->modifiable) {
-				e(node->operator, "operand must be modifiable");
-			}
 			break;
 		case TT_Star:
 			if (!dataType_isPointer(node->e->dataType)) {

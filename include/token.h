@@ -5,24 +5,19 @@
 #include <stddef.h>
 
 typedef enum {
-	TT_And,
-	TT_Caret,
 	TT_Comma,
 	TT_Dot,
 	TT_Dot_Dot,
 	TT_EOF,
 	TT_Equal,
 	TT_Fn,
-	TT_Greater_Greater,
 	TT_I8,
 	TT_Identifier,
 	TT_LBrace,
 	TT_LBracket,
-	TT_Less_Less,
 	TT_LParen,
 	TT_Minus,
 	TT_Number,
-	TT_Pipe,
 	TT_Plus,
 	TT_RBrace,
 	TT_RBracket,
@@ -30,7 +25,6 @@ typedef enum {
 	TT_RParen,
 	TT_Semicolon,
 	TT_Star,
-	TT_Tilde,
 	TT_Var,
 } TokenType;
 

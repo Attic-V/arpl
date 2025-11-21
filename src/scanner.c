@@ -42,7 +42,6 @@ Token *scan (char *source)
 			case ' ':
 				continue;
 
-			case '^': addToken(     TT_Caret       ); continue;
 			case ',': addToken(     TT_Comma       ); continue;
 			case '{': addToken(     TT_LBrace      ); continue;
 			case '[': addToken(     TT_LBracket    ); continue;
@@ -51,32 +50,15 @@ Token *scan (char *source)
 			case ']': addToken(     TT_RBracket    ); continue;
 			case ')': addToken(     TT_RParen      ); continue;
 			case ';': addToken(     TT_Semicolon   ); continue;
-			case '~': addToken(     TT_Tilde       ); continue;
 
-			case '&': addToken(     TT_And         ); continue;
 			case '.': addToken(     match('.') ? TT_Dot_Dot           : TT_Dot         ); continue;
 			case '=': addToken(     TT_Equal       ); continue;
-			case '|': addToken(     TT_Pipe        ); continue;
 			case '*': addToken(     TT_Star        ); continue;
 
 			case '+': addToken(     TT_Plus        ); continue;
 
 			case '-': addToken(     TT_Minus       ); continue;
 
-			case '>':
-				if (check('>')) {
-					scanner.current++;
-					addToken(TT_Greater_Greater);
-					continue;
-				}
-				break;
-			case '<':
-				if (check('<')) {
-					scanner.current++;
-					addToken(TT_Less_Less);
-					continue;
-				}
-				break;
 			case '/':
 				if (match('/')) {
 					while (!check('\0') && !match('\n')) {
