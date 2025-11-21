@@ -31,7 +31,6 @@ static void visitExpressionBoolean (AstExpressionBoolean *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
 static void visitExpressionPostfix (AstExpressionPostfix *node);
 static void visitExpressionPrefix (AstExpressionPrefix *node);
-static void visitExpressionTernary (AstExpressionTernary *node);
 static void visitExpressionVar (AstExpressionVar *node);
 
 static bool canCoerce (DataType *from, DataType *to);
@@ -342,10 +341,6 @@ static void visitExpression (AstExpression *node)
 				default:;
 			}
 			break;
-		case AstExpression_Ternary:
-			visitExpressionTernary(node->as.ternary);
-			node->dataType = node->as.ternary->a->dataType;
-			break;
 		case AstExpression_Var: {
 			Symbol *symbol = telescope_get(analyzer.currentScope, node->as.var->identifier);
 			if (symbol == NULL) {
@@ -556,27 +551,6 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 			break;
 		default:;
 	}
-}
-
-static void visitExpressionTernary (AstExpressionTernary *node)
-{
-	AstExpression *c = node->condition;
-	AstExpression *a = node->a;
-	AstExpression *b = node->b;
-	visitExpression(c);
-	visitExpression(a);
-	visitExpression(b);
-	if (!dataType_isBoolean(c->dataType)) {
-		e(node->operator, "condition must be a boolean");
-	}
-	if (!dataType_equal(a->dataType, b->dataType)) {
-		if (!coerce(node->a, node->b->dataType) && !coerce(node->b, node->a->dataType)) {
-			e(node->operator, "operands must have the same type");
-		}
-	}
-	c->modifiable = false;
-	a->modifiable = false;
-	b->modifiable = false;
 }
 
 static void visitExpressionVar (AstExpressionVar *node)

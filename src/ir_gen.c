@@ -31,7 +31,6 @@ static void visitExpressionCast (AstExpression *expression);
 static void visitExpressionNumber (AstExpression *expression);
 static void visitExpressionPostfix (AstExpression *expression);
 static void visitExpressionPrefix (AstExpression *expression);
-static void visitExpressionTernary (AstExpression *expression);
 static void visitExpressionVar (AstExpression *expression);
 
 static void addInstruction (Ir *instruction);
@@ -187,7 +186,6 @@ static void visitExpression (AstExpression *expression)
 		case AstExpression_Number: visitExpressionNumber(expression); break;
 		case AstExpression_Postfix: visitExpressionPostfix(expression); break;
 		case AstExpression_Prefix: visitExpressionPrefix(expression); break;
-		case AstExpression_Ternary: visitExpressionTernary(expression); break;
 		case AstExpression_Var: visitExpressionVar(expression); break;
 	}
 }
@@ -374,20 +372,6 @@ static void visitExpressionPrefix (AstExpression *expression)
 			break;
 		default:;
 	}
-}
-
-static void visitExpressionTernary (AstExpression *expression)
-{
-	AstExpressionTernary *e = expression->as.ternary;
-	int l0 = gen.label++;
-	int l1 = gen.label++;
-	visitExpression(e->condition);
-	addInstruction(ir_initJmpFalse(l0));
-	visitExpression(e->a);
-	addInstruction(ir_initJmp(l1));
-	addInstruction(ir_initLabel(l0));
-	visitExpression(e->b);
-	addInstruction(ir_initLabel(l1));
 }
 
 static void visitExpressionVar (AstExpression *expression)

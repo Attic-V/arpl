@@ -69,13 +69,6 @@ typedef struct {
 } AstExpressionPrefix;
 
 typedef struct {
-	AstExpression *condition;
-	AstExpression *a;
-	AstExpression *b;
-	Token operator;
-} AstExpressionTernary;
-
-typedef struct {
 	Token identifier;
 } AstExpressionVar;
 
@@ -89,7 +82,6 @@ typedef enum {
 	AstExpression_Number,
 	AstExpression_Postfix,
 	AstExpression_Prefix,
-	AstExpression_Ternary,
 	AstExpression_Var,
 } AstExpressionType;
 
@@ -105,7 +97,6 @@ struct AstExpression {
 		AstExpressionNumber *number;
 		AstExpressionPostfix *postfix;
 		AstExpressionPrefix *prefix;
-		AstExpressionTernary *ternary;
 		AstExpressionVar *var;
 	} as;
 	DataType *dataType;

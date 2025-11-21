@@ -43,12 +43,10 @@ Token *scan (char *source)
 				continue;
 
 			case '^': addToken(     TT_Caret       ); continue;
-			case ':': addToken(     TT_Colon       ); continue;
 			case ',': addToken(     TT_Comma       ); continue;
 			case '{': addToken(     TT_LBrace      ); continue;
 			case '[': addToken(     TT_LBracket    ); continue;
 			case '(': addToken(     TT_LParen      ); continue;
-			case '?': addToken(     TT_Question    ); continue;
 			case '}': addToken(     TT_RBrace      ); continue;
 			case ']': addToken(     TT_RBracket    ); continue;
 			case ')': addToken(     TT_RParen      ); continue;

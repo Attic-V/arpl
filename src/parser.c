@@ -33,7 +33,6 @@ static AstExpression *getExpressionProduct (void);
 static AstExpression *getExpressionRelational (void);
 static AstExpression *getExpressionShift (void);
 static AstExpression *getExpressionSum (void);
-static AstExpression *getExpressionTernary (void);
 static AstExpression *getExpressionUnaryPostfix (void);
 static AstExpression *getExpressionUnaryPrefix (void);
 static AstExpression *getExpressionXor (void);
@@ -171,24 +170,11 @@ static AstExpression *getExpression (void)
 
 static AstExpression *getExpressionAssign (void)
 {
-	AstExpression *expression = getExpressionTernary();
+	AstExpression *expression = getExpressionCast();
 	while (check(TT_Equal) || check(TT_Plus_Equal) || check(TT_Minus_Equal) || check(TT_Star_Equal)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpression();
 		expression = ast_initExpressionAssign(expression, right, operator);
-	}
-	return expression;
-}
-
-static AstExpression *getExpressionTernary (void)
-{
-	AstExpression *expression = getExpressionCast();
-	if (check(TT_Question)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *a = getExpressionCast();
-		expect(Colon, ':');
-		AstExpression *b = getExpressionTernary();
-		expression = ast_initExpressionTernary(expression, a, b, operator);
 	}
 	return expression;
 }

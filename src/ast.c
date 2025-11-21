@@ -24,7 +24,6 @@ static AstExpressionBoolean *astExpression_initBoolean (bool value);
 static AstExpressionNumber *astExpression_initNumber (Token value);
 static AstExpressionPostfix *astExpression_initPostfix (Token operator, AstExpression *e);
 static AstExpressionPrefix *astExpression_initPrefix (Token operator, AstExpression *e);
-static AstExpressionTernary *astExpression_initTernary (AstExpression *condition, AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionVar *astExpression_initVar (Token identifier);
 
 Ast *ast_init (AstRoot *root)
@@ -175,13 +174,6 @@ AstExpression *ast_initExpressionPrefix (Token operator, AstExpression *e)
 {
 	AstExpression *expression = ast_initExpression(AstExpression_Prefix);
 	expression->as.prefix = astExpression_initPrefix(operator, e);
-	return expression;
-}
-
-AstExpression *ast_initExpressionTernary (AstExpression *condition, AstExpression *a, AstExpression *b, Token operator)
-{
-	AstExpression *expression = ast_initExpression(AstExpression_Ternary);
-	expression->as.ternary = astExpression_initTernary(condition, a, b, operator);
 	return expression;
 }
 
@@ -357,16 +349,6 @@ static AstExpressionPrefix *astExpression_initPrefix (Token operator, AstExpress
 	prefix->operator = operator;
 	prefix->e = e;
 	return prefix;
-}
-
-static AstExpressionTernary *astExpression_initTernary (AstExpression *condition, AstExpression *a, AstExpression *b, Token operator)
-{
-	AstExpressionTernary *ternary = mem_alloc(sizeof(*ternary));
-	ternary->condition = condition;
-	ternary->a = a;
-	ternary->b = b;
-	ternary->operator = operator;
-	return ternary;
 }
 
 static AstExpressionVar *astExpression_initVar (Token identifier)
