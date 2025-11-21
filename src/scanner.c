@@ -115,7 +115,6 @@ Token *scan (char *source)
 			sprintf(buffer, "%.*s", token->length, token->lexeme);
 
 			#define keyword(lexeme, tokentype) if (!strcmp(buffer, #lexeme)) { token->type = TT_##tokentype; continue; }
-			keyword(default, Default)
 			keyword(fn, Fn)
 			keyword(i8, I8)
 			keyword(return, Return)

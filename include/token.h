@@ -8,7 +8,6 @@ typedef enum {
 	TT_And,
 	TT_Caret,
 	TT_Comma,
-	TT_Default,
 	TT_Dot,
 	TT_Dot_Dot,
 	TT_EOF,
