@@ -25,7 +25,6 @@ static void visitExpression (AstExpression *expression);
 static void visitExpressionAccess (AstExpression *expression);
 static void visitExpressionAssign (AstExpression *expression);
 static void visitExpressionBinary (AstExpression *expression);
-static void visitExpressionBoolean (AstExpression *expression);
 static void visitExpressionCall (AstExpression *expression);
 static void visitExpressionCast (AstExpression *expression);
 static void visitExpressionNumber (AstExpression *expression);
@@ -180,7 +179,6 @@ static void visitExpression (AstExpression *expression)
 		case AstExpression_Access: visitExpressionAccess(expression); break;
 		case AstExpression_Assign: visitExpressionAssign(expression); break;
 		case AstExpression_Binary: visitExpressionBinary(expression); break;
-		case AstExpression_Boolean: visitExpressionBoolean(expression); break;
 		case AstExpression_Call: visitExpressionCall(expression); break;
 		case AstExpression_Cast: visitExpressionCast(expression); break;
 		case AstExpression_Number: visitExpressionNumber(expression); break;
@@ -261,27 +259,15 @@ static void visitExpressionBinary (AstExpression *expression)
 	size_t size = dataType_getSize(e->a->dataType);
 	switch (e->operator.type) {
 		case TT_And: addInstruction(ir_initAnd(size)); break;
-		case TT_And_And: addInstruction(ir_initAnd(size)); break;
-		case TT_Bang_Equal: addInstruction(ir_initNotEqu(size)); break;
 		case TT_Caret: addInstruction(ir_initXor(size)); break;
-		case TT_Equal_Equal: addInstruction(ir_initEqu(size)); break;
 		case TT_Greater_Greater: addInstruction(ir_initSar(size)); break;
-		case TT_Less: addInstruction(ir_initLess(size)); break;
-		case TT_Less_Equal: addInstruction(ir_initLessEqu(size)); break;
 		case TT_Less_Less: addInstruction(ir_initShl(size)); break;
 		case TT_Pipe: addInstruction(ir_initOr(size)); break;
-		case TT_Pipe_Pipe: addInstruction(ir_initOr(size)); break;
 		case TT_Plus: addInstruction(ir_initAdd(size)); break;
 		case TT_Minus: addInstruction(ir_initSub(size)); break;
 		case TT_Star: addInstruction(ir_initMul(size)); break;
 		default:;
 	}
-}
-
-static void visitExpressionBoolean (AstExpression *expression)
-{
-	AstExpressionBoolean *e = expression->as.boolean;
-	addInstruction(ir_initPush(e->value));
 }
 
 static void visitExpressionCall (AstExpression *expression)
@@ -342,11 +328,6 @@ static void visitExpressionPrefix (AstExpression *expression)
 	size_t size = dataType_getSize(e->e->dataType);
 	switch (e->operator.type) {
 		case TT_And:
-			break;
-		case TT_Bang:
-			addInstruction(ir_initNot(size));
-			addInstruction(ir_initPush(1));
-			addInstruction(ir_initAnd(size));
 			break;
 		case TT_Minus:
 			addInstruction(ir_initNeg(size));

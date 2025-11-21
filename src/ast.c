@@ -20,7 +20,6 @@ static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpre
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen, AstArgument *arguments);
 static AstExpressionCast *astExpression_initCast (AstExpression *e, Token operator, DataType *to);
-static AstExpressionBoolean *astExpression_initBoolean (bool value);
 static AstExpressionNumber *astExpression_initNumber (Token value);
 static AstExpressionPostfix *astExpression_initPostfix (Token operator, AstExpression *e);
 static AstExpressionPrefix *astExpression_initPrefix (Token operator, AstExpression *e);
@@ -132,13 +131,6 @@ AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Tok
 {
 	AstExpression *expression = ast_initExpression(AstExpression_Binary);
 	expression->as.binary = astExpression_initBinary(a, b, operator);
-	return expression;
-}
-
-AstExpression *ast_initExpressionBoolean (bool value)
-{
-	AstExpression *expression = ast_initExpression(AstExpression_Boolean);
-	expression->as.boolean = astExpression_initBoolean(value);
 	return expression;
 }
 
@@ -300,13 +292,6 @@ static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpre
 	binary->b = b;
 	binary->operator = operator;
 	return binary;
-}
-
-static AstExpressionBoolean *astExpression_initBoolean (bool value)
-{
-	AstExpressionBoolean *boolean = mem_alloc(sizeof(*boolean));
-	boolean->value = value;
-	return boolean;
 }
 
 static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen, AstArgument *arguments)

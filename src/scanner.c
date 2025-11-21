@@ -53,14 +53,12 @@ Token *scan (char *source)
 			case ';': addToken(     TT_Semicolon   ); continue;
 			case '~': addToken(     TT_Tilde       ); continue;
 
-			case '&': addToken(     match('&') ? TT_And_And           : TT_And         ); continue;
-			case '!': addToken(     match('=') ? TT_Bang_Equal        : TT_Bang        ); continue;
+			case '&': addToken(     TT_And         ); continue;
 			case '.': addToken(     match('.') ? TT_Dot_Dot           : TT_Dot         ); continue;
-			case '=': addToken(     match('=') ? TT_Equal_Equal       : TT_Equal       ); continue;
-			case '|': addToken(     match('|') ? TT_Pipe_Pipe         : TT_Pipe        ); continue;
+			case '=': addToken(     TT_Equal       ); continue;
+			case '|': addToken(     TT_Pipe        ); continue;
 			case '*': addToken(     match('=') ? TT_Star_Equal        : TT_Star        ); continue;
 
-			case '<': addToken(     match('<') ? TT_Less_Less         : match('=') ? TT_Less_Equal        : TT_Less        ); continue;
 			case '+': addToken(     match('=') ? TT_Plus_Equal        : match('+') ? TT_Plus_Plus         : TT_Plus        ); continue;
 
 			case '-': addToken(     match('>') ? TT_Minus_Greater     : match('-') ? TT_Minus_Minus       : match('=') ? TT_Minus_Equal       : TT_Minus       ); continue;
@@ -69,6 +67,13 @@ Token *scan (char *source)
 				if (check('>')) {
 					scanner.current++;
 					addToken(TT_Greater_Greater);
+					continue;
+				}
+				break;
+			case '<':
+				if (check('<')) {
+					scanner.current++;
+					addToken(TT_Less_Less);
 					continue;
 				}
 				break;
@@ -110,14 +115,10 @@ Token *scan (char *source)
 			sprintf(buffer, "%.*s", token->length, token->lexeme);
 
 			#define keyword(lexeme, tokentype) if (!strcmp(buffer, #lexeme)) { token->type = TT_##tokentype; continue; }
-			keyword(bool, Bool)
 			keyword(default, Default)
-			keyword(else, Else)
-			keyword(false, False)
 			keyword(fn, Fn)
 			keyword(i8, I8)
 			keyword(return, Return)
-			keyword(true, True)
 			keyword(var, Var)
 			#undef keyword
 			continue;

@@ -27,7 +27,6 @@ static void visitExpressionAssign (AstExpressionAssign *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
 static void visitExpressionCall (AstExpressionCall *node);
 static void visitExpressionCast (AstExpressionCast *node);
-static void visitExpressionBoolean (AstExpressionBoolean *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
 static void visitExpressionPostfix (AstExpressionPostfix *node);
 static void visitExpressionPrefix (AstExpressionPrefix *node);
@@ -282,19 +281,8 @@ static void visitExpression (AstExpression *node)
 				case TT_Star:
 					node->dataType = node->as.binary->a->dataType;
 					break;
-				case TT_And_And:
-				case TT_Bang_Equal:
-				case TT_Equal_Equal:
-				case TT_Less:
-				case TT_Pipe_Pipe:
-					node->dataType = dataType_initBoolean();
-					break;
 				default:;
 			}
-			break;
-		case AstExpression_Boolean:
-			visitExpressionBoolean(node->as.boolean);
-			node->dataType = dataType_initBoolean();
 			break;
 		case AstExpression_Call:
 			visitExpressionCall(node->as.call);
@@ -323,9 +311,6 @@ static void visitExpression (AstExpression *node)
 		case AstExpression_Prefix:
 			visitExpressionPrefix(node->as.prefix);
 			switch (node->as.prefix->operator.type) {
-				case TT_Bang:
-					node->dataType = dataType_initBoolean();
-					break;
 				case TT_Minus:
 				case TT_Plus_Plus:
 				case TT_Tilde:
@@ -419,7 +404,6 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 		case TT_And:
 		case TT_Caret:
 		case TT_Greater_Greater:
-		case TT_Less:
 		case TT_Less_Less:
 		case TT_Pipe:
 		case TT_Plus:
@@ -428,15 +412,6 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 			if (!dataType_isInt(node->a->dataType) || !dataType_isInt(node->b->dataType)) {
 				e(node->operator, "operands must be numbers");
 			}
-			break;
-		case TT_And_And:
-		case TT_Pipe_Pipe:
-			if (!dataType_isBoolean(node->a->dataType) || !dataType_isBoolean(node->b->dataType)) {
-				e(node->operator, "operands must be booleans");
-			}
-			break;
-		case TT_Bang_Equal:
-		case TT_Equal_Equal:
 			break;
 		default:;
 	}
@@ -447,11 +422,6 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 	}
 	node->a->modifiable = false;
 	node->b->modifiable = false;
-}
-
-static void visitExpressionBoolean (AstExpressionBoolean *node)
-{
-	(void)node;
 }
 
 static void visitExpressionCall (AstExpressionCall *node)
@@ -516,12 +486,6 @@ static void visitExpressionPrefix (AstExpressionPrefix *node)
 {
 	visitExpression(node->e);
 	switch (node->operator.type) {
-		case TT_Bang:
-			if (!dataType_isBoolean(node->e->dataType)) {
-				e(node->operator, "operand must be a boolean");
-			}
-			node->e->modifiable = false;
-			break;
 		case TT_Minus:
 		case TT_Tilde:
 			if (!dataType_isInt(node->e->dataType)) {

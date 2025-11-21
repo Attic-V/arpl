@@ -29,10 +29,6 @@ typedef struct {
 	Token operator;
 } AstExpressionBinary;
 
-typedef struct {
-	bool value;
-} AstExpressionBoolean;
-
 typedef struct AstArgument AstArgument;
 
 struct AstArgument {
@@ -76,7 +72,6 @@ typedef enum {
 	AstExpression_Access,
 	AstExpression_Assign,
 	AstExpression_Binary,
-	AstExpression_Boolean,
 	AstExpression_Call,
 	AstExpression_Cast,
 	AstExpression_Number,
@@ -91,7 +86,6 @@ struct AstExpression {
 		AstExpressionAccess *access;
 		AstExpressionAssign *assign;
 		AstExpressionBinary *binary;
-		AstExpressionBoolean *boolean;
 		AstExpressionCall *call;
 		AstExpressionCast *cast;
 		AstExpressionNumber *number;

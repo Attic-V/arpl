@@ -21,16 +21,12 @@ static AstStatement *getStatementVar (void);
 
 static AstExpression *getExpression (void);
 static AstExpression *getExpressionAndBitwise (void);
-static AstExpression *getExpressionAndLogical (void);
 static AstExpression *getExpressionCallOrAccess (void);
 static AstExpression *getExpressionAssign (void);
 static AstExpression *getExpressionCast (void);
-static AstExpression *getExpressionEquality (void);
 static AstExpression *getExpressionOrBitwise (void);
-static AstExpression *getExpressionOrLogical (void);
 static AstExpression *getExpressionPrimary (void);
 static AstExpression *getExpressionProduct (void);
-static AstExpression *getExpressionRelational (void);
 static AstExpression *getExpressionShift (void);
 static AstExpression *getExpressionSum (void);
 static AstExpression *getExpressionUnaryPostfix (void);
@@ -181,57 +177,13 @@ static AstExpression *getExpressionAssign (void)
 
 static AstExpression *getExpressionCast (void)
 {
-	AstExpression *left = getExpressionOrLogical();
+	AstExpression *left = getExpressionShift();
 	while (check(TT_Minus_Greater)) {
 		Token operator = parser.tokens[parser.current++];
 		DataType *to = getType();
 		left = ast_initExpressionCast(left, operator, to);
 	}
 	return left;
-}
-
-static AstExpression *getExpressionOrLogical (void)
-{
-	AstExpression *expression = getExpressionAndLogical();
-	while (check(TT_Pipe_Pipe)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionAndLogical();
-		expression = ast_initExpressionBinary(expression, right, operator);
-	}
-	return expression;
-}
-
-static AstExpression *getExpressionAndLogical (void)
-{
-	AstExpression *expression = getExpressionEquality();
-	while (check(TT_And_And)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionEquality();
-		expression = ast_initExpressionBinary(expression, right, operator);
-	}
-	return expression;
-}
-
-static AstExpression *getExpressionEquality (void)
-{
-	AstExpression *expression = getExpressionRelational();
-	while (check(TT_Equal_Equal) || check(TT_Bang_Equal)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionRelational();
-		expression = ast_initExpressionBinary(expression, right, operator);
-	}
-	return expression;
-}
-
-static AstExpression *getExpressionRelational (void)
-{
-	AstExpression *expression = getExpressionShift();
-	while (check(TT_Less) || check(TT_Less_Equal)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionShift();
-		expression = ast_initExpressionBinary(expression, right, operator);
-	}
-	return expression;
 }
 
 static AstExpression *getExpressionShift (void)
@@ -312,7 +264,7 @@ static AstExpression *getExpressionUnaryPostfix (void)
 
 static AstExpression *getExpressionUnaryPrefix (void)
 {
-	if (check(TT_Minus) || check(TT_Bang) || check(TT_Tilde) || check(TT_Plus_Plus) || check(TT_Minus_Minus) || check(TT_And) || check(TT_Star)) {
+	if (check(TT_Minus) || check(TT_Tilde) || check(TT_Plus_Plus) || check(TT_Minus_Minus) || check(TT_And) || check(TT_Star)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpressionUnaryPrefix();
 		return ast_initExpressionPrefix(operator, right);
@@ -355,10 +307,6 @@ static AstExpression *getExpressionPrimary (void)
 			expect(RParen, ')');
 			return expression;
 		}
-		case TT_True:
-			return ast_initExpressionBoolean(true);
-		case TT_False:
-			return ast_initExpressionBoolean(false);
 		case TT_Identifier:
 			return ast_initExpressionVar(token);
 		default:;
@@ -384,7 +332,6 @@ static DataType *getType (void)
 	Token token = parser.tokens[parser.current++];
 	switch (token.type) {
 		case TT_I8: return dataType_initI8();
-		case TT_Bool: return dataType_initBoolean();
 		case TT_Star: return dataType_initPointer(getType());
 		default:;
 	}
