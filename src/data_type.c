@@ -2,7 +2,6 @@
 #include "data_type.h"
 #include "linked_list.h"
 #include "memory.h"
-#include "x86_gen.h"
 
 static DataType *dataType_init (DataTypeType type);
 
@@ -58,11 +57,6 @@ bool dataType_isI8 (DataType *t)
 bool dataType_isInt (DataType *t)
 {
 	return dataType_isI8(t);
-}
-
-bool dataType_castable (DataType *from, DataType *to)
-{
-	return CastTable[from->type][to->type] != NULL;
 }
 
 bool dataType_equal (DataType *a, DataType *b)
