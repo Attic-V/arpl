@@ -6,7 +6,6 @@
 
 static DataType *dataType_init (DataTypeType type);
 
-static DataTypeBoolean *dataTypeBoolean_init (void);
 static DataTypeFunction *dataTypeFunction_init (DataType *returnType, DataType *parameters);
 static DataTypeI8 *dataTypeI8_init (void);
 
@@ -26,19 +25,6 @@ DataTypeMember *dataType_initMember (Token identifier, DataType *dataType, size_
 	member->index = index;
 	dll_init(member);
 	return member;
-}
-
-DataType *dataType_initBoolean (void)
-{
-	DataType *t = dataType_init(DataType_Boolean);
-	t->as.boolean = dataTypeBoolean_init();
-	return t;
-}
-
-static DataTypeBoolean *dataTypeBoolean_init (void)
-{
-	DataTypeBoolean *t = mem_alloc(sizeof(*t));
-	return t;
 }
 
 DataType *dataType_initFunction (DataType *returnType, DataType *parameters)
@@ -69,11 +55,6 @@ static DataTypeI8 *dataTypeI8_init (void)
 	return t;
 }
 
-bool dataType_isBoolean (DataType *t)
-{
-	return t->type == DataType_Boolean;
-}
-
 bool dataType_isFunction (DataType *t)
 {
 	return t->type == DataType_Function;
@@ -100,7 +81,6 @@ bool dataType_equal (DataType *a, DataType *b)
 		return false;
 	}
 	switch (a->type) {
-		case DataType_Boolean: return true;
 		case DataType_I8: return true;
 		default: return false;
 	}
@@ -109,7 +89,6 @@ bool dataType_equal (DataType *a, DataType *b)
 size_t dataType_getSize (DataType *t)
 {
 	switch (t->type) {
-		case DataType_Boolean: return BYTE;
 		case DataType_I8: return BYTE;
 		default: return 0;
 	}
