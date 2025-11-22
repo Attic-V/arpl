@@ -8,7 +8,6 @@
 #include "memory.h"
 #include "parser.h"
 #include "scanner.h"
-#include "semantic.h"
 #include "token.h"
 #include "x86_gen.h"
 
@@ -24,7 +23,6 @@ int main (int argc, char **argv)
 	char *source = readFile(path);
 	Token *tokens = scan(source);
 	Ast *ast = parse(tokens);
-	analyze(ast);
 	Ir *ir = gen_ir(ast);
 	gen_x86(ir);
 
