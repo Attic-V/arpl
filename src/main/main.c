@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
+
+#include "file.h"
 
 int main (int argc, char **argv)
 {
@@ -8,8 +11,11 @@ int main (int argc, char **argv)
 	}
 
 	char *path = argv[1];
+	char *contents = file_readFile(path);
 
-	printf("%s\n", path);
+	printf("%s\n", contents);
+
+	free(contents);
 
 	return 0;
 }
