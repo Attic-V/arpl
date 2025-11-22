@@ -2,5 +2,5 @@
 
 ## current project state
 
-I'm rebuilding nearly everything.
+I'm rebuilding everything.
 
