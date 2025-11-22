@@ -118,15 +118,9 @@ static void visitDeclarationFunction (AstDeclarationFunction *node)
 	node->scope->parent = analyzer.previousScope;
 	for (AstParameter *parameter = node->parameters; parameter != NULL; parameter = parameter->next) {
 		analyzer.previousScope = node->scope;
-		if (dataType_isStruct(parameter->type)) {
-			e(parameter->identifier, "cannot pass structs. please use a pointer to a struct instead");
-		}
 		AstStatement *paraminit = ast_initStatementVar(parameter->identifier, parameter->type);
 		visitStatement(paraminit);
 		analyzer.currentScope = node->scope;
-	}
-	if (dataType_isStruct(node->dataType->as.function->returnType)) {
-		e(node->identifier, "cannot return a struct");
 	}
 	analyzer.previousScope = node->scope;
 	visitStatement(node->body);
@@ -224,14 +218,6 @@ static void visitStatementReturnE (AstStatementReturnE *node)
 static void visitStatementVar (AstStatementVar *node)
 {
 	Symbol *symbol = symbol_init(node->identifier, node->type);
-	if (dataType_isStruct(symbol->type)) {
-		Symbol *s = telescope_get(analyzer.currentScope, symbol->type->as.struct_->identifier);
-		if (s == NULL) {
-			e(symbol->type->as.struct_->identifier, "unrecognized type");
-			exit(1);
-		}
-		symbol->type->as.struct_->members = s->type->as.struct_->members;
-	}
 	if (scope_add(analyzer.currentScope, symbol)) {
 		symbol->physicalIndex = analyzer.currentPhysicalIndex;
 		analyzer.currentPhysicalIndex += dataType_getSize(symbol->type);

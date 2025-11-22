@@ -9,8 +9,6 @@ static DataType *dataType_init (DataTypeType type);
 static DataTypeBoolean *dataTypeBoolean_init (void);
 static DataTypeFunction *dataTypeFunction_init (DataType *returnType, DataType *parameters);
 static DataTypeI8 *dataTypeI8_init (void);
-static DataTypePointer *dataTypePointer_init (DataType *to);
-static DataTypeStruct *dataTypeStruct_init (Token identifier, DataTypeMember *members);
 
 static DataType *dataType_init (DataTypeType type)
 {
@@ -71,35 +69,6 @@ static DataTypeI8 *dataTypeI8_init (void)
 	return t;
 }
 
-DataType *dataType_initPointer (DataType *to)
-{
-	DataType *t = dataType_init(DataType_Pointer);
-	t->as.pointer = dataTypePointer_init(to);
-	return t;
-}
-
-static DataTypePointer *dataTypePointer_init (DataType *to)
-{
-	DataTypePointer *t = mem_alloc(sizeof(*t));
-	t->to = to;
-	return t;
-}
-
-DataType *dataType_initStruct (Token identifier, DataTypeMember *members)
-{
-	DataType *t = dataType_init(DataType_Struct);
-	t->as.struct_ = dataTypeStruct_init(identifier, members);
-	return t;
-}
-
-static DataTypeStruct *dataTypeStruct_init (Token identifier, DataTypeMember *members)
-{
-	DataTypeStruct *t = mem_alloc(sizeof(*t));
-	t->identifier = identifier;
-	t->members = members;
-	return t;
-}
-
 bool dataType_isBoolean (DataType *t)
 {
 	return t->type == DataType_Boolean;
@@ -113,16 +82,6 @@ bool dataType_isFunction (DataType *t)
 bool dataType_isI8 (DataType *t)
 {
 	return t->type == DataType_I8;
-}
-
-bool dataType_isPointer (DataType *t)
-{
-	return t->type == DataType_Pointer;
-}
-
-bool dataType_isStruct (DataType *t)
-{
-	return t->type == DataType_Struct;
 }
 
 bool dataType_isInt (DataType *t)
@@ -143,8 +102,6 @@ bool dataType_equal (DataType *a, DataType *b)
 	switch (a->type) {
 		case DataType_Boolean: return true;
 		case DataType_I8: return true;
-		case DataType_Pointer: return dataType_equal(a->as.pointer->to, b->as.pointer->to);
-		case DataType_Struct: return token_equal(a->as.struct_->identifier, b->as.struct_->identifier);
 		default: return false;
 	}
 }
@@ -154,14 +111,6 @@ size_t dataType_getSize (DataType *t)
 	switch (t->type) {
 		case DataType_Boolean: return BYTE;
 		case DataType_I8: return BYTE;
-		case DataType_Pointer: return QWORD;
-		case DataType_Struct: {
-			size_t s = 0;
-			for (DataTypeMember *m = t->as.struct_->members; m != NULL; m = m->next) {
-				s += dataType_getSize(m->dataType);
-			}
-			return s;
-		}
 		default: return 0;
 	}
 }

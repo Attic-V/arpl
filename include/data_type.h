@@ -20,10 +20,6 @@ typedef struct {
 	char _unused;
 } DataTypeI8;
 
-typedef struct {
-	DataType *to;
-} DataTypePointer;
-
 typedef struct DataTypeMember DataTypeMember;
 
 typedef struct {
@@ -43,7 +39,6 @@ typedef enum {
 	DataType_Boolean,
 	DataType_Function,
 	DataType_I8,
-	DataType_Pointer,
 	DataType_Struct,
 
 	DataTypeType_Count,
@@ -55,7 +50,6 @@ struct DataType {
 		DataTypeBoolean *boolean;
 		DataTypeFunction *function;
 		DataTypeI8 *i8;
-		DataTypePointer *pointer;
 		DataTypeStruct *struct_;
 	} as;
 	DataType *next;
@@ -65,8 +59,6 @@ struct DataType {
 DataType *dataType_initBoolean (void);
 DataType *dataType_initFunction (DataType *returnType, DataType *parameters);
 DataType *dataType_initI8 (void);
-DataType *dataType_initPointer (DataType *to);
-DataType *dataType_initStruct (Token identifier, DataTypeMember *members);
 
 DataTypeMember *dataType_initMember (Token identifier, DataType *dataType, size_t index);
 
@@ -75,8 +67,6 @@ DataType *dataType_smallestInt (size_t value);
 bool dataType_isBoolean (DataType *t);
 bool dataType_isFunction (DataType *t);
 bool dataType_isI8 (DataType *t);
-bool dataType_isPointer (DataType *t);
-bool dataType_isStruct (DataType *t);
 
 bool dataType_isInt (DataType *t);
 

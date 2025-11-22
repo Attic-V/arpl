@@ -7,7 +7,6 @@ static AstStatement *ast_initStatement (AstStatementType type);
 static AstExpression *ast_initExpression (AstExpressionType type);
 
 static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token identifier, AstStatement *body, DataType *returnType, AstParameter *parameters);
-static AstDeclarationStructD *astDeclaration_initStructD (Token keyword, Token identifier, AstParameter *members);
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children);
 static AstStatementExpr *astStatement_initExpr (AstExpression *expression);
@@ -62,13 +61,6 @@ AstDeclaration *ast_initDeclarationFunction (Token keyword, Token identifier, As
 {
 	AstDeclaration *declaration = ast_initDeclaration(AstDeclaration_Function);
 	declaration->as.function = astDeclaration_initFunction(keyword, identifier, body, returnType, parameters);
-	return declaration;
-}
-
-AstDeclaration *ast_initDeclarationStructD (Token keyword, Token identifier, AstParameter *members)
-{
-	AstDeclaration *declaration = ast_initDeclaration(AstDeclaration_StructD);
-	declaration->as.structD = astDeclaration_initStructD(keyword, identifier, members);
 	return declaration;
 }
 
@@ -159,24 +151,6 @@ static AstDeclarationFunction *astDeclaration_initFunction (Token keyword, Token
 	function->dataType = dataType_initFunction(returnType, params);
 	function->parameters = parameters;
 	return function;
-}
-
-static AstDeclarationStructD *astDeclaration_initStructD (Token keyword, Token identifier, AstParameter *members)
-{
-	int idx = 0;
-	AstDeclarationStructD *structD = mem_alloc(sizeof(*structD));
-	structD->keyword = keyword;
-	structD->identifier = identifier;
-	structD->members = members;
-	DataTypeMember *mems = NULL;
-	for (AstParameter *member = members; member != NULL; member = member->next) {
-		DataTypeMember *m = dataType_initMember(member->identifier, member->type, idx);
-		idx += dataType_getSize(member->type);
-		dll_shove(mems, m);
-	}
-	dll_rewind(mems);
-	structD->dataType = dataType_initStruct(identifier, mems);
-	return structD;
 }
 
 static AstStatementBlock *astStatement_initBlock (AstStatement *children)
