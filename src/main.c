@@ -4,7 +4,6 @@
 #include "ast.h"
 #include "data.h"
 #include "file.h"
-#include "ir_gen.h"
 #include "memory.h"
 #include "parser.h"
 #include "scanner.h"
@@ -22,7 +21,6 @@ int main (int argc, char **argv)
 	char *source = readFile(path);
 	Token *tokens = scan(source);
 	Ast *ast = parse(tokens);
-	Ir *ir = gen_ir(ast);
 
 	mem_free();
 
