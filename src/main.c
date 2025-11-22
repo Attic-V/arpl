@@ -17,7 +17,6 @@ int main (int argc, char **argv)
 	char *path = argv[1];
 
 	char *source = readFile(path);
-	Token *tokens = scan(source);
 
 	mem_free();
 
