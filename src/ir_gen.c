@@ -23,9 +23,7 @@ static void visitStatementVar (AstStatementVar *statement);
 
 static void visitExpression (AstExpression *expression);
 static void visitExpressionAssign (AstExpression *expression);
-static void visitExpressionBinary (AstExpression *expression);
 static void visitExpressionNumber (AstExpression *expression);
-static void visitExpressionPrefix (AstExpression *expression);
 static void visitExpressionVar (AstExpression *expression);
 
 static void addInstruction (Ir *instruction);
@@ -173,9 +171,7 @@ static void visitExpression (AstExpression *expression)
 {
 	switch (expression->type) {
 		case AstExpression_Assign: visitExpressionAssign(expression); break;
-		case AstExpression_Binary: visitExpressionBinary(expression); break;
 		case AstExpression_Number: visitExpressionNumber(expression); break;
-		case AstExpression_Prefix: visitExpressionPrefix(expression); break;
 		case AstExpression_Var: visitExpressionVar(expression); break;
 	}
 }
@@ -195,47 +191,12 @@ static void visitExpressionAssign (AstExpression *expression)
 	addInstruction(ir_initDeref(size));
 }
 
-static void visitExpressionBinary (AstExpression *expression)
-{
-	AstExpressionBinary *e = expression->as.binary;
-	visitExpression(e->a);
-	visitExpression(e->b);
-	size_t size = dataType_getSize(e->a->dataType);
-	switch (e->operator.type) {
-		case TT_Plus: addInstruction(ir_initAdd(size)); break;
-		case TT_Minus: addInstruction(ir_initSub(size)); break;
-		case TT_Star: addInstruction(ir_initMul(size)); break;
-		default:;
-	}
-}
-
 static void visitExpressionNumber (AstExpression *expression)
 {
 	AstExpressionNumber *e = expression->as.number;
 	char *buffer = mem_alloc(e->value.length + 1);
 	sprintf(buffer, "%.*s", e->value.length, e->value.lexeme);
 	addInstruction(ir_initPush(atoi(buffer)));
-}
-
-static void visitExpressionPrefix (AstExpression *expression)
-{
-	AstExpressionPrefix *e = expression->as.prefix;
-	visitExpression(e->e);
-	size_t size = dataType_getSize(e->e->dataType);
-	switch (e->operator.type) {
-		case TT_Minus:
-			addInstruction(ir_initNeg(size));
-			break;
-		case TT_Star:
-			if (expression->as.prefix->e->modifiable) {
-				addInstruction(ir_initDeref(size));
-			}
-			if (!expression->modifiable) {
-				addInstruction(ir_initDeref(size));
-			}
-			break;
-		default:;
-	}
 }
 
 static void visitExpressionVar (AstExpression *expression)

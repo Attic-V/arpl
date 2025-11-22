@@ -16,12 +16,6 @@ typedef struct {
 	Token operator;
 } AstExpressionAssign;
 
-typedef struct {
-	AstExpression *a;
-	AstExpression *b;
-	Token operator;
-} AstExpressionBinary;
-
 typedef struct AstArgument AstArgument;
 
 struct AstArgument {
@@ -35,19 +29,12 @@ typedef struct {
 } AstExpressionNumber;
 
 typedef struct {
-	Token operator;
-	AstExpression *e;
-} AstExpressionPrefix;
-
-typedef struct {
 	Token identifier;
 } AstExpressionVar;
 
 typedef enum {
 	AstExpression_Assign,
-	AstExpression_Binary,
 	AstExpression_Number,
-	AstExpression_Prefix,
 	AstExpression_Var,
 } AstExpressionType;
 
@@ -55,9 +42,7 @@ struct AstExpression {
 	AstExpressionType type;
 	union {
 		AstExpressionAssign *assign;
-		AstExpressionBinary *binary;
 		AstExpressionNumber *number;
-		AstExpressionPrefix *prefix;
 		AstExpressionVar *var;
 	} as;
 	DataType *dataType;

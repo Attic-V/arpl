@@ -14,15 +14,12 @@ typedef enum {
 	TT_LBrace,
 	TT_LBracket,
 	TT_LParen,
-	TT_Minus,
 	TT_Number,
-	TT_Plus,
 	TT_RBrace,
 	TT_RBracket,
 	TT_Return,
 	TT_RParen,
 	TT_Semicolon,
-	TT_Star,
 	TT_Var,
 } TokenType;
 

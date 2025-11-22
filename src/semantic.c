@@ -23,9 +23,7 @@ static void visitStatementVar (AstStatementVar *node);
 
 static void visitExpression (AstExpression *node);
 static void visitExpressionAssign (AstExpressionAssign *node);
-static void visitExpressionBinary (AstExpressionBinary *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
-static void visitExpressionPrefix (AstExpressionPrefix *node);
 static void visitExpressionVar (AstExpressionVar *node);
 
 #define e(token, message) \
@@ -249,36 +247,12 @@ static void visitExpression (AstExpression *node)
 			visitExpressionAssign(node->as.assign);
 			node->dataType = node->as.assign->a->dataType;
 			break;
-		case AstExpression_Binary:
-			visitExpressionBinary(node->as.binary);
-			switch (node->as.binary->operator.type) {
-				case TT_Plus:
-				case TT_Minus:
-				case TT_Star:
-					node->dataType = node->as.binary->a->dataType;
-					break;
-				default:;
-			}
-			break;
 		case AstExpression_Number:
 			visitExpressionNumber(node->as.number);
 			char *buffer = mem_alloc(node->as.number->value.length + 1);
 			sprintf(buffer, "%.*s", node->as.number->value.length, node->as.number->value.lexeme);
 			size_t value = atoi(buffer);
 			node->dataType = dataType_smallestInt(value);
-			break;
-		case AstExpression_Prefix:
-			visitExpressionPrefix(node->as.prefix);
-			switch (node->as.prefix->operator.type) {
-				case TT_Minus:
-					node->dataType = node->as.prefix->e->dataType;
-					break;
-				case TT_Star:
-					node->dataType = node->as.prefix->e->dataType->as.pointer->to;
-					node->modifiable = true;
-					break;
-				default:;
-			}
 			break;
 		case AstExpression_Var: {
 			Symbol *symbol = telescope_get(analyzer.currentScope, node->as.var->identifier);
@@ -308,50 +282,9 @@ static void visitExpressionAssign (AstExpressionAssign *node)
 	node->b->modifiable = false;
 }
 
-static void visitExpressionBinary (AstExpressionBinary *node)
-{
-	visitExpression(node->a);
-	visitExpression(node->b);
-	switch (node->operator.type) {
-		case TT_Plus:
-		case TT_Minus:
-		case TT_Star:
-			if (!dataType_isInt(node->a->dataType) || !dataType_isInt(node->b->dataType)) {
-				e(node->operator, "operands must be numbers");
-			}
-			break;
-		default:;
-	}
-	if (!dataType_equal(node->a->dataType, node->b->dataType)) {
-		e(node->operator, "operands must have the same type");
-	}
-	node->a->modifiable = false;
-	node->b->modifiable = false;
-}
-
 static void visitExpressionNumber (AstExpressionNumber *node)
 {
 	(void)node;
-}
-
-static void visitExpressionPrefix (AstExpressionPrefix *node)
-{
-	visitExpression(node->e);
-	switch (node->operator.type) {
-		case TT_Minus:
-			if (!dataType_isInt(node->e->dataType)) {
-				e(node->operator, "operand must be a number");
-			}
-			node->e->modifiable = false;
-			break;
-		case TT_Star:
-			if (!dataType_isPointer(node->e->dataType)) {
-				e(node->operator, "operand must be a pointer");
-				exit(1);
-			}
-			break;
-		default:;
-	}
 }
 
 static void visitExpressionVar (AstExpressionVar *node)

@@ -22,9 +22,6 @@ static AstStatement *getStatementVar (void);
 static AstExpression *getExpression (void);
 static AstExpression *getExpressionAssign (void);
 static AstExpression *getExpressionPrimary (void);
-static AstExpression *getExpressionProduct (void);
-static AstExpression *getExpressionSum (void);
-static AstExpression *getExpressionUnaryPrefix (void);
 
 static AstParameter *getParameter (void);
 
@@ -158,45 +155,13 @@ static AstExpression *getExpression (void)
 
 static AstExpression *getExpressionAssign (void)
 {
-	AstExpression *expression = getExpressionSum();
+	AstExpression *expression = getExpressionPrimary();
 	while (check(TT_Equal)) {
 		Token operator = parser.tokens[parser.current++];
 		AstExpression *right = getExpression();
 		expression = ast_initExpressionAssign(expression, right, operator);
 	}
 	return expression;
-}
-
-static AstExpression *getExpressionSum (void)
-{
-	AstExpression *expression = getExpressionProduct();
-	while (check(TT_Plus) || check(TT_Minus)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionProduct();
-		expression = ast_initExpressionBinary(expression, right, operator);
-	}
-	return expression;
-}
-
-static AstExpression *getExpressionProduct (void)
-{
-	AstExpression *expression = getExpressionUnaryPrefix();
-	while (check(TT_Star)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionUnaryPrefix();
-		expression = ast_initExpressionBinary(expression, right, operator);
-	}
-	return expression;
-}
-
-static AstExpression *getExpressionUnaryPrefix (void)
-{
-	if (check(TT_Minus) || check(TT_Star)) {
-		Token operator = parser.tokens[parser.current++];
-		AstExpression *right = getExpressionUnaryPrefix();
-		return ast_initExpressionPrefix(operator, right);
-	}
-	return getExpressionPrimary();
 }
 
 static AstExpression *getExpressionPrimary (void)
@@ -230,7 +195,6 @@ static DataType *getType (void)
 	Token token = parser.tokens[parser.current++];
 	switch (token.type) {
 		case TT_I8: return dataType_initI8();
-		case TT_Star: return dataType_initPointer(getType());
 		default:;
 	}
 	err(token, "expected type");

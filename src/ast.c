@@ -16,9 +16,7 @@ static AstStatementReturnE *astStatement_initReturnE (Token keyword, AstExpressi
 static AstStatementVar *astStatement_initVar (Token identifier, DataType *type);
 
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
-static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionNumber *astExpression_initNumber (Token value);
-static AstExpressionPrefix *astExpression_initPrefix (Token operator, AstExpression *e);
 static AstExpressionVar *astExpression_initVar (Token identifier);
 
 Ast *ast_init (AstRoot *root)
@@ -116,24 +114,10 @@ AstExpression *ast_initExpressionAssign (AstExpression *a, AstExpression *b, Tok
 	return expression;
 }
 
-AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Token operator)
-{
-	AstExpression *expression = ast_initExpression(AstExpression_Binary);
-	expression->as.binary = astExpression_initBinary(a, b, operator);
-	return expression;
-}
-
 AstExpression *ast_initExpressionNumber (Token value)
 {
 	AstExpression *expression = ast_initExpression(AstExpression_Number);
 	expression->as.number = astExpression_initNumber(value);
-	return expression;
-}
-
-AstExpression *ast_initExpressionPrefix (Token operator, AstExpression *e)
-{
-	AstExpression *expression = ast_initExpression(AstExpression_Prefix);
-	expression->as.prefix = astExpression_initPrefix(operator, e);
 	return expression;
 }
 
@@ -244,28 +228,11 @@ static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpre
 	return assign;
 }
 
-static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator)
-{
-	AstExpressionBinary *binary = mem_alloc(sizeof(*binary));
-	binary->a = a;
-	binary->b = b;
-	binary->operator = operator;
-	return binary;
-}
-
 static AstExpressionNumber *astExpression_initNumber (Token value)
 {
 	AstExpressionNumber *number = mem_alloc(sizeof(*number));
 	number->value = value;
 	return number;
-}
-
-static AstExpressionPrefix *astExpression_initPrefix (Token operator, AstExpression *e)
-{
-	AstExpressionPrefix *prefix = mem_alloc(sizeof(*prefix));
-	prefix->operator = operator;
-	prefix->e = e;
-	return prefix;
 }
 
 static AstExpressionVar *astExpression_initVar (Token identifier)

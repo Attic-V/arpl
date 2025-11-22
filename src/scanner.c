@@ -52,11 +52,6 @@ Token *scan (char *source)
 			case ';': addToken(     TT_Semicolon   ); continue;
 
 			case '=': addToken(     TT_Equal       ); continue;
-			case '*': addToken(     TT_Star        ); continue;
-
-			case '+': addToken(     TT_Plus        ); continue;
-
-			case '-': addToken(     TT_Minus       ); continue;
 
 			case '/':
 				if (match('/')) {
