@@ -17,16 +17,6 @@ static DataType *dataType_init (DataTypeType type)
 	return t;
 }
 
-DataTypeMember *dataType_initMember (Token identifier, DataType *dataType, size_t index)
-{
-	DataTypeMember *member = mem_alloc(sizeof(*member));
-	member->identifier = identifier;
-	member->dataType = dataType;
-	member->index = index;
-	dll_init(member);
-	return member;
-}
-
 DataType *dataType_initFunction (DataType *returnType, DataType *parameters)
 {
 	DataType *t = dataType_init(DataType_Function);

@@ -16,25 +16,9 @@ typedef struct {
 	char _unused;
 } DataTypeI8;
 
-typedef struct DataTypeMember DataTypeMember;
-
-typedef struct {
-	Token identifier;
-	DataTypeMember *members;
-} DataTypeStruct;
-
-struct DataTypeMember {
-	Token identifier;
-	DataType *dataType;
-	DataTypeMember *next;
-	DataTypeMember *previous;
-	size_t index;
-};
-
 typedef enum {
 	DataType_Function,
 	DataType_I8,
-	DataType_Struct,
 
 	DataTypeType_Count,
 } DataTypeType;
@@ -44,7 +28,6 @@ struct DataType {
 	union {
 		DataTypeFunction *function;
 		DataTypeI8 *i8;
-		DataTypeStruct *struct_;
 	} as;
 	DataType *next;
 	DataType *previous;
@@ -52,8 +35,6 @@ struct DataType {
 
 DataType *dataType_initFunction (DataType *returnType, DataType *parameters);
 DataType *dataType_initI8 (void);
-
-DataTypeMember *dataType_initMember (Token identifier, DataType *dataType, size_t index);
 
 DataType *dataType_smallestInt (size_t value);
 
