@@ -17,7 +17,6 @@ static AstStatementVar *astStatement_initVar (Token identifier, DataType *type);
 
 static AstExpressionAssign *astExpression_initAssign (AstExpression *a, AstExpression *b, Token operator);
 static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpression *b, Token operator);
-static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen, AstArgument *arguments);
 static AstExpressionNumber *astExpression_initNumber (Token value);
 static AstExpressionPrefix *astExpression_initPrefix (Token operator, AstExpression *e);
 static AstExpressionVar *astExpression_initVar (Token identifier);
@@ -121,13 +120,6 @@ AstExpression *ast_initExpressionBinary (AstExpression *a, AstExpression *b, Tok
 {
 	AstExpression *expression = ast_initExpression(AstExpression_Binary);
 	expression->as.binary = astExpression_initBinary(a, b, operator);
-	return expression;
-}
-
-AstExpression *ast_initExpressionCall (AstExpression *e, Token lparen, Token rparen, AstArgument *arguments)
-{
-	AstExpression *expression = ast_initExpression(AstExpression_Call);
-	expression->as.call = astExpression_initCall(e, lparen, rparen, arguments);
 	return expression;
 }
 
@@ -259,16 +251,6 @@ static AstExpressionBinary *astExpression_initBinary (AstExpression *a, AstExpre
 	binary->b = b;
 	binary->operator = operator;
 	return binary;
-}
-
-static AstExpressionCall *astExpression_initCall (AstExpression *e, Token lparen, Token rparen, AstArgument *arguments)
-{
-	AstExpressionCall *call = mem_alloc(sizeof(*call));
-	call->e = e;
-	call->lparen = lparen;
-	call->rparen = rparen;
-	call->arguments = arguments;
-	return call;
 }
 
 static AstExpressionNumber *astExpression_initNumber (Token value)

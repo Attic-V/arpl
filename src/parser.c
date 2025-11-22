@@ -20,14 +20,12 @@ static AstStatement *getStatementReturnE (void);
 static AstStatement *getStatementVar (void);
 
 static AstExpression *getExpression (void);
-static AstExpression *getExpressionCallOrAccess (void);
 static AstExpression *getExpressionAssign (void);
 static AstExpression *getExpressionPrimary (void);
 static AstExpression *getExpressionProduct (void);
 static AstExpression *getExpressionSum (void);
 static AstExpression *getExpressionUnaryPrefix (void);
 
-static AstArgument *getArgument (void);
 static AstParameter *getParameter (void);
 
 static DataType *getType (void);
@@ -198,26 +196,7 @@ static AstExpression *getExpressionUnaryPrefix (void)
 		AstExpression *right = getExpressionUnaryPrefix();
 		return ast_initExpressionPrefix(operator, right);
 	}
-	return getExpressionCallOrAccess();
-}
-
-static AstExpression *getExpressionCallOrAccess (void)
-{
-	AstExpression *e = getExpressionPrimary();
-	if (match(TT_LParen)) {
-		Token lparen = parser.tokens[parser.current - 1];
-		AstArgument *arguments = NULL;
-		if (!check(TT_RParen)) {
-			do {
-				AstArgument *argument = getArgument();
-				dll_shove(arguments, argument);
-			} while (match(TT_Comma));
-		}
-		dll_rewind(arguments);
-		Token rparen = expect(RParen, ')');
-		e = ast_initExpressionCall(e, lparen, rparen, arguments);
-	}
-	return e;
+	return getExpressionPrimary();
 }
 
 static AstExpression *getExpressionPrimary (void)
@@ -237,11 +216,6 @@ static AstExpression *getExpressionPrimary (void)
 	}
 	err(token, "expected expression");
 	exit(1);
-}
-
-static AstArgument *getArgument (void)
-{
-	return ast_initArgument(getExpression());
 }
 
 static AstParameter *getParameter (void)

@@ -24,7 +24,6 @@ static void visitStatementVar (AstStatementVar *statement);
 static void visitExpression (AstExpression *expression);
 static void visitExpressionAssign (AstExpression *expression);
 static void visitExpressionBinary (AstExpression *expression);
-static void visitExpressionCall (AstExpression *expression);
 static void visitExpressionNumber (AstExpression *expression);
 static void visitExpressionPrefix (AstExpression *expression);
 static void visitExpressionVar (AstExpression *expression);
@@ -175,7 +174,6 @@ static void visitExpression (AstExpression *expression)
 	switch (expression->type) {
 		case AstExpression_Assign: visitExpressionAssign(expression); break;
 		case AstExpression_Binary: visitExpressionBinary(expression); break;
-		case AstExpression_Call: visitExpressionCall(expression); break;
 		case AstExpression_Number: visitExpressionNumber(expression); break;
 		case AstExpression_Prefix: visitExpressionPrefix(expression); break;
 		case AstExpression_Var: visitExpressionVar(expression); break;
@@ -209,27 +207,6 @@ static void visitExpressionBinary (AstExpression *expression)
 		case TT_Star: addInstruction(ir_initMul(size)); break;
 		default:;
 	}
-}
-
-static void visitExpressionCall (AstExpression *expression)
-{
-	AstExpressionCall *e = expression->as.call;
-
-	int nargs = 0;
-	AstArgument *a = e->arguments;
-	dll_wind(a);
-	for (; a != NULL; a = a->previous, nargs++) {
-		visitExpression(a->expression);
-	}
-
-	visitExpression(e->e);
-	addInstruction(ir_initCall());
-
-	addInstruction(ir_initStore());
-	for (int i = 0; i < nargs; i++) {
-		addInstruction(ir_initPop());
-	}
-	addInstruction(ir_initRestore());
 }
 
 static void visitExpressionNumber (AstExpression *expression)

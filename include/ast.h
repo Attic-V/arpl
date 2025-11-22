@@ -31,13 +31,6 @@ struct AstArgument {
 };
 
 typedef struct {
-	AstExpression *e;
-	Token lparen;
-	Token rparen;
-	AstArgument *arguments;
-} AstExpressionCall;
-
-typedef struct {
 	Token value;
 } AstExpressionNumber;
 
@@ -53,7 +46,6 @@ typedef struct {
 typedef enum {
 	AstExpression_Assign,
 	AstExpression_Binary,
-	AstExpression_Call,
 	AstExpression_Number,
 	AstExpression_Prefix,
 	AstExpression_Var,
@@ -64,7 +56,6 @@ struct AstExpression {
 	union {
 		AstExpressionAssign *assign;
 		AstExpressionBinary *binary;
-		AstExpressionCall *call;
 		AstExpressionNumber *number;
 		AstExpressionPrefix *prefix;
 		AstExpressionVar *var;

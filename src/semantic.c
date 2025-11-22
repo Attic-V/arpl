@@ -24,7 +24,6 @@ static void visitStatementVar (AstStatementVar *node);
 static void visitExpression (AstExpression *node);
 static void visitExpressionAssign (AstExpressionAssign *node);
 static void visitExpressionBinary (AstExpressionBinary *node);
-static void visitExpressionCall (AstExpressionCall *node);
 static void visitExpressionNumber (AstExpressionNumber *node);
 static void visitExpressionPrefix (AstExpressionPrefix *node);
 static void visitExpressionVar (AstExpressionVar *node);
@@ -261,10 +260,6 @@ static void visitExpression (AstExpression *node)
 				default:;
 			}
 			break;
-		case AstExpression_Call:
-			visitExpressionCall(node->as.call);
-			node->dataType = node->as.call->e->dataType->as.function->returnType;
-			break;
 		case AstExpression_Number:
 			visitExpressionNumber(node->as.number);
 			char *buffer = mem_alloc(node->as.number->value.length + 1);
@@ -332,31 +327,6 @@ static void visitExpressionBinary (AstExpressionBinary *node)
 	}
 	node->a->modifiable = false;
 	node->b->modifiable = false;
-}
-
-static void visitExpressionCall (AstExpressionCall *node)
-{
-	visitExpression(node->e);
-	if (!dataType_isFunction(node->e->dataType)) {
-		e(node->lparen, "cannot call non-function");
-		exit(1);
-	}
-	if (node->e->type != AstExpression_Var) {
-		e(node->lparen, "cannot perform call here");
-		return;
-	}
-	Symbol *fn = telescope_get(analyzer.currentScope, node->e->as.var->identifier);
-	DataType *parameter = fn->type->as.function->parameters;
-	AstArgument *argument = node->arguments;
-	for (; argument != NULL && parameter != NULL; argument = argument->next, parameter = parameter->next) {
-		visitExpression(argument->expression);
-		if (!dataType_equal(argument->expression->dataType, parameter)) {
-			e(node->lparen, "call does not match function signature");
-		}
-	}
-	if (argument != NULL || parameter != NULL) {
-		e(node->lparen, "call does not match function signature");
-	}
 }
 
 static void visitExpressionNumber (AstExpressionNumber *node)
