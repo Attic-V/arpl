@@ -14,11 +14,21 @@ int main (int argc, char **argv)
 	char *path = argv[1];
 
 	struct file_reader *reader = file_open(path);
-	if (!reader) return 1;
+	struct scanner_scanner *scanner = scanner_create();
 
-	scanner_scan(reader);
+	scanner_attach(scanner, reader);
+
+	for (;;) {
+		struct token_token token = scanner_getToken(scanner);
+		if (token.type == token_eof) break;
+
+		printf("%c", token.ch);
+	}
+
+	scanner_detach(scanner);
 
 	file_close(reader);
+	scanner_destroy(scanner);
 
 	return 0;
 }

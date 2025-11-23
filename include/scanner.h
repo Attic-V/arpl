@@ -3,7 +3,15 @@
 
 #include "file.h"
 
-void scanner_scan (struct file_reader *reader);
+#include "token.h"
+
+struct scanner_scanner;
+
+struct scanner_scanner *scanner_create (void);
+void scanner_destroy (struct scanner_scanner *scanner);
+void scanner_attach (struct scanner_scanner *scanner, struct file_reader *reader);
+void scanner_detach (struct scanner_scanner *scanner);
+struct token_token scanner_getToken (struct scanner_scanner *scanner);
 
 #endif
 
