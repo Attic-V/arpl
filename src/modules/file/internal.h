@@ -12,5 +12,8 @@ struct file_reader {
 	FILE *file;
 };
 
+struct file_reader *createReader (void);
+void destroyReader (struct file_reader *reader);
+
 #endif
 

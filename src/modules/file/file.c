@@ -8,9 +8,8 @@ struct file_reader *file_open (char *path)
 		return NULL;
 	}
 
-	struct file_reader *reader = malloc(sizeof(struct file_reader));
+	struct file_reader *reader = createReader();
 	if (!reader) {
-		perror("memory allocation failed");
 		fclose(file);
 		return NULL;
 	}
@@ -33,6 +32,27 @@ void file_close (struct file_reader *reader)
 	if (reader->file) {
 		fclose(reader->file);
 	}
+
+	destroyReader(reader);
+}
+
+struct file_reader *createReader (void)
+{
+	struct file_reader *reader = malloc(sizeof(struct file_reader));
+	if (!reader) {
+		perror("memory allocation failed");
+		return NULL;
+	}
+
+	reader->file = NULL;
+
+	return reader;
+}
+
+void destroyReader (struct file_reader *reader)
+{
+	if (!reader) return;
+
 	free(reader);
 }
 
