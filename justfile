@@ -13,6 +13,3 @@ alias b := build
 	just clean
 	just build
 
-@watch:
-	watch -c 'make CFLAGS="-fdiagnostics-color=always"'
-
