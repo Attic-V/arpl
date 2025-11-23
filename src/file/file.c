@@ -1,40 +1,38 @@
 #include "internal.h"
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-char *file_readFile (char *path)
+struct file_reader *file_open (char *path)
 {
 	FILE *file = fopen(path, "rb");
-	if (file == NULL) {
+	if (!file) {
 		fprintf(stderr, "could not open file '%s': %s\n", path, strerror(errno));
-		exit(1);
+		return NULL;
 	}
 
-	fseek(file, 0L, SEEK_END);
-	size_t size = ftell(file);
-	rewind(file);
-
-	char *buffer = malloc(size + 1);
-	if (buffer == NULL) {
+	struct file_reader *reader = malloc(sizeof(struct file_reader));
+	if (!reader) {
 		perror("memory allocation failed");
 		fclose(file);
-		exit(1);
+		return NULL;
 	}
 
-	size_t bytesRead = fread(buffer, 1, size, file);
-	if (bytesRead < size) {
-		fprintf(stderr, "could not read file '%s': %s\n", path, strerror(errno));
-		fclose(file);
-		free(buffer);
-		exit(1);
+	reader->file = file;
+	return reader;
+}
+
+int file_getChar (struct file_reader *reader)
+{
+	if (!reader || !reader->file) return '\0';
+
+	return fgetc(reader->file);
+}
+
+void file_close (struct file_reader *reader)
+{
+	if (!reader) return;
+
+	if (reader->file) {
+		fclose(reader->file);
 	}
-
-	buffer[bytesRead] = '\0';
-
-	fclose(file);
-	return buffer;
+	free(reader);
 }
 

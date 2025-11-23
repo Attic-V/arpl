@@ -1,7 +1,9 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
-void scanner_scan (char *source);
+#include "file.h"
+
+void scanner_scan (struct file_reader *reader);
 
 #endif
 

@@ -12,11 +12,13 @@ int main (int argc, char **argv)
 	}
 
 	char *path = argv[1];
-	char *contents = file_readFile(path);
 
-	scanner_scan(contents);
+	struct file_reader *reader = file_open(path);
+	if (!reader) return 1;
 
-	free(contents);
+	scanner_scan(reader);
+
+	file_close(reader);
 
 	return 0;
 }

@@ -1,13 +1,10 @@
 #include "internal.h"
 
-#include <stdio.h>
-
-void scanner_scan (char *source)
+void scanner_scan (struct file_reader *reader)
 {
-	char *current = source;
 	for (;;) {
-		char ch = *current++;
-		if (ch == '\0') break;
+		char ch = file_getChar(reader);
+		if (ch == EOF) break;
 		switch (ch) {
 			case '\n':
 			case '\t':
