@@ -17,6 +17,7 @@ void scanner_destroy (struct scanner_scanner *scanner)
 void scanner_attach (struct scanner_scanner *scanner, struct file_reader *reader)
 {
 	scanner->reader = reader;
+	scanner->row = 1;
 }
 
 void scanner_detach (struct scanner_scanner *scanner)
@@ -31,8 +32,12 @@ struct token_token scanner_getToken (struct scanner_scanner *scanner)
 	if (ch == EOF) {
 		return (struct token_token){token_eof};
 	}
+	if (ch == '\n') {
+		scanner->row++;
+		return scanner_getToken(scanner);
+	}
 
-	fprintf(stderr, "unexpected character: '%c'\n", ch);
+	fprintf(stderr, "%d: unexpected character: '%c'\n", scanner->row, ch);
 	return scanner_getToken(scanner);
 }
 

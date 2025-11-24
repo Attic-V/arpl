@@ -8,6 +8,7 @@
 
 struct scanner_scanner {
 	struct file_reader *reader;
+	int row;
 };
 
 #endif
