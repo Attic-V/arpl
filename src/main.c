@@ -19,10 +19,10 @@ int main (int argc, char **argv)
 	scanner_attach(scanner, reader);
 
 	for (;;) {
-		struct token_token token = scanner_getToken(scanner);
-		printf("%d\n", token.type);
+		enum token_tokentype tokentype = scanner_getTokentype(scanner);
+		printf("%d\n", tokentype);
 
-		if (token.type == token_eof) break;
+		if (tokentype == token_eof) break;
 	}
 
 	scanner_detach(scanner);

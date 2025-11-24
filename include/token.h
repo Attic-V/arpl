@@ -5,9 +5,5 @@ enum token_tokentype {
 	token_eof,
 };
 
-struct token_token {
-	enum token_tokentype type;
-};
-
 #endif
 
