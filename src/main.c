@@ -20,9 +20,9 @@ int main (int argc, char **argv)
 
 	for (;;) {
 		struct token_token token = scanner_getToken(scanner);
-		if (token.type == token_eof) break;
+		printf("%d\n", token.type);
 
-		printf("%d '%c'\n", token.type, token.ch);
+		if (token.type == token_eof) break;
 	}
 
 	scanner_detach(scanner);

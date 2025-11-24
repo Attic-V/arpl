@@ -7,7 +7,6 @@ enum token_tokentype {
 
 struct token_token {
 	enum token_tokentype type;
-	char ch;
 };
 
 #endif
