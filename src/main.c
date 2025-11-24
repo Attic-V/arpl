@@ -20,7 +20,7 @@ int main (int argc, char **argv)
 
 	for (;;) {
 		enum token_tokentype tokentype = scanner_getTokentype(scanner);
-		printf("%d\n", tokentype);
+		printf("%s\n", token_getLabel(tokentype));
 
 		if (tokentype == token_eof) break;
 	}
