@@ -2,7 +2,6 @@
 #define TOKEN_H
 
 enum token_tokentype {
-	token_character,
 	token_eof,
 };
 

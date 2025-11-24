@@ -22,7 +22,7 @@ int main (int argc, char **argv)
 		struct token_token token = scanner_getToken(scanner);
 		if (token.type == token_eof) break;
 
-		printf("%c", token.ch);
+		printf("%d '%c'\n", token.type, token.ch);
 	}
 
 	scanner_detach(scanner);

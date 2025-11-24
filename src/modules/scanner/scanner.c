@@ -28,10 +28,14 @@ struct token_token scanner_getToken (struct scanner_scanner *scanner)
 {
 	char ch = file_getChar(scanner->reader);
 
-	struct token_token token;
-	token.type = ch == EOF ? token_eof : token_character;
-	token.ch = ch;
+	if (ch == EOF) {
+		return (struct token_token){
+			.ch = ch,
+			.type = token_eof,
+		};
+	}
 
-	return token;
+	fprintf(stderr, "unexpected character: '%c'\n", ch);
+	return scanner_getToken(scanner);
 }
 
