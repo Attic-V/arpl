@@ -1,11 +1,15 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-enum token_tokentype {
+enum token_type {
 	token_eof,
 };
 
-char *token_getLabel (enum token_tokentype tokentype);
+struct token_token {
+	enum token_type type;
+};
+
+char *token_getLabel (enum token_type type);
 
 #endif
 

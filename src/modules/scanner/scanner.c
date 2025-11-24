@@ -25,19 +25,19 @@ void scanner_detach (struct scanner_scanner *scanner)
 	scanner->reader = NULL;
 }
 
-enum token_tokentype scanner_getTokentype (struct scanner_scanner *scanner)
+struct token_token scanner_getToken (struct scanner_scanner *scanner)
 {
 	char ch = file_getChar(scanner->reader);
 
 	if (ch == EOF) {
-		return token_eof;
+		return (struct token_token){token_eof};
 	}
 	if (ch == '\n') {
 		scanner->row++;
-		return scanner_getTokentype(scanner);
+		return scanner_getToken(scanner);
 	}
 
 	fprintf(stderr, "%d: unexpected character: '%c'\n", scanner->row, ch);
-	return scanner_getTokentype(scanner);
+	return scanner_getToken(scanner);
 }
 

@@ -1,8 +1,8 @@
 #include "internal.h"
 
-char *token_getLabel (enum token_tokentype tokentype)
+char *token_getLabel (enum token_type type)
 {
-	switch (tokentype) {
+	switch (type) {
 		case token_eof:
 			return "EOF";
 		default:
