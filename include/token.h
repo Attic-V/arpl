@@ -2,7 +2,7 @@
 #define TOKEN_H
 
 enum token_type {
-	token_eof,
+	token_type_eof,
 };
 
 struct token_token {
