@@ -4,7 +4,7 @@ char *token_getLabel (enum token_type type)
 {
 	switch (type) {
 		case token_type_eof:
-			return "EOF";
+			return "eof";
 		default:
 			return "unknown";
 	}
