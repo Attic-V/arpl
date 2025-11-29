@@ -37,3 +37,12 @@ void file_close (struct file_reader *reader)
 	free(reader);
 }
 
+int file_peekChar (struct file_reader *reader)
+{
+	int c = file_getChar(reader);
+	if (c == EOF) {
+		return EOF;
+	}
+	return ungetc(c, reader->file);
+}
+

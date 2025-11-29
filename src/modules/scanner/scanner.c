@@ -27,17 +27,39 @@ void scanner_detach (struct scanner_scanner *scanner)
 
 struct token_token scanner_getToken (struct scanner_scanner *scanner)
 {
-	char ch = file_getChar(scanner->reader);
+	switch (file_peekChar(scanner->reader)) {
+		case EOF:
+			file_getChar(scanner->reader);
+			return (struct token_token){token_type_eof};
+		case '\n':
+			file_getChar(scanner->reader);
+			scanner->row++;
+			return scanner_getToken(scanner);
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			int value = 0;
+			for (;;) {
+				char c = file_peekChar(scanner->reader);
+				if (c < '0' || '9' < c) break;
+				file_getChar(scanner->reader);
 
-	if (ch == EOF) {
-		return (struct token_token){token_type_eof};
+				value *= 10;
+				value += c - '0';
+			}
+			return (struct token_token){token_type_number,
+				.as.number.value = value,
+			};
+		default:
+			fprintf(stderr, "%d: unexpected character: '%c'\n", scanner->row, file_getChar(scanner->reader));
+			return scanner_getToken(scanner);
 	}
-	if (ch == '\n') {
-		scanner->row++;
-		return scanner_getToken(scanner);
-	}
-
-	fprintf(stderr, "%d: unexpected character: '%c'\n", scanner->row, ch);
-	return scanner_getToken(scanner);
 }
 

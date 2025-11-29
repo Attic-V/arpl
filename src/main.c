@@ -20,7 +20,15 @@ int main (int argc, char **argv)
 
 	for (;;) {
 		struct token_token token = scanner_getToken(scanner);
-		printf("%s\n", token_getLabel(token.type));
+		printf("%s ", token_getLabel(token.type));
+		switch (token.type) {
+			case token_type_eof:
+				break;
+			case token_type_number:
+				printf("%d", token.as.number.value);
+				break;
+		}
+		printf("\n");
 
 		if (token.type == token_type_eof) break;
 	}
