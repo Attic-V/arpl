@@ -81,8 +81,9 @@ struct token_token scanner_getToken (struct scanner_scanner *scanner)
 				};
 			}
 		default:
-			fprintf(stderr, "%d: unexpected character: '%c'\n", scanner->row, file_getChar(scanner->reader));
-			return scanner_getToken(scanner);
+			return (struct token_token){token_type_unexpected,
+				.as.unexpected.c = file_getChar(scanner->reader),
+			};
 	}
 }
 

@@ -27,6 +27,9 @@ int main (int argc, char **argv)
 			case token_type_number:
 				printf("%d", token.as.number.value);
 				break;
+			case token_type_unexpected:
+				printf("'%c'", token.as.unexpected.c);
+				break;
 		}
 		printf("\n");
 

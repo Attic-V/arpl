@@ -4,6 +4,7 @@
 enum token_type {
 	token_type_eof,
 	token_type_number,
+	token_type_unexpected,
 };
 
 struct token_token {
@@ -12,6 +13,9 @@ struct token_token {
 		struct {
 			int value;
 		} number;
+		struct {
+			char c;
+		} unexpected;
 	} as;
 };
 
