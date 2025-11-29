@@ -24,6 +24,8 @@ int main (int argc, char **argv)
 		switch (token.type) {
 			case token_type_eof:
 				break;
+			case token_type_newline:
+				break;
 			case token_type_number:
 				printf("%d", token.as.number.value);
 				break;

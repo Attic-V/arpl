@@ -44,10 +44,14 @@ struct token_token scanner_getToken (struct scanner_scanner *scanner)
 	switch (file_peekChar(scanner->reader)) {
 		case EOF:
 			file_getChar(scanner->reader);
-			return (struct token_token){token_type_eof};
+			return (struct token_token){
+				.type = token_type_eof,
+			};
 		case '\n':
 			file_getChar(scanner->reader);
-			return scanner_getToken(scanner);
+			return (struct token_token){
+				.type = token_type_newline,
+			};
 		case '0':
 		case '1':
 		case '2':
@@ -66,7 +70,8 @@ struct token_token scanner_getToken (struct scanner_scanner *scanner)
 				struct token_token *tokenptr = malloc(sizeof(struct token_token));
 				memcpy(tokenptr, &token, sizeof(struct token_token));
 				queue_enqueue(scanner->delayed, tokenptr);
-				return (struct token_token){token_type_number,
+				return (struct token_token){
+					.type = token_type_number,
 					.as.number.value = value,
 				};
 			} else {
@@ -74,12 +79,14 @@ struct token_token scanner_getToken (struct scanner_scanner *scanner)
 					? 1
 					: (int)floor(log10(fabs((double)token.as.number.value))) + 1;
 				int newvalue = value * (int)pow(10, numdigits) + token.as.number.value;
-				return (struct token_token){token_type_number,
+				return (struct token_token){
+					.type = token_type_number,
 					.as.number.value = newvalue,
 				};
 			}
 		default:
-			return (struct token_token){token_type_unexpected,
+			return (struct token_token){
+				.type = token_type_unexpected,
 				.as.unexpected.c = file_getChar(scanner->reader),
 			};
 	}
