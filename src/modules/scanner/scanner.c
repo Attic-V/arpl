@@ -29,64 +29,41 @@ void scanner_detach (struct scanner_scanner *scanner)
 
 struct token_token scanner_getToken (struct scanner_scanner *scanner)
 {
-	switch (peekType(scanner)) {
-		case token_type_eof:
-			file_getChar(scanner->reader);
-			return (struct token_token){
-				.type = token_type_eof,
-			};
-		case token_type_newline:
-			file_getChar(scanner->reader);
-			return (struct token_token){
-				.type = token_type_newline,
-			};
-		case token_type_number:
-			int value = file_getChar(scanner->reader) - '0';
+	int c = file_peekChar(scanner->reader);
 
-			if (peekType(scanner) == token_type_number) {
-				struct token_token token = scanner_getToken(scanner);
-				int numdigits = token.as.number.value == 0 ? 1
-					: (int)floor(log10(fabs((double)token.as.number.value))) + 1;
-				int newvalue = value * (int)pow(10, numdigits) + token.as.number.value;
-				return (struct token_token){
-					.type = token_type_number,
-					.as.number.value = newvalue,
-				};
-			} else {
-				return (struct token_token){
-					.type = token_type_number,
-					.as.number.value = value,
-				};
-			}
-		case token_type_unexpected:
-		default:
-			return (struct token_token){
-				.type = token_type_unexpected,
-				.as.unexpected.c = file_getChar(scanner->reader),
-			};
+	if (c == EOF) {
+		file_getChar(scanner->reader);
+		return (struct token_token){
+			.type = token_type_eof,
+		};
 	}
-}
 
-enum token_type peekType (struct scanner_scanner *scanner)
-{
-	switch (file_peekChar(scanner->reader)) {
-		case EOF:
-			return token_type_eof;
-		case '\n':
-			return token_type_newline;
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-		case '8':
-		case '9':
-			return token_type_number;
-		default:
-			return token_type_unexpected;
+	if (c == '\n') {
+		file_getChar(scanner->reader);
+		return (struct token_token){
+			.type = token_type_newline,
+		};
 	}
+
+	if ('0' <= c && c <= '9') {
+		int value = 0;
+		for (;;) {
+			int ch = file_peekChar(scanner->reader);
+			if (ch < '0' || '9' < ch) break;
+
+			file_getChar(scanner->reader);
+			value *= 10;
+			value += ch - '0';
+		}
+		return (struct token_token){
+			.type = token_type_number,
+			.as.number.value = value,
+		};
+	}
+
+	return (struct token_token){
+		.type = token_type_unexpected,
+		.as.unexpected.c = file_getChar(scanner->reader),
+	};
 }
 

@@ -10,7 +10,5 @@ struct scanner_scanner {
 	struct file_reader *reader;
 };
 
-enum token_type peekType (struct scanner_scanner *scanner);
-
 #endif
 
