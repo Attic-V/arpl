@@ -47,13 +47,10 @@ struct token_token scanner_getToken (struct scanner_scanner *scanner)
 
 	if ('0' <= c && c <= '9') {
 		int value = 0;
-		for (;;) {
-			int ch = file_peekChar(scanner->reader);
-			if (ch < '0' || '9' < ch) break;
-
+		for (; '0' <= c && c <= '9'; c = file_peekChar(scanner->reader)) {
 			file_getChar(scanner->reader);
 			value *= 10;
-			value += ch - '0';
+			value += c - '0';
 		}
 		return (struct token_token){
 			.type = token_type_number,
