@@ -19,12 +19,13 @@ CC := gcc
 
 CFLAGS := -std=c23 -Wall -Werror -Wextra -pedantic
 CPPFLAGS := -MMD -MP -Iinclude
+LDFLAGS := -lm
 
 all: $(BUILD_DIR)/$(TARGET)
 
 $(BUILD_DIR)/$(TARGET): $(OBJ) $(OBJ_DIR)/$(MAIN).o | $(BUILD_DIR)
 	@echo "linking objects"
-	@$(CC) $^ -o $@
+	@$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
 $(OBJ_DIR)/%.o: $(MOD_DIR)/%/*.c | $(OBJ_DIR) $(DEP_DIR)
 	@echo "compiling '$*'"

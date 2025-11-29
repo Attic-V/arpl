@@ -1,5 +1,8 @@
 #include "internal.h"
 
+#include <math.h>
+#include <string.h>
+
 struct scanner_scanner *scanner_create (void)
 {
 	struct scanner_scanner *scanner = malloc(sizeof(struct scanner_scanner));
@@ -18,15 +21,27 @@ void scanner_attach (struct scanner_scanner *scanner, struct file_reader *reader
 {
 	scanner->reader = reader;
 	scanner->row = 1;
+
+	scanner->delayed = queue_create();
 }
 
 void scanner_detach (struct scanner_scanner *scanner)
 {
 	scanner->reader = NULL;
+
+	queue_destroy(scanner->delayed);
 }
 
 struct token_token scanner_getToken (struct scanner_scanner *scanner)
 {
+	if (!queue_isEmpty(scanner->delayed)) {
+		struct token_token *tokenptr = queue_dequeue(scanner->delayed);
+		struct token_token token;
+		memcpy(&token, tokenptr, sizeof(struct token_token));
+		free(tokenptr);
+		return token;
+	}
+
 	switch (file_peekChar(scanner->reader)) {
 		case EOF:
 			file_getChar(scanner->reader);
@@ -45,18 +60,26 @@ struct token_token scanner_getToken (struct scanner_scanner *scanner)
 		case '7':
 		case '8':
 		case '9':
-			int value = 0;
-			for (;;) {
-				char c = file_peekChar(scanner->reader);
-				if (c < '0' || '9' < c) break;
-				file_getChar(scanner->reader);
+			char c = file_getChar(scanner->reader);
+			int value = c - '0';
 
-				value *= 10;
-				value += c - '0';
+			struct token_token token = scanner_getToken(scanner);
+			if (token.type != token_type_number) {
+				struct token_token *tokenptr = malloc(sizeof(struct token_token));
+				memcpy(tokenptr, &token, sizeof(struct token_token));
+				queue_enqueue(scanner->delayed, tokenptr);
+				return (struct token_token){token_type_number,
+					.as.number.value = value,
+				};
+			} else {
+				int numdigits = token.as.number.value == 0
+					? 1
+					: (int)floor(log10(fabs((double)token.as.number.value))) + 1;
+				int newvalue = value * (int)pow(10, numdigits) + token.as.number.value;
+				return (struct token_token){token_type_number,
+					.as.number.value = newvalue,
+				};
 			}
-			return (struct token_token){token_type_number,
-				.as.number.value = value,
-			};
 		default:
 			fprintf(stderr, "%d: unexpected character: '%c'\n", scanner->row, file_getChar(scanner->reader));
 			return scanner_getToken(scanner);

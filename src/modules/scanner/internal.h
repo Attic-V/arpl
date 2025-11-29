@@ -6,9 +6,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "queue.h"
+
 struct scanner_scanner {
 	struct file_reader *reader;
 	int row;
+	struct queue_queue *delayed;
 };
 
 #endif
