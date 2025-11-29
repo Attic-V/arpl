@@ -19,7 +19,7 @@ CC := gcc
 
 CFLAGS := -std=c23 -Wall -Werror -Wextra -pedantic
 CPPFLAGS := -MMD -MP -Iinclude
-LDFLAGS := -lm
+LDFLAGS :=
 
 all: $(BUILD_DIR)/$(TARGET)
 

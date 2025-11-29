@@ -1,6 +1,5 @@
 #include "internal.h"
 
-#include <math.h>
 #include <string.h>
 
 struct scanner_scanner *scanner_create (void)
