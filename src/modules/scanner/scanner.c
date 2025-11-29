@@ -20,7 +20,6 @@ void scanner_destroy (struct scanner_scanner *scanner)
 void scanner_attach (struct scanner_scanner *scanner, struct file_reader *reader)
 {
 	scanner->reader = reader;
-	scanner->row = 1;
 
 	scanner->delayed = queue_create();
 }
@@ -48,7 +47,6 @@ struct token_token scanner_getToken (struct scanner_scanner *scanner)
 			return (struct token_token){token_type_eof};
 		case '\n':
 			file_getChar(scanner->reader);
-			scanner->row++;
 			return scanner_getToken(scanner);
 		case '0':
 		case '1':
