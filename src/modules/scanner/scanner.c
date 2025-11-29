@@ -20,38 +20,60 @@ void scanner_destroy (struct scanner_scanner *scanner)
 void scanner_attach (struct scanner_scanner *scanner, struct file_reader *reader)
 {
 	scanner->reader = reader;
-
-	scanner->delayed = queue_create();
 }
 
 void scanner_detach (struct scanner_scanner *scanner)
 {
 	scanner->reader = NULL;
-
-	queue_destroy(scanner->delayed);
 }
 
 struct token_token scanner_getToken (struct scanner_scanner *scanner)
 {
-	if (!queue_isEmpty(scanner->delayed)) {
-		struct token_token *tokenptr = queue_dequeue(scanner->delayed);
-		struct token_token token;
-		memcpy(&token, tokenptr, sizeof(struct token_token));
-		free(tokenptr);
-		return token;
-	}
-
-	switch (file_peekChar(scanner->reader)) {
-		case EOF:
+	switch (peekType(scanner)) {
+		case token_type_eof:
 			file_getChar(scanner->reader);
 			return (struct token_token){
 				.type = token_type_eof,
 			};
-		case '\n':
+		case token_type_newline:
 			file_getChar(scanner->reader);
 			return (struct token_token){
 				.type = token_type_newline,
 			};
+		case token_type_number:
+			int value = file_getChar(scanner->reader) - '0';
+
+			if (peekType(scanner) == token_type_number) {
+				struct token_token token = scanner_getToken(scanner);
+				int numdigits = token.as.number.value == 0 ? 1
+					: (int)floor(log10(fabs((double)token.as.number.value))) + 1;
+				int newvalue = value * (int)pow(10, numdigits) + token.as.number.value;
+				return (struct token_token){
+					.type = token_type_number,
+					.as.number.value = newvalue,
+				};
+			} else {
+				return (struct token_token){
+					.type = token_type_number,
+					.as.number.value = value,
+				};
+			}
+		case token_type_unexpected:
+		default:
+			return (struct token_token){
+				.type = token_type_unexpected,
+				.as.unexpected.c = file_getChar(scanner->reader),
+			};
+	}
+}
+
+enum token_type peekType (struct scanner_scanner *scanner)
+{
+	switch (file_peekChar(scanner->reader)) {
+		case EOF:
+			return token_type_eof;
+		case '\n':
+			return token_type_newline;
 		case '0':
 		case '1':
 		case '2':
@@ -62,33 +84,9 @@ struct token_token scanner_getToken (struct scanner_scanner *scanner)
 		case '7':
 		case '8':
 		case '9':
-			char c = file_getChar(scanner->reader);
-			int value = c - '0';
-
-			struct token_token token = scanner_getToken(scanner);
-			if (token.type != token_type_number) {
-				struct token_token *tokenptr = malloc(sizeof(struct token_token));
-				memcpy(tokenptr, &token, sizeof(struct token_token));
-				queue_enqueue(scanner->delayed, tokenptr);
-				return (struct token_token){
-					.type = token_type_number,
-					.as.number.value = value,
-				};
-			} else {
-				int numdigits = token.as.number.value == 0
-					? 1
-					: (int)floor(log10(fabs((double)token.as.number.value))) + 1;
-				int newvalue = value * (int)pow(10, numdigits) + token.as.number.value;
-				return (struct token_token){
-					.type = token_type_number,
-					.as.number.value = newvalue,
-				};
-			}
+			return token_type_number;
 		default:
-			return (struct token_token){
-				.type = token_type_unexpected,
-				.as.unexpected.c = file_getChar(scanner->reader),
-			};
+			return token_type_unexpected;
 	}
 }
 
